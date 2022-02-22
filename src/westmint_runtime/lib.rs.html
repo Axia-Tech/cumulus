@@ -973,7 +973,7 @@
 <span id="972">972</span>
 <span id="973">973</span>
 <span id="974">974</span>
-</pre><pre class="rust"><code><span class="comment">// Copyright (C) 2021 Parity Technologies (UK) Ltd.</span>
+</pre><pre class="rust"><code><span class="comment">// Copyright (C) 2021 Axia Technologies (UK) Ltd.</span>
 <span class="comment">// SPDX-License-Identifier: Apache-2.0</span>
 
 <span class="comment">// Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
@@ -1039,7 +1039,7 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>, <span class="ident">test</span>))]</span>
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">sp_runtime::BuildStorage</span>;
 
-<span class="comment">// Axia imports</span>
+<span class="comment">// AXIA imports</span>
 <span class="kw">use</span> <span class="ident">pallet_xcm::XcmPassthrough</span>;
 <span class="kw">use</span> <span class="ident">axia_allychain::primitives::Sibling</span>;
 <span class="kw">use</span> <span class="ident">axia_runtime_common</span>::{<span class="ident">BlockHashCount</span>, <span class="ident">RocksDbWeight</span>, <span class="ident">SlowAdjustingFeeUpdate</span>};
@@ -1201,7 +1201,7 @@
 	<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">ApprovalDeposit</span>: <span class="ident">Balance</span> <span class="op">=</span> <span class="ident">EXISTENTIAL_DEPOSIT</span>;
 	<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">AssetsStringLimit</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">50</span>;
 	<span class="doccomment">/// Key = 32 bytes, Value = 36 bytes (32+1+1+1+1)</span>
-	<span class="comment">// https://github.com/paritytech/axlib/blob/069917b/frame/assets/src/lib.rs#L257L271</span>
+	<span class="comment">// https://github.com/axia-tech/axlib/blob/069917b/frame/assets/src/lib.rs#L257L271</span>
 	<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">MetadataDepositBase</span>: <span class="ident">Balance</span> <span class="op">=</span> <span class="ident">deposit</span>(<span class="number">1</span>, <span class="number">68</span>);
 	<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">MetadataDepositPerByte</span>: <span class="ident">Balance</span> <span class="op">=</span> <span class="ident">deposit</span>(<span class="number">0</span>, <span class="number">1</span>);
 }
@@ -1402,12 +1402,12 @@
 <span class="kw">impl</span> <span class="ident">cumulus_pallet_aura_ext::Config</span> <span class="kw">for</span> <span class="ident">Runtime</span> {}
 
 <span class="macro">parameter_types!</span> {
-	<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">AlphanetLocation</span>: <span class="ident">MultiLocation</span> <span class="op">=</span> <span class="ident">MultiLocation::parent</span>();
-	<span class="kw">pub</span> <span class="ident">RelayNetwork</span>: <span class="ident">NetworkId</span> <span class="op">=</span> <span class="ident">NetworkId::Named</span>(<span class="string">b&quot;Alphanet&quot;</span>.<span class="ident">to_vec</span>());
+	<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">ALPHANETLocation</span>: <span class="ident">MultiLocation</span> <span class="op">=</span> <span class="ident">MultiLocation::parent</span>();
+	<span class="kw">pub</span> <span class="ident">RelayNetwork</span>: <span class="ident">NetworkId</span> <span class="op">=</span> <span class="ident">NetworkId::Named</span>(<span class="string">b&quot;ALPHANET&quot;</span>.<span class="ident">to_vec</span>());
 	<span class="kw">pub</span> <span class="ident">RelayChainOrigin</span>: <span class="ident">Origin</span> <span class="op">=</span> <span class="ident">cumulus_pallet_xcm::Origin::Relay</span>.<span class="ident">into</span>();
 	<span class="kw">pub</span> <span class="ident">Ancestry</span>: <span class="ident">MultiLocation</span> <span class="op">=</span> <span class="ident">Allychain</span>(<span class="ident">AllychainInfo::allychain_id</span>().<span class="ident">into</span>()).<span class="ident">into</span>();
 	<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">Local</span>: <span class="ident">MultiLocation</span> <span class="op">=</span> <span class="ident">Here</span>.<span class="ident">into</span>();
-	<span class="kw">pub</span> <span class="ident">CheckingAccount</span>: <span class="ident">AccountId</span> <span class="op">=</span> <span class="ident">AxiaXcm::check_account</span>();
+	<span class="kw">pub</span> <span class="ident">CheckingAccount</span>: <span class="ident">AccountId</span> <span class="op">=</span> <span class="ident">AXIAXcm::check_account</span>();
 }
 
 <span class="doccomment">/// Type for specifying how a `MultiLocation` can be converted into an `AccountId`. This is used</span>
@@ -1427,7 +1427,7 @@
 	<span class="comment">// Use this currency:</span>
 	<span class="ident">Balances</span>,
 	<span class="comment">// Use this currency when it is a fungible asset matching the given location or name:</span>
-	<span class="ident">IsConcrete</span><span class="op">&lt;</span><span class="ident">AlphanetLocation</span><span class="op">&gt;</span>,
+	<span class="ident">IsConcrete</span><span class="op">&lt;</span><span class="ident">ALPHANETLocation</span><span class="op">&gt;</span>,
 	<span class="comment">// Convert an XCM MultiLocation into a local account id:</span>
 	<span class="ident">LocationToAccountId</span>,
 	<span class="comment">// Our chain&#39;s account ID type (we can&#39;t get away without mentioning it explicitly):</span>
@@ -1514,11 +1514,11 @@
 	<span class="kw">type</span> <span class="ident">LocationInverter</span> <span class="op">=</span> <span class="ident">LocationInverter</span><span class="op">&lt;</span><span class="ident">Ancestry</span><span class="op">&gt;</span>;
 	<span class="kw">type</span> <span class="ident">Barrier</span> <span class="op">=</span> <span class="ident">Barrier</span>;
 	<span class="kw">type</span> <span class="ident">Weigher</span> <span class="op">=</span> <span class="ident">FixedWeightBounds</span><span class="op">&lt;</span><span class="ident">UnitWeightCost</span>, <span class="ident">Call</span>, <span class="ident">MaxInstructions</span><span class="op">&gt;</span>;
-	<span class="kw">type</span> <span class="ident">Trader</span> <span class="op">=</span> <span class="ident">UsingComponents</span><span class="op">&lt;</span><span class="ident">IdentityFee</span><span class="op">&lt;</span><span class="ident">Balance</span><span class="op">&gt;</span>, <span class="ident">AlphanetLocation</span>, <span class="ident">AccountId</span>, <span class="ident">Balances</span>, ()<span class="op">&gt;</span>;
-	<span class="kw">type</span> <span class="ident">ResponseHandler</span> <span class="op">=</span> <span class="ident">AxiaXcm</span>;
-	<span class="kw">type</span> <span class="ident">AssetTrap</span> <span class="op">=</span> <span class="ident">AxiaXcm</span>;
-	<span class="kw">type</span> <span class="ident">AssetClaims</span> <span class="op">=</span> <span class="ident">AxiaXcm</span>;
-	<span class="kw">type</span> <span class="ident">SubscriptionService</span> <span class="op">=</span> <span class="ident">AxiaXcm</span>;
+	<span class="kw">type</span> <span class="ident">Trader</span> <span class="op">=</span> <span class="ident">UsingComponents</span><span class="op">&lt;</span><span class="ident">IdentityFee</span><span class="op">&lt;</span><span class="ident">Balance</span><span class="op">&gt;</span>, <span class="ident">ALPHANETLocation</span>, <span class="ident">AccountId</span>, <span class="ident">Balances</span>, ()<span class="op">&gt;</span>;
+	<span class="kw">type</span> <span class="ident">ResponseHandler</span> <span class="op">=</span> <span class="ident">AXIAXcm</span>;
+	<span class="kw">type</span> <span class="ident">AssetTrap</span> <span class="op">=</span> <span class="ident">AXIAXcm</span>;
+	<span class="kw">type</span> <span class="ident">AssetClaims</span> <span class="op">=</span> <span class="ident">AXIAXcm</span>;
+	<span class="kw">type</span> <span class="ident">SubscriptionService</span> <span class="op">=</span> <span class="ident">AXIAXcm</span>;
 }
 
 <span class="macro">parameter_types!</span> {
@@ -1696,7 +1696,7 @@
 
 		<span class="comment">// XCM helpers.</span>
 		<span class="ident">XcmpQueue</span>: <span class="ident">cumulus_pallet_xcmp_queue</span>::{<span class="ident">Pallet</span>, <span class="ident">Call</span>, <span class="ident">Storage</span>, <span class="ident">Event</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>},
-		<span class="ident">AxiaXcm</span>: <span class="ident">pallet_xcm</span>::{<span class="ident">Pallet</span>, <span class="ident">Call</span>, <span class="ident">Event</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">Origin</span>},
+		<span class="ident">AXIAXcm</span>: <span class="ident">pallet_xcm</span>::{<span class="ident">Pallet</span>, <span class="ident">Call</span>, <span class="ident">Event</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">Origin</span>},
 		<span class="ident">CumulusXcm</span>: <span class="ident">cumulus_pallet_xcm</span>::{<span class="ident">Pallet</span>, <span class="ident">Event</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">Origin</span>},
 		<span class="ident">DmpQueue</span>: <span class="ident">cumulus_pallet_dmp_queue</span>::{<span class="ident">Pallet</span>, <span class="ident">Call</span>, <span class="ident">Storage</span>, <span class="ident">Event</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>},
 

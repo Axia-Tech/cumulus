@@ -71,7 +71,7 @@
 <span id="70">70</span>
 <span id="71">71</span>
 <span id="72">72</span>
-</pre><pre class="rust"><code><span class="comment">// Copyright (C) 2021 Parity Technologies (UK) Ltd.</span>
+</pre><pre class="rust"><code><span class="comment">// Copyright (C) 2021 Axia Technologies (UK) Ltd.</span>
 <span class="comment">// SPDX-License-Identifier: Apache-2.0</span>
 
 <span class="comment">// Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
@@ -98,7 +98,7 @@
 	<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">MILLICENTS</span>: <span class="ident">Balance</span> <span class="op">=</span> <span class="ident">CENTS</span> <span class="op">/</span> <span class="number">1_000</span>;
 
 	<span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">deposit</span>(<span class="ident">items</span>: <span class="ident">u32</span>, <span class="ident">bytes</span>: <span class="ident">u32</span>) -&gt; <span class="ident">Balance</span> {
-		<span class="comment">// map to 1/10 of what the axctest relay chain charges (v9020)</span>
+		<span class="comment">// map to 1/10 of what the axiatest relay chain charges (v9020)</span>
 		(<span class="ident">items</span> <span class="kw">as</span> <span class="ident">Balance</span> <span class="op">*</span> <span class="number">2_000</span> <span class="op">*</span> <span class="ident">CENTS</span> <span class="op">+</span> (<span class="ident">bytes</span> <span class="kw">as</span> <span class="ident">Balance</span>) <span class="op">*</span> <span class="number">100</span> <span class="op">*</span> <span class="ident">MILLICENTS</span>) <span class="op">/</span> <span class="number">10</span>
 	}
 }

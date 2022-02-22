@@ -392,7 +392,7 @@
 <span id="391">391</span>
 <span id="392">392</span>
 <span id="393">393</span>
-</pre><pre class="rust"><code><span class="comment">// Copyright 2019-2021 Parity Technologies (UK) Ltd.</span>
+</pre><pre class="rust"><code><span class="comment">// Copyright 2019-2021 Axia Technologies (UK) Ltd.</span>
 <span class="comment">// This file is part of Cumulus.</span>
 
 <span class="comment">// Cumulus is free software: you can redistribute it and/or modify</span>
@@ -565,8 +565,8 @@
 <span class="kw">impl</span> <span class="ident">allychain_info::Config</span> <span class="kw">for</span> <span class="ident">Runtime</span> {}
 
 <span class="macro">parameter_types!</span> {
-	<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">BetanetLocation</span>: <span class="ident">MultiLocation</span> <span class="op">=</span> <span class="ident">MultiLocation::parent</span>();
-	<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">BetanetNetwork</span>: <span class="ident">NetworkId</span> <span class="op">=</span> <span class="ident">NetworkId::AXIA</span>;
+	<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">BETANETLocation</span>: <span class="ident">MultiLocation</span> <span class="op">=</span> <span class="ident">MultiLocation::parent</span>();
+	<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">BETANETNetwork</span>: <span class="ident">NetworkId</span> <span class="op">=</span> <span class="ident">NetworkId::AXIA</span>;
 	<span class="kw">pub</span> <span class="ident">Ancestry</span>: <span class="ident">MultiLocation</span> <span class="op">=</span> <span class="ident">Allychain</span>(<span class="ident">AllychainInfo::allychain_id</span>().<span class="ident">into</span>()).<span class="ident">into</span>();
 }
 

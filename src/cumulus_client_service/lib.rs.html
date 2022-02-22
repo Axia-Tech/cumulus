@@ -358,7 +358,7 @@
 <span id="357">357</span>
 <span id="358">358</span>
 <span id="359">359</span>
-</pre><pre class="rust"><code><span class="comment">// Copyright 2020-2021 Parity Technologies (UK) Ltd.</span>
+</pre><pre class="rust"><code><span class="comment">// Copyright 2020-2021 Axia Technologies (UK) Ltd.</span>
 <span class="comment">// This file is part of Cumulus.</span>
 
 <span class="comment">// Axlib is free software: you can redistribute it and/or modify</span>
@@ -486,7 +486,7 @@
 		<span class="ident">overseer_handle</span>: <span class="ident">relay_chain_full_node</span>
 			.<span class="ident">overseer_handle</span>
 			.<span class="ident">clone</span>()
-			.<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="string">&quot;Axia full node did not provide an `OverseerHandle`!&quot;</span>)<span class="question-mark">?</span>,
+			.<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="string">&quot;AXIA full node did not provide an `OverseerHandle`!&quot;</span>)<span class="question-mark">?</span>,
 		<span class="ident">_phantom</span>: <span class="ident">PhantomData</span>,
 	})<span class="question-mark">?</span>;
 
@@ -497,7 +497,7 @@
 		<span class="ident">overseer_handle</span>: <span class="ident">relay_chain_full_node</span>
 			.<span class="ident">overseer_handle</span>
 			.<span class="ident">clone</span>()
-			.<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="string">&quot;Axia full node did not provide an `OverseerHandle`!&quot;</span>)<span class="question-mark">?</span>,
+			.<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="string">&quot;AXIA full node did not provide an `OverseerHandle`!&quot;</span>)<span class="question-mark">?</span>,
 		<span class="ident">spawner</span>,
 		<span class="ident">para_id</span>,
 		<span class="ident">key</span>: <span class="ident">relay_chain_full_node</span>.<span class="ident">collator_key</span>.<span class="ident">clone</span>(),
@@ -659,7 +659,7 @@
 	<span class="ident">allychain_config</span>
 }
 
-<span class="doccomment">/// Build the Axia full node using the given `config`.</span>
+<span class="doccomment">/// Build the AXIA full node using the given `config`.</span>
 <span class="attribute">#[<span class="ident">sc_tracing::logging::prefix_logs_with</span>(<span class="string">&quot;Relaychain&quot;</span>)]</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">build_axia_full_node</span>(
 	<span class="ident">config</span>: <span class="ident">Configuration</span>,

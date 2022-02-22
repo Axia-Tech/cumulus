@@ -712,7 +712,7 @@
 <span id="711">711</span>
 <span id="712">712</span>
 <span id="713">713</span>
-</pre><pre class="rust"><code><span class="comment">// Copyright 2019-2021 Parity Technologies (UK) Ltd.</span>
+</pre><pre class="rust"><code><span class="comment">// Copyright 2019-2021 Axia Technologies (UK) Ltd.</span>
 <span class="comment">// This file is part of Cumulus.</span>
 
 <span class="comment">// Cumulus is free software: you can redistribute it and/or modify</span>
@@ -984,10 +984,10 @@
 
 <span class="macro">parameter_types!</span> {
 	<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">RocLocation</span>: <span class="ident">MultiLocation</span> <span class="op">=</span> <span class="ident">MultiLocation::parent</span>();
-	<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">BetanetNetwork</span>: <span class="ident">NetworkId</span> <span class="op">=</span> <span class="ident">NetworkId::AXIA</span>;
+	<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">BETANETNetwork</span>: <span class="ident">NetworkId</span> <span class="op">=</span> <span class="ident">NetworkId::AXIA</span>;
 	<span class="kw">pub</span> <span class="ident">RelayChainOrigin</span>: <span class="ident">Origin</span> <span class="op">=</span> <span class="ident">cumulus_pallet_xcm::Origin::Relay</span>.<span class="ident">into</span>();
 	<span class="kw">pub</span> <span class="ident">Ancestry</span>: <span class="ident">MultiLocation</span> <span class="op">=</span> <span class="ident">Allychain</span>(<span class="ident">AllychainInfo::allychain_id</span>().<span class="ident">into</span>()).<span class="ident">into</span>();
-	<span class="kw">pub</span> <span class="ident">CheckingAccount</span>: <span class="ident">AccountId</span> <span class="op">=</span> <span class="ident">AxiaXcm::check_account</span>();
+	<span class="kw">pub</span> <span class="ident">CheckingAccount</span>: <span class="ident">AccountId</span> <span class="op">=</span> <span class="ident">AXIAXcm::check_account</span>();
 }
 
 <span class="doccomment">/// Type for specifying how a `MultiLocation` can be converted into an `AccountId`. This is used</span>
@@ -999,7 +999,7 @@
 	<span class="comment">// Sibling allychain origins convert to AccountId via the `ParaId::into`.</span>
 	<span class="ident">SiblingAllychainConvertsVia</span><span class="op">&lt;</span><span class="ident">Sibling</span>, <span class="ident">AccountId</span><span class="op">&gt;</span>,
 	<span class="comment">// Straight up local `AccountId32` origins just alias directly to `AccountId`.</span>
-	<span class="ident">AccountId32Aliases</span><span class="op">&lt;</span><span class="ident">BetanetNetwork</span>, <span class="ident">AccountId</span><span class="op">&gt;</span>,
+	<span class="ident">AccountId32Aliases</span><span class="op">&lt;</span><span class="ident">BETANETNetwork</span>, <span class="ident">AccountId</span><span class="op">&gt;</span>,
 );
 
 <span class="doccomment">/// Means for transacting assets on this chain.</span>
@@ -1059,7 +1059,7 @@
 	<span class="ident">ParentAsSuperuser</span><span class="op">&lt;</span><span class="ident">Origin</span><span class="op">&gt;</span>,
 	<span class="comment">// Native signed account converter; this just converts an `AccountId32` origin into a normal</span>
 	<span class="comment">// `Origin::Signed` origin of the same 32-byte value.</span>
-	<span class="ident">SignedAccountId32AsNative</span><span class="op">&lt;</span><span class="ident">BetanetNetwork</span>, <span class="ident">Origin</span><span class="op">&gt;</span>,
+	<span class="ident">SignedAccountId32AsNative</span><span class="op">&lt;</span><span class="ident">BETANETNetwork</span>, <span class="ident">Origin</span><span class="op">&gt;</span>,
 	<span class="comment">// Xcm origins can be represented natively under the Xcm pallet&#39;s Xcm origin.</span>
 	<span class="ident">XcmPassthrough</span><span class="op">&lt;</span><span class="ident">Origin</span><span class="op">&gt;</span>,
 );
@@ -1111,14 +1111,14 @@
 	<span class="kw">type</span> <span class="ident">Barrier</span> <span class="op">=</span> <span class="ident">Barrier</span>;
 	<span class="kw">type</span> <span class="ident">Weigher</span> <span class="op">=</span> <span class="ident">FixedWeightBounds</span><span class="op">&lt;</span><span class="ident">UnitWeightCost</span>, <span class="ident">Call</span>, <span class="ident">MaxInstructions</span><span class="op">&gt;</span>;
 	<span class="kw">type</span> <span class="ident">Trader</span> <span class="op">=</span> <span class="ident">UsingComponents</span><span class="op">&lt;</span><span class="ident">IdentityFee</span><span class="op">&lt;</span><span class="ident">Balance</span><span class="op">&gt;</span>, <span class="ident">RocLocation</span>, <span class="ident">AccountId</span>, <span class="ident">Balances</span>, ()<span class="op">&gt;</span>;
-	<span class="kw">type</span> <span class="ident">ResponseHandler</span> <span class="op">=</span> <span class="ident">AxiaXcm</span>;
-	<span class="kw">type</span> <span class="ident">AssetTrap</span> <span class="op">=</span> <span class="ident">AxiaXcm</span>;
-	<span class="kw">type</span> <span class="ident">AssetClaims</span> <span class="op">=</span> <span class="ident">AxiaXcm</span>;
-	<span class="kw">type</span> <span class="ident">SubscriptionService</span> <span class="op">=</span> <span class="ident">AxiaXcm</span>;
+	<span class="kw">type</span> <span class="ident">ResponseHandler</span> <span class="op">=</span> <span class="ident">AXIAXcm</span>;
+	<span class="kw">type</span> <span class="ident">AssetTrap</span> <span class="op">=</span> <span class="ident">AXIAXcm</span>;
+	<span class="kw">type</span> <span class="ident">AssetClaims</span> <span class="op">=</span> <span class="ident">AXIAXcm</span>;
+	<span class="kw">type</span> <span class="ident">SubscriptionService</span> <span class="op">=</span> <span class="ident">AXIAXcm</span>;
 }
 
 <span class="doccomment">/// Local origins on this chain are allowed to dispatch XCM sends/executions.</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">LocalOriginToLocation</span> <span class="op">=</span> <span class="ident">SignedToAccountId32</span><span class="op">&lt;</span><span class="ident">Origin</span>, <span class="ident">AccountId</span>, <span class="ident">BetanetNetwork</span><span class="op">&gt;</span>;
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">LocalOriginToLocation</span> <span class="op">=</span> <span class="ident">SignedToAccountId32</span><span class="op">&lt;</span><span class="ident">Origin</span>, <span class="ident">AccountId</span>, <span class="ident">BETANETNetwork</span><span class="op">&gt;</span>;
 
 <span class="doccomment">/// The means for routing XCM messages which are not for local execution into the right message</span>
 <span class="doccomment">/// queues.</span>
@@ -1183,7 +1183,7 @@
 	<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">MaxAuthorities</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">100_000</span>;
 }
 
-<span class="doccomment">/// A majority of the Unit body from Betanet over XCM is our required administration origin.</span>
+<span class="doccomment">/// A majority of the Unit body from BETANET over XCM is our required administration origin.</span>
 <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">AdminOrigin</span> <span class="op">=</span> <span class="ident">EnsureOneOf</span><span class="op">&lt;</span>
 	<span class="ident">AccountId</span>,
 	<span class="ident">EnsureRoot</span><span class="op">&lt;</span><span class="ident">AccountId</span><span class="op">&gt;</span>,
@@ -1237,7 +1237,7 @@
 
 		<span class="comment">// XCM helpers.</span>
 		<span class="ident">XcmpQueue</span>: <span class="ident">cumulus_pallet_xcmp_queue</span>::{<span class="ident">Pallet</span>, <span class="ident">Call</span>, <span class="ident">Storage</span>, <span class="ident">Event</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>} <span class="op">=</span> <span class="number">50</span>,
-		<span class="ident">AxiaXcm</span>: <span class="ident">pallet_xcm</span>::{<span class="ident">Pallet</span>, <span class="ident">Call</span>, <span class="ident">Event</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">Origin</span>} <span class="op">=</span> <span class="number">51</span>,
+		<span class="ident">AXIAXcm</span>: <span class="ident">pallet_xcm</span>::{<span class="ident">Pallet</span>, <span class="ident">Call</span>, <span class="ident">Event</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">Origin</span>} <span class="op">=</span> <span class="number">51</span>,
 		<span class="ident">CumulusXcm</span>: <span class="ident">cumulus_pallet_xcm</span>::{<span class="ident">Pallet</span>, <span class="ident">Call</span>, <span class="ident">Event</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">Origin</span>} <span class="op">=</span> <span class="number">52</span>,
 		<span class="ident">DmpQueue</span>: <span class="ident">cumulus_pallet_dmp_queue</span>::{<span class="ident">Pallet</span>, <span class="ident">Call</span>, <span class="ident">Storage</span>, <span class="ident">Event</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>} <span class="op">=</span> <span class="number">53</span>,
 

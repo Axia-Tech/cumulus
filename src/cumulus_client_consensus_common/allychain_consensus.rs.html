@@ -417,7 +417,7 @@
 <span id="416">416</span>
 <span id="417">417</span>
 <span id="418">418</span>
-</pre><pre class="rust"><code><span class="comment">// Copyright 2019-2021 Parity Technologies (UK) Ltd.</span>
+</pre><pre class="rust"><code><span class="comment">// Copyright 2019-2021 Axia Technologies (UK) Ltd.</span>
 <span class="comment">// This file is part of Cumulus.</span>
 
 <span class="comment">// Cumulus is free software: you can redistribute it and/or modify</span>
@@ -456,7 +456,7 @@
 
 <span class="doccomment">/// Helper for the relay chain client. This is expected to be a lightweight handle like an `Arc`.</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">RelaychainClient</span>: <span class="ident">Clone</span> <span class="op">+</span> <span class="lifetime">&#39;static</span> {
-	<span class="doccomment">/// The error type for interacting with the Axia client.</span>
+	<span class="doccomment">/// The error type for interacting with the AXIA client.</span>
 	<span class="kw">type</span> <span class="ident">Error</span>: <span class="ident">std::fmt::Debug</span> <span class="op">+</span> <span class="ident">Send</span>;
 
 	<span class="doccomment">/// A stream that yields head-data for a allychain.</span>
@@ -645,7 +645,7 @@
 {
 	<span class="comment">// HACK</span>
 	<span class="comment">//</span>
-	<span class="comment">// Remove after https://github.com/paritytech/axlib/pull/8052 or similar is merged</span>
+	<span class="comment">// Remove after https://github.com/axia-tech/axlib/pull/8052 or similar is merged</span>
 	<span class="kw">if</span> <span class="ident">notification</span>.<span class="ident">origin</span> <span class="op">!</span><span class="op">=</span> <span class="ident">BlockOrigin::Own</span> {
 		<span class="ident">announce_block</span>(<span class="ident">notification</span>.<span class="ident">hash</span>, <span class="prelude-val">None</span>);
 	}

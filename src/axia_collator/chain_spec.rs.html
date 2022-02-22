@@ -714,7 +714,7 @@
 <span id="713">713</span>
 <span id="714">714</span>
 <span id="715">715</span>
-</pre><pre class="rust"><code><span class="comment">// Copyright 2019-2021 Parity Technologies (UK) Ltd.</span>
+</pre><pre class="rust"><code><span class="comment">// Copyright 2019-2021 Axia Technologies (UK) Ltd.</span>
 <span class="comment">// This file is part of Cumulus.</span>
 
 <span class="comment">// Cumulus is free software: you can redistribute it and/or modify</span>
@@ -946,7 +946,7 @@
 
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">statemint_development_config</span>(<span class="ident">id</span>: <span class="ident">ParaId</span>) -&gt; <span class="ident">StatemintChainSpec</span> {
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">properties</span> <span class="op">=</span> <span class="ident">sc_chain_spec::Properties::new</span>();
-	<span class="ident">properties</span>.<span class="ident">insert</span>(<span class="string">&quot;tokenSymbol&quot;</span>.<span class="ident">into</span>(), <span class="string">&quot;AXC&quot;</span>.<span class="ident">into</span>());
+	<span class="ident">properties</span>.<span class="ident">insert</span>(<span class="string">&quot;tokenSymbol&quot;</span>.<span class="ident">into</span>(), <span class="string">&quot;DOT&quot;</span>.<span class="ident">into</span>());
 	<span class="ident">properties</span>.<span class="ident">insert</span>(<span class="string">&quot;tokenDecimals&quot;</span>.<span class="ident">into</span>(), <span class="number">10</span>.<span class="ident">into</span>());
 
 	<span class="ident">StatemintChainSpec::from_genesis</span>(
@@ -981,7 +981,7 @@
 
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">statemint_local_config</span>(<span class="ident">id</span>: <span class="ident">ParaId</span>) -&gt; <span class="ident">StatemintChainSpec</span> {
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">properties</span> <span class="op">=</span> <span class="ident">sc_chain_spec::Properties::new</span>();
-	<span class="ident">properties</span>.<span class="ident">insert</span>(<span class="string">&quot;tokenSymbol&quot;</span>.<span class="ident">into</span>(), <span class="string">&quot;AXC&quot;</span>.<span class="ident">into</span>());
+	<span class="ident">properties</span>.<span class="ident">insert</span>(<span class="string">&quot;tokenSymbol&quot;</span>.<span class="ident">into</span>(), <span class="string">&quot;DOT&quot;</span>.<span class="ident">into</span>());
 	<span class="ident">properties</span>.<span class="ident">insert</span>(<span class="string">&quot;tokenDecimals&quot;</span>.<span class="ident">into</span>(), <span class="number">10</span>.<span class="ident">into</span>());
 
 	<span class="ident">StatemintChainSpec::from_genesis</span>(
@@ -1101,7 +1101,7 @@
 		<span class="prelude-val">None</span>,
 		<span class="prelude-val">None</span>,
 		<span class="prelude-val">Some</span>(<span class="ident">properties</span>),
-		<span class="ident">Extensions</span> { <span class="ident">relay_chain</span>: <span class="string">&quot;axctest-dev&quot;</span>.<span class="ident">into</span>(), <span class="ident">para_id</span>: <span class="ident">id</span>.<span class="ident">into</span>() },
+		<span class="ident">Extensions</span> { <span class="ident">relay_chain</span>: <span class="string">&quot;axiatest-dev&quot;</span>.<span class="ident">into</span>(), <span class="ident">para_id</span>: <span class="ident">id</span>.<span class="ident">into</span>() },
 	)
 }
 
@@ -1150,7 +1150,7 @@
 		<span class="prelude-val">None</span>,
 		<span class="prelude-val">None</span>,
 		<span class="prelude-val">Some</span>(<span class="ident">properties</span>),
-		<span class="ident">Extensions</span> { <span class="ident">relay_chain</span>: <span class="string">&quot;axctest-local&quot;</span>.<span class="ident">into</span>(), <span class="ident">para_id</span>: <span class="ident">id</span>.<span class="ident">into</span>() },
+		<span class="ident">Extensions</span> { <span class="ident">relay_chain</span>: <span class="string">&quot;axiatest-local&quot;</span>.<span class="ident">into</span>(), <span class="ident">para_id</span>: <span class="ident">id</span>.<span class="ident">into</span>() },
 	)
 }
 
@@ -1202,7 +1202,7 @@
 		<span class="prelude-val">None</span>,
 		<span class="prelude-val">None</span>,
 		<span class="prelude-val">Some</span>(<span class="ident">properties</span>),
-		<span class="ident">Extensions</span> { <span class="ident">relay_chain</span>: <span class="string">&quot;axctest&quot;</span>.<span class="ident">into</span>(), <span class="ident">para_id</span>: <span class="ident">id</span>.<span class="ident">into</span>() },
+		<span class="ident">Extensions</span> { <span class="ident">relay_chain</span>: <span class="string">&quot;axiatest&quot;</span>.<span class="ident">into</span>(), <span class="ident">para_id</span>: <span class="ident">id</span>.<span class="ident">into</span>() },
 	)
 }
 
@@ -1373,7 +1373,7 @@
 					),
 				],
 				<span class="macro">vec!</span>[],
-				<span class="comment">// re-use the Alphanet sudo key</span>
+				<span class="comment">// re-use the ALPHANET sudo key</span>
 				<span class="macro">hex!</span>(<span class="string">&quot;6648d7f3382690650c681aba1b993cd11e54deb4df21a3a18c3e2177de9f7342&quot;</span>).<span class="ident">into</span>(),
 				<span class="ident">id</span>,
 			)

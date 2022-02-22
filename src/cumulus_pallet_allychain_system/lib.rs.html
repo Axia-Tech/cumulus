@@ -1023,7 +1023,7 @@
 <span id="1022">1022</span>
 <span id="1023">1023</span>
 <span id="1024">1024</span>
-</pre><pre class="rust"><code><span class="comment">// Copyright 2020 Parity Technologies (UK) Ltd.</span>
+</pre><pre class="rust"><code><span class="comment">// Copyright 2020 Axia Technologies (UK) Ltd.</span>
 <span class="comment">// This file is part of Cumulus.</span>
 
 <span class="comment">// Cumulus is free software: you can redistribute it and/or modify</span>
@@ -1449,9 +1449,9 @@
 	<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Error</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
 		<span class="doccomment">/// Attempt to upgrade validation function while existing upgrade pending</span>
 		<span class="ident">OverlappingUpgrades</span>,
-		<span class="doccomment">/// Axia currently prohibits this allychain from upgrading its validation function</span>
-		<span class="ident">ProhibitedByAxia</span>,
-		<span class="doccomment">/// The supplied validation function has compiled into a blob larger than Axia is</span>
+		<span class="doccomment">/// AXIA currently prohibits this allychain from upgrading its validation function</span>
+		<span class="ident">ProhibitedByAXIA</span>,
+		<span class="doccomment">/// The supplied validation function has compiled into a blob larger than AXIA is</span>
 		<span class="doccomment">/// willing to run</span>
 		<span class="ident">TooBig</span>,
 		<span class="doccomment">/// The inherent which supplies the validation data did not run this block</span>
@@ -1763,7 +1763,7 @@
 			<span class="ident">weight_used</span> <span class="op">+</span><span class="op">=</span> <span class="ident">T::DmpMessageHandler::handle_dmp_messages</span>(<span class="ident">message_iter</span>, <span class="ident">max_weight</span>);
 			<span class="op">&lt;</span><span class="ident">LastDmqMqcHead</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::put</span>(<span class="kw-2">&amp;</span><span class="ident">dmq_head</span>);
 
-			<span class="ident"><span class="self">Self</span>::deposit_event</span>(<span class="ident">Event::DownwardMessagesProcessed</span>(<span class="ident">weight_used</span>, <span class="ident">dmq_head</span>.<span class="ident">head</span>()));
+			<span class="ident"><span class="self">Self</span>::deposit_event</span>(<span class="ident">Event::DownwardMessagesProcessed</span>(<span class="ident">weight_used</span>, <span class="ident">dmq_head</span>.<span class="number">0</span>));
 		}
 
 		<span class="comment">// After hashing each message in the message queue chain submitted by the collator, we</span>
@@ -1771,7 +1771,7 @@
 		<span class="comment">//</span>
 		<span class="comment">// A mismatch means that at least some of the submitted messages were altered, omitted or</span>
 		<span class="comment">// added improperly.</span>
-		<span class="macro">assert_eq!</span>(<span class="ident">dmq_head</span>.<span class="ident">head</span>(), <span class="ident">expected_dmq_mqc_head</span>);
+		<span class="macro">assert_eq!</span>(<span class="ident">dmq_head</span>.<span class="number">0</span>, <span class="ident">expected_dmq_mqc_head</span>);
 
 		<span class="ident">ProcessedDownwardMessages</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::put</span>(<span class="ident">dm_count</span>);
 
@@ -1899,7 +1899,7 @@
 		<span class="comment">// Ensure that `ValidationData` exists. We do not care about the validation data per se,</span>
 		<span class="comment">// but we do care about the [`UpgradeRestrictionSignal`] which arrives with the same inherent.</span>
 		<span class="macro">ensure!</span>(<span class="op">&lt;</span><span class="ident">ValidationData</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::exists</span>(), <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::ValidationDataNotAvailable</span>,);
-		<span class="macro">ensure!</span>(<span class="op">&lt;</span><span class="ident">UpgradeRestrictionSignal</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::get</span>().<span class="ident">is_none</span>(), <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::ProhibitedByAxia</span>);
+		<span class="macro">ensure!</span>(<span class="op">&lt;</span><span class="ident">UpgradeRestrictionSignal</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::get</span>().<span class="ident">is_none</span>(), <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::ProhibitedByAXIA</span>);
 
 		<span class="macro">ensure!</span>(<span class="op">!</span><span class="op">&lt;</span><span class="ident">PendingValidationCode</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::exists</span>(), <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::OverlappingUpgrades</span>);
 		<span class="kw">let</span> <span class="ident">cfg</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::host_configuration</span>().<span class="ident">ok_or</span>(<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::HostConfigurationNotAvailable</span>)<span class="question-mark">?</span>;
