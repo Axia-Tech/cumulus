@@ -15,19 +15,19 @@ cumulus-pallet-allychain-system-proc-macro = { path = "proc-macro", default-feat
 axia-allychain = { git = "https://github.com/axia-tech/axia", default-features = false, features = [ "wasm-api" ], branch = "dev" }
 xcm = { git = "https://github.com/axia-tech/axia", default-features = false, branch = "dev" }
 
-# Axlib dependencies
-frame-support = { git = "https://github.com/axia-tech/axlib", default-features = false, branch = "dev" }
-pallet-balances = { git = "https://github.com/axia-tech/axlib", default-features = false, branch = "dev" }
-sp-core = { git = "https://github.com/axia-tech/axlib", default-features = false, branch = "dev" }
-sp-inherents = { git = "https://github.com/axia-tech/axlib", default-features = false, branch = "dev" }
-sp-io = { git = "https://github.com/axia-tech/axlib", default-features = false, branch = "dev" }
-sp-std = { git = "https://github.com/axia-tech/axlib", default-features = false, branch = "dev" }
-sp-runtime = { git = "https://github.com/axia-tech/axlib", default-features = false, branch = "dev" }
-sp-version = { git = "https://github.com/axia-tech/axlib", default-features = false, branch = "dev" }
-frame-system = { git = "https://github.com/axia-tech/axlib", default-features = false, branch = "dev" }
-sp-state-machine = { git = "https://github.com/axia-tech/axlib", default-features = false, branch = "dev" }
-sp-trie = { git = "https://github.com/axia-tech/axlib", default-features = false, branch = "dev" }
-sp-externalities = { git = "https://github.com/axia-tech/axlib", default-features = false, branch = "dev" }
+# Substrate dependencies
+frame-support = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
+pallet-balances = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
+sp-core = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
+sp-inherents = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
+sp-io = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
+sp-std = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
+sp-runtime = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
+sp-version = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
+frame-system = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
+sp-state-machine = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
+sp-trie = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
+sp-externalities = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
 
 # Other Dependencies
 codec = { package = "axia-scale-codec", git = "https://github.com/axia-tech/axia-scale-codec", branch = "v2.3.1", version = "2.3.1", default-features = false, features = ["derive"]}
@@ -41,11 +41,11 @@ environmental = { version = "1.1.2", default-features = false }
 hex-literal = "0.2.1"
 lazy_static = "1.4"
 
-# Axlib dependencies
-sp-version = { git = "https://github.com/axia-tech/axlib", branch = "dev" }
-sc-client-api = { git = "https://github.com/axia-tech/axlib", branch = "dev" }
-sp-keyring = { git = "https://github.com/axia-tech/axlib", branch = "dev" }
-sp-tracing = { git = "https://github.com/axia-tech/axlib", branch = "dev" }
+# Substrate dependencies
+sp-version = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
+sc-client-api = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
+sp-keyring = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
+sp-tracing = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
 
 # Cumulus dependencies
 cumulus-test-client = { path = "../../test/client" }

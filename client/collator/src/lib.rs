@@ -1,12 +1,12 @@
 // Copyright 2019-2021 Parity Technologies (UK) Ltd.
 // This file is part of Cumulus.
 
-// Axlib is free software: you can redistribute it and/or modify
+// Substrate is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 
-// Axlib is distributed in the hope that it will be useful,
+// Substrate is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
@@ -14,10 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with Cumulus.  If not, see <http://www.gnu.org/licenses/>.
 
-//! Cumulus Collator implementation for Axlib.
+//! Cumulus Collator implementation for Substrate.
 
 use cumulus_client_network::WaitToAnnounce;
-use cumulus_primitives_core::{CollectCollationInfo, AllychainBlockData, PersistedValidationData};
+use cumulus_primitives_core::{CollectCollationInfo, ParachainBlockData, PersistedValidationData};
 
 use sc_client_api::BlockBackend;
 use sp_api::ProvideRuntimeApi;
@@ -28,7 +28,7 @@ use sp_runtime::{
 	traits::{Block as BlockT, HashFor, Header as HeaderT, Zero},
 };
 
-use cumulus_client_consensus_common::AllychainConsensus;
+use cumulus_client_consensus_common::ParachainConsensus;
 use axia_node_primitives::{
 	BlockData, Collation, CollationGenerationConfig, CollationResult, PoV,
 };
@@ -48,7 +48,7 @@ const LOG_TARGET: &str = "cumulus-collator";
 /// The implementation of the Cumulus `Collator`.
 pub struct Collator<Block: BlockT, BS, RA> {
 	block_status: Arc<BS>,
-	allychain_consensus: Box<dyn AllychainConsensus<Block>>,
+	allychain_consensus: Box<dyn ParachainConsensus<Block>>,
 	wait_to_announce: Arc<Mutex<WaitToAnnounce<Block>>>,
 	runtime_api: Arc<RA>,
 }
@@ -77,14 +77,14 @@ where
 		spawner: Arc<dyn SpawnNamed + Send + Sync>,
 		announce_block: Arc<dyn Fn(Block::Hash, Option<Vec<u8>>) + Send + Sync>,
 		runtime_api: Arc<RA>,
-		allychain_consensus: Box<dyn AllychainConsensus<Block>>,
+		allychain_consensus: Box<dyn ParachainConsensus<Block>>,
 	) -> Self {
 		let wait_to_announce = Arc::new(Mutex::new(WaitToAnnounce::new(spawner, announce_block)));
 
 		Self { block_status, wait_to_announce, runtime_api, allychain_consensus }
 	}
 
-	/// Checks the status of the given block hash in the Allychain.
+	/// Checks the status of the given block hash in the Parachain.
 	///
 	/// Returns `true` if the block could be found and is good to be build on.
 	fn check_block_status(&self, hash: Block::Hash, header: &Block::Header) -> bool {
@@ -144,7 +144,7 @@ where
 
 	fn build_collation(
 		&mut self,
-		block: AllychainBlockData<Block>,
+		block: ParachainBlockData<Block>,
 		block_hash: Block::Hash,
 	) -> Option<Collation> {
 		let block_data = BlockData(block.encode());
@@ -232,7 +232,7 @@ where
 		};
 
 		// Create the allychain block data for the validators.
-		let b = AllychainBlockData::<Block>::new(header, extrinsics, compact_proof);
+		let b = ParachainBlockData::<Block>::new(header, extrinsics, compact_proof);
 
 		tracing::info!(
 			target: LOG_TARGET,
@@ -264,7 +264,7 @@ pub struct StartCollatorParams<Block: BlockT, RA, BS, Spawner> {
 	pub overseer_handle: OverseerHandle,
 	pub spawner: Spawner,
 	pub key: CollatorPair,
-	pub allychain_consensus: Box<dyn AllychainConsensus<Block>>,
+	pub allychain_consensus: Box<dyn ParachainConsensus<Block>>,
 }
 
 /// Start the collator.
@@ -319,7 +319,7 @@ pub async fn start_collator<Block, RA, BS, Spawner>(
 #[cfg(test)]
 mod tests {
 	use super::*;
-	use cumulus_client_consensus_common::AllychainCandidate;
+	use cumulus_client_consensus_common::ParachainCandidate;
 	use cumulus_test_client::{
 		Client, ClientBlockImportExt, DefaultTestClientBuilderExt, InitBlockBuilder,
 		TestClientBuilder, TestClientBuilderExt,
@@ -327,32 +327,32 @@ mod tests {
 	use cumulus_test_runtime::{Block, Header};
 	use futures::{channel::mpsc, executor::block_on, StreamExt};
 	use axia_node_subsystem_test_helpers::ForwardSubsystem;
-	use axia_overseer::{dummy::dummy_overseer_builder, HeadSupportsAllychains};
+	use axia_overseer::{dummy::dummy_overseer_builder, HeadSupportsParachains};
 	use sp_consensus::BlockOrigin;
 	use sp_core::{testing::TaskExecutor, Pair};
 	use sp_runtime::traits::BlakeTwo256;
 	use sp_state_machine::Backend;
 
-	struct AlwaysSupportsAllychains;
-	impl HeadSupportsAllychains for AlwaysSupportsAllychains {
+	struct AlwaysSupportsParachains;
+	impl HeadSupportsParachains for AlwaysSupportsParachains {
 		fn head_supports_allychains(&self, _head: &PHash) -> bool {
 			true
 		}
 	}
 
 	#[derive(Clone)]
-	struct DummyAllychainConsensus {
+	struct DummyParachainConsensus {
 		client: Arc<Client>,
 	}
 
 	#[async_trait::async_trait]
-	impl AllychainConsensus<Block> for DummyAllychainConsensus {
+	impl ParachainConsensus<Block> for DummyParachainConsensus {
 		async fn produce_candidate(
 			&mut self,
 			parent: &Header,
 			_: PHash,
 			validation_data: &PersistedValidationData,
-		) -> Option<AllychainCandidate<Block>> {
+		) -> Option<ParachainCandidate<Block>> {
 			let block_id = BlockId::Hash(parent.hash());
 			let builder = self.client.init_block_builder_at(
 				&block_id,
@@ -367,7 +367,7 @@ mod tests {
 				.await
 				.expect("Imports the block");
 
-			Some(AllychainCandidate { block, proof: proof.expect("Proof is returned") })
+			Some(ParachainCandidate { block, proof: proof.expect("Proof is returned") })
 		}
 	}
 
@@ -384,7 +384,7 @@ mod tests {
 		let (sub_tx, sub_rx) = mpsc::channel(64);
 
 		let (overseer, handle) =
-			dummy_overseer_builder(spawner.clone(), AlwaysSupportsAllychains, None)
+			dummy_overseer_builder(spawner.clone(), AlwaysSupportsParachains, None)
 				.expect("Creates overseer builder")
 				.replace_collation_generation(|_| ForwardSubsystem(sub_tx))
 				.build()
@@ -400,7 +400,7 @@ mod tests {
 			spawner,
 			para_id,
 			key: CollatorPair::generate().0,
-			allychain_consensus: Box::new(DummyAllychainConsensus { client: client.clone() }),
+			allychain_consensus: Box::new(DummyParachainConsensus { client: client.clone() }),
 		});
 		block_on(collator_start);
 
@@ -423,7 +423,7 @@ mod tests {
 		let block_data = collation.proof_of_validity.block_data;
 
 		let block =
-			AllychainBlockData::<Block>::decode(&mut &block_data.0[..]).expect("Is a valid block");
+			ParachainBlockData::<Block>::decode(&mut &block_data.0[..]).expect("Is a valid block");
 
 		assert_eq!(1, *block.header().number());
 

@@ -5,16 +5,16 @@ authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2018"
 
 [dependencies]
-# Axlib dependencies
-sp-inherents = { git = "https://github.com/axia-tech/axlib", default-features = false, branch = "dev" }
-sp-core = { git = "https://github.com/axia-tech/axlib", default-features = false, branch = "dev" }
-sc-client-api = { git = "https://github.com/axia-tech/axlib", optional = true , branch = "dev" }
-sp-runtime = { git = "https://github.com/axia-tech/axlib", optional = true , branch = "dev" }
-sp-std = { git = "https://github.com/axia-tech/axlib", default-features = false, branch = "dev" }
-sp-state-machine = { git = "https://github.com/axia-tech/axlib", optional = true , branch = "dev" }
-sp-trie = { git = "https://github.com/axia-tech/axlib", default-features = false, branch = "dev" }
-sp-api = { git = "https://github.com/axia-tech/axlib", optional = true , branch = "dev" }
-sp-storage = { git = "https://github.com/axia-tech/axlib", optional = true , branch = "dev" }
+# Substrate dependencies
+sp-inherents = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
+sp-core = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
+sc-client-api = { git = "https://github.com/axia-tech/axia-core", optional = true , branch = "dev" }
+sp-runtime = { git = "https://github.com/axia-tech/axia-core", optional = true , branch = "dev" }
+sp-std = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
+sp-state-machine = { git = "https://github.com/axia-tech/axia-core", optional = true , branch = "dev" }
+sp-trie = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
+sp-api = { git = "https://github.com/axia-tech/axia-core", optional = true , branch = "dev" }
+sp-storage = { git = "https://github.com/axia-tech/axia-core", optional = true , branch = "dev" }
 
 # Axia dependencies
 axia-client = { git = "https://github.com/axia-tech/axia", optional = true, branch = "dev" }

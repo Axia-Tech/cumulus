@@ -5,22 +5,22 @@ authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2018"
 
 [dependencies]
-# Axlib dependencies
-sp-std = { git = "https://github.com/axia-tech/axlib", default-features = false, branch = "dev" }
-sp-runtime = { git = "https://github.com/axia-tech/axlib", default-features = false, branch = "dev" }
-sp-trie = { git = "https://github.com/axia-tech/axlib", default-features = false, branch = "dev" }
-frame-support = { git = "https://github.com/axia-tech/axlib", default-features = false, branch = "dev" }
+# Substrate dependencies
+sp-std = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
+sp-runtime = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
+sp-trie = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
+frame-support = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
 
-# Axia dependencies
+# Polkadot dependencies
 axia-allychain = { git = "https://github.com/axia-tech/axia", default-features = false, branch = "dev" }
 axia-primitives = { git = "https://github.com/axia-tech/axia", default-features = false, branch = "dev" }
-axlib-primitives = { git = "https://github.com/axia-tech/axia", default-features = false, branch = "dev" }
+axia-core-primitives = { git = "https://github.com/axia-tech/axia", default-features = false, branch = "dev" }
 xcm = { git = "https://github.com/axia-tech/axia", default-features = false, branch = "dev" }
 
 cumulus-primitives-core = { path = "../core", default-features = false }
 
 # Other dependencies
-codec = { package = "axia-scale-codec", git = "https://github.com/axia-tech/axia-scale-codec", branch = "v2.3.1", version = "2.3.1", default-features = false, features = [ "derive" ] }
+codec = { package = "parity-scale-codec", version = "2.3.0", default-features = false, features = [ "derive" ] }
 
 
 [features]
@@ -30,7 +30,7 @@ std = [
 	"sp-std/std",
 	"axia-primitives/std",
 	"axia-allychain/std",
-	"axlib-primitives/std",
+	"axia-core-primitives/std",
 	"sp-runtime/std",
 	"sp-trie/std",
 	"frame-support/std",

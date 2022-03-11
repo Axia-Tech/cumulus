@@ -11,7 +11,7 @@ use allychain_template_runtime::{Block, RuntimeApi};
 use axia_allychain::primitives::AccountIdConversion;
 use sc_cli::{
 	ChainSpec, CliConfiguration, DefaultConfigurationValues, ImportParams, KeystoreParams,
-	NetworkParams, Result, RuntimeVersion, SharedParams, AxlibCli,
+	NetworkParams, Result, RuntimeVersion, SharedParams, SubstrateCli,
 };
 use sc_service::config::{BasePath, PrometheusConfig};
 use sp_core::hexdisplay::HexDisplay;
@@ -24,24 +24,24 @@ fn load_spec(
 ) -> std::result::Result<Box<dyn sc_service::ChainSpec>, String> {
 	Ok(match id {
 		"dev" => Box::new(chain_spec::development_config(para_id)),
-		"template-betanet" => Box::new(chain_spec::local_testnet_config(para_id)),
+		"template-rococo" => Box::new(chain_spec::local_testnet_config(para_id)),
 		"" | "local" => Box::new(chain_spec::local_testnet_config(para_id)),
 		path => Box::new(chain_spec::ChainSpec::from_json_file(std::path::PathBuf::from(path))?),
 	})
 }
 
-impl AxlibCli for Cli {
+impl SubstrateCli for Cli {
 	fn impl_name() -> String {
-		"Allychain Collator Template".into()
+		"Parachain Collator Template".into()
 	}
 
 	fn impl_version() -> String {
-		env!("AXLIB_CLI_IMPL_VERSION").into()
+		env!("SUBSTRATE_CLI_IMPL_VERSION").into()
 	}
 
 	fn description() -> String {
 		format!(
-			"Allychain Collator Template\n\nThe command-line arguments provided first will be \
+			"Parachain Collator Template\n\nThe command-line arguments provided first will be \
 		passed to the allychain node, while the arguments provided after -- will be passed \
 		to the relaychain node.\n\n\
 		{} [allychain-args] -- [relaychain-args]",
@@ -70,17 +70,17 @@ impl AxlibCli for Cli {
 	}
 }
 
-impl AxlibCli for RelayChainCli {
+impl SubstrateCli for RelayChainCli {
 	fn impl_name() -> String {
-		"Allychain Collator Template".into()
+		"Parachain Collator Template".into()
 	}
 
 	fn impl_version() -> String {
-		env!("AXLIB_CLI_IMPL_VERSION").into()
+		env!("SUBSTRATE_CLI_IMPL_VERSION").into()
 	}
 
 	fn description() -> String {
-		"Allychain Collator Template\n\nThe command-line arguments provided first will be \
+		"Parachain Collator Template\n\nThe command-line arguments provided first will be \
 		passed to the allychain node, while the arguments provided after -- will be passed \
 		to the relaychain node.\n\n\
 		allychain-collator [allychain-args] -- [relaychain-args]"
@@ -174,7 +174,7 @@ pub fn run() -> Result<()> {
 					[RelayChainCli::executable_name()].iter().chain(cli.relaychain_args.iter()),
 				);
 
-				let axia_config = AxlibCli::create_configuration(
+				let axia_config = SubstrateCli::create_configuration(
 					&axia_cli,
 					&axia_cli,
 					config.tokio_handle.clone(),
@@ -267,12 +267,12 @@ pub fn run() -> Result<()> {
 
 				let tokio_handle = config.tokio_handle.clone();
 				let axia_config =
-					AxlibCli::create_configuration(&axia_cli, &axia_cli, tokio_handle)
+					SubstrateCli::create_configuration(&axia_cli, &axia_cli, tokio_handle)
 						.map_err(|err| format!("Relay chain argument error: {}", err))?;
 
-				info!("Allychain id: {:?}", id);
-				info!("Allychain Account: {}", allychain_account);
-				info!("Allychain genesis state: {}", genesis_state);
+				info!("Parachain id: {:?}", id);
+				info!("Parachain Account: {}", allychain_account);
+				info!("Parachain genesis state: {}", genesis_state);
 				info!("Is collating: {}", if config.role.is_authority() { "yes" } else { "no" });
 
 				crate::service::start_allychain_node(config, axia_config, id)
@@ -342,8 +342,8 @@ impl CliConfiguration<Self> for RelayChainCli {
 		self.base.base.prometheus_config(default_listen_port)
 	}
 
-	fn init<C: AxlibCli>(&self) -> Result<()> {
-		unreachable!("AxiaCli is never initialized; qed");
+	fn init<C: SubstrateCli>(&self) -> Result<()> {
+		unreachable!("PolkadotCli is never initialized; qed");
 	}
 
 	fn chain_id(&self, is_dev: bool) -> Result<String> {

@@ -84,17 +84,17 @@ pub mod pallet {
 		/// It comes from the (parent) relay chain.
 		Relay,
 		/// It comes from a (sibling) allychain.
-		SiblingAllychain(ParaId),
+		SiblingParachain(ParaId),
 	}
 
 	impl From<ParaId> for Origin {
 		fn from(id: ParaId) -> Origin {
-			Origin::SiblingAllychain(id)
+			Origin::SiblingParachain(id)
 		}
 	}
 	impl From<u32> for Origin {
 		fn from(id: u32) -> Origin {
-			Origin::SiblingAllychain(id.into())
+			Origin::SiblingParachain(id.into())
 		}
 	}
 }
@@ -175,7 +175,7 @@ where
 	OuterOrigin: Into<Result<Origin, OuterOrigin>>,
 {
 	match o.into() {
-		Ok(Origin::SiblingAllychain(id)) => Ok(id),
+		Ok(Origin::SiblingParachain(id)) => Ok(id),
 		_ => Err(BadOrigin),
 	}
 }

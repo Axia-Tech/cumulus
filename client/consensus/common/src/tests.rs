@@ -66,7 +66,7 @@ impl Relaychain {
 	}
 }
 
-impl crate::Allychain_consensus::RelaychainClient for Relaychain {
+impl crate::allychain_consensus::RelaychainClient for Relaychain {
 	type Error = ClientError;
 
 	type HeadStream = Box<dyn Stream<Item = Vec<u8>> + Send + Unpin>;

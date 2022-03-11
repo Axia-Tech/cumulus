@@ -6,7 +6,7 @@
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 
-// Axia is distributed in the hope that it will be useful,
+// Polkadot is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Cumulus.  If not, see <http://www.gnu.org/licenses/>.
 
-//! Allychain PoV recovery
+//! Parachain PoV recovery
 //!
 //! A allychain needs to build PoVs that are send to the relay chain to progress. These PoVs are
 //! erasure encoded and one piece of it is stored by each relay chain validator. As the relay chain
@@ -54,11 +54,11 @@ use sp_runtime::{
 use axia_node_primitives::{AvailableData, POV_BOMB_LIMIT};
 use axia_overseer::Handle as OverseerHandle;
 use axia_primitives::v1::{
-	Block as PBlock, CandidateReceipt, CommittedCandidateReceipt, Id as ParaId, AllychainHost,
+	Block as PBlock, CandidateReceipt, CommittedCandidateReceipt, Id as ParaId, ParachainHost,
 	SessionIndex,
 };
 
-use cumulus_primitives_core::AllychainBlockData;
+use cumulus_primitives_core::ParachainBlockData;
 
 use codec::Decode;
 use futures::{select, stream::FuturesUnordered, Future, FutureExt, Stream, StreamExt};
@@ -110,7 +110,7 @@ impl<Block: BlockT, PC, IQ, RC> PoVRecovery<Block, PC, IQ, RC>
 where
 	PC: BlockBackend<Block> + BlockchainEvents<Block> + UsageProvider<Block>,
 	RC: ProvideRuntimeApi<PBlock> + BlockchainEvents<PBlock>,
-	RC::Api: AllychainHost<PBlock>,
+	RC::Api: ParachainHost<PBlock>,
 	IQ: ImportQueue<Block>,
 {
 	/// Create a new instance.
@@ -262,7 +262,7 @@ where
 			},
 		};
 
-		let block_data = match AllychainBlockData::<Block>::decode(&mut &raw_block_data[..]) {
+		let block_data = match ParachainBlockData::<Block>::decode(&mut &raw_block_data[..]) {
 			Ok(d) => d,
 			Err(error) => {
 				tracing::warn!(
@@ -425,7 +425,7 @@ fn pending_candidates<RC>(
 ) -> impl Stream<Item = (CommittedCandidateReceipt, SessionIndex)>
 where
 	RC: ProvideRuntimeApi<PBlock> + BlockchainEvents<PBlock>,
-	RC::Api: AllychainHost<PBlock>,
+	RC::Api: ParachainHost<PBlock>,
 {
 	relay_chain_client.import_notification_stream().filter_map(move |n| {
 		let runtime_api = relay_chain_client.runtime_api();

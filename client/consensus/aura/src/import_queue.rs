@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Cumulus.  If not, see <http://www.gnu.org/licenses/>.
 
-//! Allychain specific wrapper for the AuRa import queue.
+//! Parachain specific wrapper for the AuRa import queue.
 
 use codec::Codec;
 use sc_client_api::{backend::AuxStore, BlockOf, UsageProvider};
@@ -31,7 +31,7 @@ use sp_core::crypto::Pair;
 use sp_inherents::CreateInherentDataProviders;
 use sp_runtime::traits::{Block as BlockT, DigestItemFor};
 use std::{fmt::Debug, hash::Hash, sync::Arc};
-use axlib_prometheus_endpoint::Registry;
+use substrate_prometheus_endpoint::Registry;
 
 /// Parameters of [`import_queue`].
 pub struct ImportQueueParams<'a, I, C, CIDP, S, CAW> {
@@ -89,7 +89,7 @@ where
 	CIDP::InherentDataProviders: InherentDataProviderExt + Send + Sync,
 {
 	sc_consensus_aura::import_queue::<P, _, _, _, _, _, _>(sc_consensus_aura::ImportQueueParams {
-		block_import: cumulus_client_consensus_common::AllychainBlockImport::new(block_import),
+		block_import: cumulus_client_consensus_common::ParachainBlockImport::new(block_import),
 		justification_import: None,
 		client,
 		create_inherent_data_providers,

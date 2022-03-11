@@ -22,7 +22,7 @@ mod chain_spec;
 mod genesis;
 
 use core::future::Future;
-use cumulus_client_consensus_common::{AllychainCandidate, AllychainConsensus};
+use cumulus_client_consensus_common::{ParachainCandidate, ParachainConsensus};
 use cumulus_client_network::BlockAnnounceValidator;
 use cumulus_client_service::{
 	prepare_node_config, start_collator, start_full_node, StartCollatorParams, StartFullNodeParams,
@@ -48,7 +48,7 @@ use sp_runtime::{codec::Encode, generic, traits::BlakeTwo256};
 use sp_state_machine::BasicExternalities;
 use sp_trie::PrefixedMemoryDB;
 use std::sync::Arc;
-use axlib_test_client::{
+use substrate_test_client::{
 	BlockchainEventsExt, RpcHandlersExt, RpcTransactionError, RpcTransactionOutput,
 };
 
@@ -62,13 +62,13 @@ pub use sp_keyring::Sr25519Keyring as Keyring;
 struct NullConsensus;
 
 #[async_trait::async_trait]
-impl AllychainConsensus<Block> for NullConsensus {
+impl ParachainConsensus<Block> for NullConsensus {
 	async fn produce_candidate(
 		&mut self,
 		_: &Header,
 		_: PHash,
 		_: &PersistedValidationData,
-	) -> Option<AllychainCandidate<Block>> {
+	) -> Option<ParachainCandidate<Block>> {
 		None
 	}
 }
@@ -261,7 +261,7 @@ where
 		.unwrap_or_else(|| announce_block);
 
 	if let Some(collator_key) = collator_key {
-		let allychain_consensus: Box<dyn AllychainConsensus<Block>> = match consensus {
+		let allychain_consensus: Box<dyn ParachainConsensus<Block>> = match consensus {
 			Consensus::RelayChain => {
 				let proposer_factory = sc_basic_authorship::ProposerFactory::with_proof_recording(
 					task_manager.spawn_handle(),
@@ -279,7 +279,7 @@ where
 					proposer_factory,
 					move |_, (relay_parent, validation_data)| {
 						let allychain_inherent =
-							cumulus_primitives_allychain_inherent::AllychainInherentData::create_at(
+							cumulus_primitives_allychain_inherent::ParachainInherentData::create_at(
 								relay_parent,
 								&*relay_chain_client,
 								&*relay_chain_backend,
@@ -416,7 +416,7 @@ impl TestNodeBuilder {
 
 	/// Instruct the node to exclusively connect to registered allychain nodes.
 	///
-	/// Allychain nodes can be registered using [`Self::connect_to_allychain_node`] and
+	/// Parachain nodes can be registered using [`Self::connect_to_allychain_node`] and
 	/// [`Self::connect_to_allychain_nodes`].
 	pub fn exclusively_connect_to_registered_allychain_nodes(mut self) -> Self {
 		self.allychain_nodes_exclusive = true;
@@ -450,7 +450,7 @@ impl TestNodeBuilder {
 	/// node.
 	pub fn connect_to_relay_chain_node(
 		mut self,
-		node: &axia_test_service::AXIATESTNode,
+		node: &axia_test_service::PolkadotTestNode,
 	) -> Self {
 		self.relay_chain_nodes.push(node.addr.clone());
 		self
@@ -462,7 +462,7 @@ impl TestNodeBuilder {
 	/// node.
 	pub fn connect_to_relay_chain_nodes<'a>(
 		mut self,
-		nodes: impl IntoIterator<Item = &'a axia_test_service::AXIATESTNode>,
+		nodes: impl IntoIterator<Item = &'a axia_test_service::PolkadotTestNode>,
 	) -> Self {
 		self.relay_chain_nodes.extend(nodes.into_iter().map(|n| n.addr.clone()));
 		self
@@ -719,7 +719,7 @@ pub fn run_relay_chain_validator_node(
 	key: Sr25519Keyring,
 	storage_update_func: impl Fn(),
 	boot_nodes: Vec<MultiaddrWithPeerId>,
-) -> axia_test_service::AXIATESTNode {
+) -> axia_test_service::PolkadotTestNode {
 	axia_test_service::run_validator_node(
 		tokio_handle,
 		key,

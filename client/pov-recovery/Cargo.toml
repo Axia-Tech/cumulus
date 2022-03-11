@@ -6,15 +6,15 @@ description = "Cumulus-specific networking protocol"
 edition = "2018"
 
 [dependencies]
-# Axlib deps
-sp-consensus = { git = "https://github.com/axia-tech/axlib", branch = "dev" }
-sp-runtime = { git = "https://github.com/axia-tech/axlib", branch = "dev" }
-sp-api = { git = "https://github.com/axia-tech/axlib", branch = "dev" }
-sp-maybe-compressed-blob = { git = "https://github.com/axia-tech/axlib", branch = "dev" }
-sc-client-api = { git = "https://github.com/axia-tech/axlib", branch = "dev" }
-sc-consensus = { git = "https://github.com/axia-tech/axlib", branch = "dev" }
+# Substrate deps
+sp-consensus = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
+sp-runtime = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
+sp-api = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
+sp-maybe-compressed-blob = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
+sc-client-api = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
+sc-consensus = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
 
-# Axia deps
+# Polkadot deps
 axia-primitives = { git = "https://github.com/axia-tech/axia", branch = "dev" }
 axia-node-primitives = { git = "https://github.com/axia-tech/axia", branch = "dev" }
 axia-overseer = { git = "https://github.com/axia-tech/axia", branch = "dev" }
@@ -24,7 +24,7 @@ axia-node-subsystem = { git = "https://github.com/axia-tech/axia", branch = "dev
 cumulus-primitives-core = { path = "../../primitives/core" }
 
 # other deps
-codec = { package = "axia-scale-codec", git = "https://github.com/axia-tech/axia-scale-codec", branch = "v2.3.1", version = "2.3.1", features = [ "derive" ] }
+codec = { package = "parity-scale-codec", version = "2.3.0", features = [ "derive" ] }
 futures = { version = "0.3.1", features = ["compat"] }
 futures-timer = "3.0.2"
 tracing = "0.1.22"
@@ -36,8 +36,8 @@ tokio = { version = "1.10", features = ["macros"] }
 # Cumulus deps
 cumulus-test-service = { path = "../../test/service" }
 
-# axlib deps
-sc-client-api = { git = "https://github.com/axia-tech/axlib", branch = "dev" }
-sc-cli = { git = "https://github.com/axia-tech/axlib", branch = "dev" }
-axlib-test-utils = { git = "https://github.com/axia-tech/axlib", branch = "dev" }
-sc-service = { git = "https://github.com/axia-tech/axlib", branch = "dev" }
+# substrate deps
+sc-client-api = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
+sc-cli = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
+substrate-test-utils = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
+sc-service = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }

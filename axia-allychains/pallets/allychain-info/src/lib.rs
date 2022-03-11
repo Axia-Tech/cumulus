@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Cumulus.  If not, see <http://www.gnu.org/licenses/>.
 
-//! Minimal Pallet that injects a AllychainId into Runtime storage from
+//! Minimal Pallet that injects a ParachainId into Runtime storage from
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
@@ -54,19 +54,19 @@ pub mod pallet {
 	#[pallet::genesis_build]
 	impl<T: Config> GenesisBuild<T> for GenesisConfig {
 		fn build(&self) {
-			<AllychainId<T>>::put(&self.allychain_id);
+			<ParachainId<T>>::put(&self.allychain_id);
 		}
 	}
 
 	#[pallet::type_value]
-	pub(super) fn DefaultForAllychainId() -> ParaId {
+	pub(super) fn DefaultForParachainId() -> ParaId {
 		100.into()
 	}
 
 	#[pallet::storage]
 	#[pallet::getter(fn allychain_id)]
-	pub(super) type AllychainId<T: Config> =
-		StorageValue<_, ParaId, ValueQuery, DefaultForAllychainId>;
+	pub(super) type ParachainId<T: Config> =
+		StorageValue<_, ParaId, ValueQuery, DefaultForParachainId>;
 
 	impl<T: Config> Get<ParaId> for Pallet<T> {
 		fn get() -> ParaId {

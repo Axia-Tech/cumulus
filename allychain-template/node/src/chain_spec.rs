@@ -21,9 +21,9 @@ pub fn get_pair_from_seed<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, ChainSpecGroup, ChainSpecExtension)]
 #[serde(deny_unknown_fields)]
 pub struct Extensions {
-	/// The relay chain of the Allychain.
+	/// The relay chain of the Parachain.
 	pub relay_chain: String,
-	/// The id of the Allychain.
+	/// The id of the Parachain.
 	pub para_id: u32,
 }
 
@@ -106,7 +106,7 @@ pub fn development_config(id: ParaId) -> ChainSpec {
 		None,
 		None,
 		Extensions {
-			relay_chain: "betanet-local".into(), // You MUST set this to the correct network!
+			relay_chain: "rococo-local".into(), // You MUST set this to the correct network!
 			para_id: id.into(),
 		},
 	)
@@ -165,7 +165,7 @@ pub fn local_testnet_config(id: ParaId) -> ChainSpec {
 		Some(properties),
 		// Extensions
 		Extensions {
-			relay_chain: "betanet-local".into(), // You MUST set this to the correct network!
+			relay_chain: "rococo-local".into(), // You MUST set this to the correct network!
 			para_id: id.into(),
 		},
 	)
@@ -186,7 +186,7 @@ fn testnet_genesis(
 		balances: allychain_template_runtime::BalancesConfig {
 			balances: endowed_accounts.iter().cloned().map(|k| (k, 1 << 60)).collect(),
 		},
-		allychain_info: allychain_template_runtime::AllychainInfoConfig { allychain_id: id },
+		allychain_info: allychain_template_runtime::ParachainInfoConfig { allychain_id: id },
 		collator_selection: allychain_template_runtime::CollatorSelectionConfig {
 			invulnerables: invulnerables.iter().cloned().map(|(acc, _)| acc).collect(),
 			candidacy_bond: EXISTENTIAL_DEPOSIT * 16,

@@ -1,20 +1,20 @@
 // Copyright 2019-2021 Parity Technologies (UK) Ltd.
-// This file is part of Axia.
+// This file is part of Polkadot.
 
-// Axia is free software: you can redistribute it and/or modify
+// Polkadot is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 
-// Axia is distributed in the hope that it will be useful,
+// Polkadot is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
 // You should have received a copy of the GNU General Public License
-// along with Axia.  If not, see <http://www.gnu.org/licenses/>.
+// along with Polkadot.  If not, see <http://www.gnu.org/licenses/>.
 
-//! Allychain specific networking
+//! Parachain specific networking
 //!
 //! Provides a custom block announcement implementation for allychains
 //! that use the relay chain provided consensus. See [`BlockAnnounceValidator`]
@@ -38,7 +38,7 @@ use axia_node_primitives::{CollationSecondedSignal, Statement};
 use axia_allychain::primitives::HeadData;
 use axia_primitives::v1::{
 	Block as PBlock, CandidateReceipt, CompactStatement, Hash as PHash, Id as ParaId,
-	OccupiedCoreAssumption, AllychainHost, SigningContext, UncheckedSigned,
+	OccupiedCoreAssumption, ParachainHost, SigningContext, UncheckedSigned,
 };
 
 use codec::{Decode, DecodeAll, Encode};
@@ -141,7 +141,7 @@ impl BlockAnnounceData {
 	) -> Result<Validation, BlockAnnounceError>
 	where
 		P: ProvideRuntimeApi<PBlock> + Send + Sync + 'static,
-		P::Api: AllychainHost<PBlock>,
+		P::Api: ParachainHost<PBlock>,
 	{
 		let runtime_api = relay_chain_client.runtime_api();
 		let validator_index = self.statement.unchecked_validator_index();
@@ -203,7 +203,7 @@ impl TryFrom<&'_ CollationSecondedSignal> for BlockAnnounceData {
 	}
 }
 
-/// Allychain specific block announce validator.
+/// Parachain specific block announce validator.
 ///
 /// This block announce validator is required if the allychain is running
 /// with the relay chain provided consensus to make sure each node only
@@ -265,7 +265,7 @@ impl<Block, R, B, BCE> BlockAnnounceValidator<Block, R, B, BCE> {
 impl<Block: BlockT, R, B, BCE> BlockAnnounceValidator<Block, R, B, BCE>
 where
 	R: ProvideRuntimeApi<PBlock> + Send + Sync + 'static,
-	R::Api: AllychainHost<PBlock>,
+	R::Api: ParachainHost<PBlock>,
 	B: Backend<PBlock> + 'static,
 {
 	/// Get the included block of the given allychain in the relay chain.
@@ -352,7 +352,7 @@ impl<Block: BlockT, P, B, BCE> BlockAnnounceValidatorT<Block>
 	for BlockAnnounceValidator<Block, P, B, BCE>
 where
 	P: ProvideRuntimeApi<PBlock> + Send + Sync + 'static,
-	P::Api: AllychainHost<PBlock>,
+	P::Api: ParachainHost<PBlock>,
 	B: Backend<PBlock> + 'static,
 	BCE: BlockchainEvents<PBlock> + 'static + Send + Sync,
 {

@@ -34,9 +34,9 @@ pub use block_builder::*;
 pub use cumulus_test_runtime as runtime;
 pub use axia_allychain::primitives::{BlockData, HeadData, ValidationParams, ValidationResult};
 pub use sc_executor::error::Result as ExecutorResult;
-pub use axlib_test_client::*;
+pub use substrate_test_client::*;
 
-pub type AllychainBlockData = cumulus_primitives_core::AllychainBlockData<Block>;
+pub type ParachainBlockData = cumulus_primitives_core::ParachainBlockData<Block>;
 
 mod local_executor {
 	/// Native executor instance.
@@ -59,7 +59,7 @@ mod local_executor {
 pub use local_executor::LocalExecutor;
 
 /// Test client database backend.
-pub type Backend = axlib_test_client::Backend<Block>;
+pub type Backend = substrate_test_client::Backend<Block>;
 
 /// Test client executor.
 pub type Executor =
@@ -67,7 +67,7 @@ pub type Executor =
 
 /// Test client builder for Cumulus
 pub type TestClientBuilder =
-	axlib_test_client::TestClientBuilder<Block, Executor, Backend, GenesisParameters>;
+	substrate_test_client::TestClientBuilder<Block, Executor, Backend, GenesisParameters>;
 
 /// LongestChain type for the test runtime/client.
 pub type LongestChain = sc_consensus::LongestChain<Backend, Block>;
@@ -79,7 +79,7 @@ pub type Client = client::Client<Backend, Executor, Block, runtime::RuntimeApi>;
 #[derive(Default)]
 pub struct GenesisParameters;
 
-impl axlib_test_client::GenesisInit for GenesisParameters {
+impl substrate_test_client::GenesisInit for GenesisParameters {
 	fn genesis_storage(&self) -> Storage {
 		genesis_config().build_storage().unwrap()
 	}
@@ -178,7 +178,7 @@ pub fn validate_block(
 	let executor = WasmExecutor::new(
 		WasmExecutionMethod::Interpreted,
 		Some(1024),
-		sp_io::AxlibHostFunctions::host_functions(),
+		sp_io::SubstrateHostFunctions::host_functions(),
 		1,
 		None,
 	);

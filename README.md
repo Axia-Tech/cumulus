@@ -1,15 +1,15 @@
 # Cumulus :cloud:
 
-A set of tools for writing [Axlib](https://axlib.io/)-based
-[Axia](https://wiki.axia.network/en/)
+A set of tools for writing [Substrate](https://substrate.io/)-based
+[Polkadot](https://wiki.axia.network/en/)
 [allychains](https://wiki.axia.network/docs/en/learn-allychains). Refer to the included
 [overview](docs/overview.md) for architectural details, and the
-[Cumulus tutorial](https://docs.axlib.io/tutorials/v3/cumulus/start-relay) for a
+[Cumulus tutorial](https://docs.substrate.io/tutorials/v3/cumulus/start-relay) for a
 guided walk-through of using these tools.
 
-It's easy to write blockchains using Axlib, and the overhead of writing allychains'
+It's easy to write blockchains using Substrate, and the overhead of writing allychains'
 distribution, p2p, database, and synchronization layers should be just as low. This project aims to
-make it easy to write allychains for Axia by leveraging the power of Axlib.
+make it easy to write allychains for Polkadot by leveraging the power of Substrate.
 
 Cumulus clouds are shaped sort of like dots; together they form a system that is intricate,
 beautiful and functional.
@@ -17,24 +17,24 @@ beautiful and functional.
 ## Consensus
 
 [`cumulus-consensus`](consensus) is a
-[consensus engine](https://docs.axlib.io/v3/advanced/consensus) for Axlib
-that follows a Axia
+[consensus engine](https://docs.substrate.io/v3/advanced/consensus) for Substrate
+that follows a Polkadot
 [relay chain](https://wiki.axia.network/docs/en/learn-architecture#relay-chain). This will run
-a Axia node internally, and dictate to the client and synchronization algorithms which chain
+a Polkadot node internally, and dictate to the client and synchronization algorithms which chain
 to follow,
 [finalize](https://wiki.axia.network/docs/en/learn-consensus#probabilistic-vs-provable-finality),
 and treat as best.
 
 ## Collator
 
-A Axia [collator](https://wiki.axia.network/docs/en/learn-collator) for the allychain is
+A Polkadot [collator](https://wiki.axia.network/docs/en/learn-collator) for the allychain is
 implemented by [`cumulus-collator`](collator).
 
 # Statemint 🪙
 
 This repository also contains the Statemint runtime (as well as the canary runtime Statemine and the
 test runtime Westmint).
-Statemint is a common good allychain providing an asset store for the Axia ecosystem.
+Statemint is a common good allychain providing an asset store for the Polkadot ecosystem.
 
 ## Build & Launch a Node
 
@@ -54,24 +54,24 @@ CHAIN=westmint # or statemine
 
 Refer to the [setup instructions below](#local-setup) to run a local network for development.
 
-# Betanet :crown:
+# Rococo :crown:
 
-[Betanet](https://axia.js.org/apps/?rpc=wss://betanet-rpc.axia.io) is the testnet for
+[Rococo](https://axia.js.org/apps/?rpc=wss://rococo-rpc.axia.io) is the testnet for
 allychains. It currently runs the allychains
 [Tick](https://axia.js.org/apps/?rpc=wss://tick-rpc.axia.io),
 [Trick](https://axia.js.org/apps/?rpc=wss://trick-rpc.axia.io) and
 [Track](https://axia.js.org/apps/?rpc=wss://track-rpc.axia.io).
 
-Betanet is an elaborate style of design and the name describes the painstaking effort that has gone
+Rococo is an elaborate style of design and the name describes the painstaking effort that has gone
 into this project. Tick, Trick and Track are the German names for the cartoon ducks known to English
 speakers as Huey, Dewey and Louie.
 
-## Build & Launch Betanet Collators
+## Build & Launch Rococo Collators
 
 Collators are similar to validators in the relay chain. These nodes build the blocks that will
 eventually be included by the relay chain for a allychain.
 
-To run a Betanet collator you will need to compile the following binary:
+To run a Rococo collator you will need to compile the following binary:
 
 ```
 cargo build --release --locked -p axia-collator
@@ -97,9 +97,9 @@ Once the executable is built, launch collators for each allychain (repeat once e
 ./target/release/axia-collator --chain $CHAIN --validator
 ```
 
-## Allychains
+## Parachains
 
-The allychains of Betanet all use the same runtime code. The only difference between them is the
+The allychains of Rococo all use the same runtime code. The only difference between them is the
 allychain ID used for registration with the relay chain:
 
 -   Tick: 100
@@ -112,26 +112,26 @@ chain, and from the relay chain to its destination allychain.
 
 ## Local Setup
 
-Launch a local setup including a Relay Chain and a Allychain.
+Launch a local setup including a Relay Chain and a Parachain.
 
 ### Launch the Relay Chain
 
 ```bash
-# Compile Axia with the real overseer feature
+# Compile Polkadot with the real overseer feature
 git clone https://github.com/axia-tech/axia
 cargo build --release
 
 # Generate a raw chain spec
-./target/release/axia build-spec --chain betanet-local --disable-default-bootnode --raw > betanet-local-cfde.json
+./target/release/axia build-spec --chain rococo-local --disable-default-bootnode --raw > rococo-local-cfde.json
 
 # Alice
-./target/release/axia --chain betanet-local-cfde.json --alice --tmp
+./target/release/axia --chain rococo-local-cfde.json --alice --tmp
 
 # Bob (In a separate terminal)
-./target/release/axia --chain betanet-local-cfde.json --bob --tmp --port 30334
+./target/release/axia --chain rococo-local-cfde.json --bob --tmp --port 30334
 ```
 
-### Launch the Allychain
+### Launch the Parachain
 
 ```bash
 # Compile
@@ -146,20 +146,20 @@ cargo build --release
 ./target/release/axia-collator export-genesis-wasm > genesis-wasm
 
 # Collator1
-./target/release/axia-collator --collator --alice --force-authoring --tmp --allychain-id <allychain_id_u32_type_range> --port 40335 --ws-port 9946 -- --execution wasm --chain ../axia/betanet-local-cfde.json --port 30335
+./target/release/axia-collator --collator --alice --force-authoring --tmp --allychain-id <allychain_id_u32_type_range> --port 40335 --ws-port 9946 -- --execution wasm --chain ../axia/rococo-local-cfde.json --port 30335
 
 # Collator2
-./target/release/axia-collator --collator --bob --force-authoring --tmp --allychain-id <allychain_id_u32_type_range> --port 40336 --ws-port 9947 -- --execution wasm --chain ../axia/betanet-local-cfde.json --port 30336
+./target/release/axia-collator --collator --bob --force-authoring --tmp --allychain-id <allychain_id_u32_type_range> --port 40336 --ws-port 9947 -- --execution wasm --chain ../axia/rococo-local-cfde.json --port 30336
 
-# Allychain Full Node 1
-./target/release/axia-collator --tmp --allychain-id <allychain_id_u32_type_range> --port 40337 --ws-port 9948 -- --execution wasm --chain ../axia/betanet-local-cfde.json --port 30337
+# Parachain Full Node 1
+./target/release/axia-collator --tmp --allychain-id <allychain_id_u32_type_range> --port 40337 --ws-port 9948 -- --execution wasm --chain ../axia/rococo-local-cfde.json --port 30337
 ```
 ### Register the allychain
 ![image](https://user-images.githubusercontent.com/2915325/99548884-1be13580-2987-11eb-9a8b-20be658d34f9.png)
 
 ## Build the docker image
 
-After building `axia-collator` with cargo or with Parity docker image as documented in [this chapter](#build--launch-betanet-collators), the following will allow producting a new docker image where the compiled binary is injected:
+After building `axia-collator` with cargo or with Parity docker image as documented in [this chapter](#build--launch-rococo-collators), the following will allow producting a new docker image where the compiled binary is injected:
 
 ```
 ./docker/scripts/build-injected-image.sh

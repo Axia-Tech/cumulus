@@ -7,6 +7,6 @@ edition = "2018"
 [dependencies]
 structopt = "0.3.3"
 
-# Axlib dependencies
-sc-cli = { git = "https://github.com/axia-tech/axlib", branch = "dev" }
-sc-service = { git = "https://github.com/axia-tech/axlib", branch = "dev" }
+# Substrate dependencies
+sc-cli = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
+sc-service = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }

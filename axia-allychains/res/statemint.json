@@ -10,7 +10,7 @@
   "telemetryEndpoints": null,
   "protocolId": null,
   "properties": null,
-  "relay_chain": "betanet",
+  "relay_chain": "rococo",
   "para_id": 1,
   "consensusEngine": null,
   "genesis": {

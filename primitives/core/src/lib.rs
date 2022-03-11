@@ -1,12 +1,12 @@
 // Copyright 2020-2021 Parity Technologies (UK) Ltd.
 // This file is part of Cumulus.
 
-// Axlib is free software: you can redistribute it and/or modify
+// Substrate is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 
-// Axlib is distributed in the hope that it will be useful,
+// Substrate is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
@@ -22,7 +22,7 @@ use codec::{Decode, Encode};
 use sp_runtime::{traits::Block as BlockT, RuntimeDebug};
 use sp_std::prelude::*;
 
-pub use axlib_primitives::InboundDownwardMessage;
+pub use axia_core_primitives::InboundDownwardMessage;
 pub use axia_allychain::primitives::{
 	DmpMessageHandler, Id as ParaId, UpwardMessage, ValidationParams, XcmpMessageFormat,
 	XcmpMessageHandler,
@@ -33,7 +33,7 @@ pub use axia_primitives::v1::{
 
 /// A module that re-exports relevant relay chain definitions.
 pub mod relay_chain {
-	pub use axlib_primitives::*;
+	pub use axia_core_primitives::*;
 	pub use axia_primitives::{v1, v1::well_known_keys};
 }
 
@@ -149,7 +149,7 @@ pub trait OnValidationData {
 /// This is send as PoV (proof of validity block) to the relay-chain validators. There it will be
 /// passed to the allychain validation Wasm blob to be validated.
 #[derive(codec::Encode, codec::Decode, Clone)]
-pub struct AllychainBlockData<B: BlockT> {
+pub struct ParachainBlockData<B: BlockT> {
 	/// The header of the allychain block.
 	header: B::Header,
 	/// The extrinsics of the allychain block.
@@ -158,7 +158,7 @@ pub struct AllychainBlockData<B: BlockT> {
 	storage_proof: sp_trie::CompactProof,
 }
 
-impl<B: BlockT> AllychainBlockData<B> {
+impl<B: BlockT> ParachainBlockData<B> {
 	/// Creates a new instance of `Self`.
 	pub fn new(
 		header: <B as BlockT>::Header,

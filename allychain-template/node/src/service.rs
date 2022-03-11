@@ -1,4 +1,4 @@
-//! Service and ServiceFactory implementation. Specialized wrapper over axlib service.
+//! Service and ServiceFactory implementation. Specialized wrapper over substrate service.
 
 // std
 use std::sync::Arc;
@@ -12,14 +12,14 @@ use allychain_template_runtime::{
 use cumulus_client_consensus_aura::{
 	build_aura_consensus, BuildAuraConsensusParams, SlotProportion,
 };
-use cumulus_client_consensus_common::AllychainConsensus;
+use cumulus_client_consensus_common::ParachainConsensus;
 use cumulus_client_network::build_block_announce_validator;
 use cumulus_client_service::{
 	prepare_node_config, start_collator, start_full_node, StartCollatorParams, StartFullNodeParams,
 };
 use cumulus_primitives_core::ParaId;
 
-// Axlib Imports
+// Substrate Imports
 use sc_client_api::ExecutorProvider;
 use sc_executor::NativeElseWasmExecutor;
 use sc_network::NetworkService;
@@ -29,7 +29,7 @@ use sp_api::ConstructRuntimeApi;
 use sp_consensus::SlotData;
 use sp_keystore::SyncCryptoStorePtr;
 use sp_runtime::traits::BlakeTwo256;
-use axlib_prometheus_endpoint::Registry;
+use substrate_prometheus_endpoint::Registry;
 
 /// Native executor instance.
 pub struct TemplateRuntimeExecutor;
@@ -163,7 +163,7 @@ where
 /// Start a node with the given allychain `Configuration` and relay chain `Configuration`.
 ///
 /// This is the actual implementation that is abstract over the executor and the runtime api.
-#[sc_tracing::logging::prefix_logs_with("Allychain")]
+#[sc_tracing::logging::prefix_logs_with("Parachain")]
 async fn start_node_impl<RuntimeApi, Executor, RB, BIQ, BIC>(
 	allychain_config: Configuration,
 	axia_config: Configuration,
@@ -190,7 +190,7 @@ where
 		+ sp_block_builder::BlockBuilder<Block>
 		+ cumulus_primitives_core::CollectCollationInfo<Block>
 		+ pallet_transaction_payment_rpc::TransactionPaymentRuntimeApi<Block, Balance>
-		+ axlib_frame_rpc_system::AccountNonceApi<Block, AccountId, Nonce>,
+		+ substrate_frame_rpc_system::AccountNonceApi<Block, AccountId, Nonce>,
 	sc_client_api::StateBackendFor<TFullBackend<Block>, Block>: sp_api::StateBackend<BlakeTwo256>,
 	Executor: sc_executor::NativeExecutionDispatch + 'static,
 	RB: Fn(
@@ -225,7 +225,7 @@ where
 		Arc<NetworkService<Block, Hash>>,
 		SyncCryptoStorePtr,
 		bool,
-	) -> Result<Box<dyn AllychainConsensus<Block>>, sc_service::Error>,
+	) -> Result<Box<dyn ParachainConsensus<Block>>, sc_service::Error>,
 {
 	if matches!(allychain_config.role, Role::Light) {
 		return Err("Light client not supported!".into())
@@ -447,7 +447,7 @@ pub async fn start_allychain_node(
 				proposer_factory,
 				create_inherent_data_providers: move |_, (relay_parent, validation_data)| {
 					let allychain_inherent =
-					cumulus_primitives_allychain_inherent::AllychainInherentData::create_at_with_client(
+					cumulus_primitives_allychain_inherent::ParachainInherentData::create_at_with_client(
 						relay_parent,
 						&relay_chain_client,
 						&*relay_chain_backend,

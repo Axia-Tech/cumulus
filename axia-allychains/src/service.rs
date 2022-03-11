@@ -17,7 +17,7 @@ use cumulus_client_consensus_aura::{
 	build_aura_consensus, BuildAuraConsensusParams, SlotProportion,
 };
 use cumulus_client_consensus_common::{
-	AllychainBlockImport, AllychainCandidate, AllychainConsensus,
+	ParachainBlockImport, ParachainCandidate, ParachainConsensus,
 };
 use cumulus_client_network::build_block_announce_validator;
 use cumulus_client_service::{
@@ -52,20 +52,20 @@ use sp_runtime::{
 	traits::{BlakeTwo256, Header as HeaderT},
 };
 use std::sync::Arc;
-use axlib_prometheus_endpoint::Registry;
+use substrate_prometheus_endpoint::Registry;
 
 /// Native executor instance.
-pub struct BetanetAllychainRuntimeExecutor;
+pub struct RococoParachainRuntimeExecutor;
 
-impl sc_executor::NativeExecutionDispatch for BetanetAllychainRuntimeExecutor {
+impl sc_executor::NativeExecutionDispatch for RococoParachainRuntimeExecutor {
 	type ExtendHostFunctions = ();
 
 	fn dispatch(method: &str, data: &[u8]) -> Option<Vec<u8>> {
-		betanet_allychain_runtime::api::dispatch(method, data)
+		rococo_allychain_runtime::api::dispatch(method, data)
 	}
 
 	fn native_version() -> sc_executor::NativeVersion {
-		betanet_allychain_runtime::native_version()
+		rococo_allychain_runtime::native_version()
 	}
 }
 
@@ -245,7 +245,7 @@ where
 /// Start a shell node with the given allychain `Configuration` and relay chain `Configuration`.
 ///
 /// This is the actual implementation that is abstract over the executor and the runtime api for shell nodes.
-#[sc_tracing::logging::prefix_logs_with("Allychain")]
+#[sc_tracing::logging::prefix_logs_with("Parachain")]
 async fn start_shell_node_impl<RuntimeApi, Executor, RB, BIQ, BIC>(
 	allychain_config: Configuration,
 	axia_config: Configuration,
@@ -305,7 +305,7 @@ where
 		Arc<NetworkService<Block, Hash>>,
 		SyncCryptoStorePtr,
 		bool,
-	) -> Result<Box<dyn AllychainConsensus<Block>>, sc_service::Error>,
+	) -> Result<Box<dyn ParachainConsensus<Block>>, sc_service::Error>,
 {
 	if matches!(allychain_config.role, Role::Light) {
 		return Err("Light client not supported!".into())
@@ -421,7 +421,7 @@ where
 /// Start a node with the given allychain `Configuration` and relay chain `Configuration`.
 ///
 /// This is the actual implementation that is abstract over the executor and the runtime api.
-#[sc_tracing::logging::prefix_logs_with("Allychain")]
+#[sc_tracing::logging::prefix_logs_with("Parachain")]
 async fn start_node_impl<RuntimeApi, Executor, RB, BIQ, BIC>(
 	allychain_config: Configuration,
 	axia_config: Configuration,
@@ -483,7 +483,7 @@ where
 		Arc<NetworkService<Block, Hash>>,
 		SyncCryptoStorePtr,
 		bool,
-	) -> Result<Box<dyn AllychainConsensus<Block>>, sc_service::Error>,
+	) -> Result<Box<dyn ParachainConsensus<Block>>, sc_service::Error>,
 {
 	if matches!(allychain_config.role, Role::Light) {
 		return Err("Light client not supported!".into())
@@ -608,13 +608,13 @@ where
 	Ok((task_manager, client))
 }
 
-/// Build the import queue for the betanet allychain runtime.
-pub fn betanet_allychain_build_import_queue(
+/// Build the import queue for the rococo allychain runtime.
+pub fn rococo_allychain_build_import_queue(
 	client: Arc<
 		TFullClient<
 			Block,
-			betanet_allychain_runtime::RuntimeApi,
-			NativeElseWasmExecutor<BetanetAllychainRuntimeExecutor>,
+			rococo_allychain_runtime::RuntimeApi,
+			NativeElseWasmExecutor<RococoParachainRuntimeExecutor>,
 		>,
 	>,
 	config: &Configuration,
@@ -625,8 +625,8 @@ pub fn betanet_allychain_build_import_queue(
 		Block,
 		TFullClient<
 			Block,
-			betanet_allychain_runtime::RuntimeApi,
-			NativeElseWasmExecutor<BetanetAllychainRuntimeExecutor>,
+			rococo_allychain_runtime::RuntimeApi,
+			NativeElseWasmExecutor<RococoParachainRuntimeExecutor>,
 		>,
 	>,
 	sc_service::Error,
@@ -663,8 +663,8 @@ pub fn betanet_allychain_build_import_queue(
 	.map_err(Into::into)
 }
 
-/// Start a betanet allychain node.
-pub async fn start_betanet_allychain_node(
+/// Start a rococo allychain node.
+pub async fn start_rococo_allychain_node(
 	allychain_config: Configuration,
 	axia_config: Configuration,
 	id: ParaId,
@@ -673,17 +673,17 @@ pub async fn start_betanet_allychain_node(
 	Arc<
 		TFullClient<
 			Block,
-			betanet_allychain_runtime::RuntimeApi,
-			NativeElseWasmExecutor<BetanetAllychainRuntimeExecutor>,
+			rococo_allychain_runtime::RuntimeApi,
+			NativeElseWasmExecutor<RococoParachainRuntimeExecutor>,
 		>,
 	>,
 )> {
-	start_node_impl::<betanet_allychain_runtime::RuntimeApi, BetanetAllychainRuntimeExecutor, _, _, _>(
+	start_node_impl::<rococo_allychain_runtime::RuntimeApi, RococoParachainRuntimeExecutor, _, _, _>(
 		allychain_config,
 		axia_config,
 		id,
 		|_| Ok(Default::default()),
-		betanet_allychain_build_import_queue,
+		rococo_allychain_build_import_queue,
 		|client,
 		 prometheus_registry,
 		 telemetry,
@@ -720,7 +720,7 @@ pub async fn start_betanet_allychain_node(
 				proposer_factory,
 				create_inherent_data_providers: move |_, (relay_parent, validation_data)| {
 					let allychain_inherent =
-					cumulus_primitives_allychain_inherent::AllychainInherentData::create_at_with_client(
+					cumulus_primitives_allychain_inherent::ParachainInherentData::create_at_with_client(
 						relay_parent,
 						&relay_chain_client,
 						&*relay_chain_backend,
@@ -835,7 +835,7 @@ pub async fn start_shell_node(
 					relay_chain_backend: relay_chain_node.backend.clone(),
 					create_inherent_data_providers: move |_, (relay_parent, validation_data)| {
 						let allychain_inherent =
-					cumulus_primitives_allychain_inherent::AllychainInherentData::create_at_with_client(
+					cumulus_primitives_allychain_inherent::ParachainInherentData::create_at_with_client(
 						relay_parent,
 						&relay_chain_client,
 						&*relay_chain_backend,
@@ -876,12 +876,12 @@ impl<R> BuildOnAccess<R> {
 	}
 }
 
-/// Special [`AllychainConsensus`] implementation that waits for the upgrade from
+/// Special [`ParachainConsensus`] implementation that waits for the upgrade from
 /// shell to a allychain runtime that implements Aura.
 struct WaitForAuraConsensus<Client> {
 	client: Arc<Client>,
-	aura_consensus: Arc<Mutex<BuildOnAccess<Box<dyn AllychainConsensus<Block>>>>>,
-	relay_chain_consensus: Arc<Mutex<Box<dyn AllychainConsensus<Block>>>>,
+	aura_consensus: Arc<Mutex<BuildOnAccess<Box<dyn ParachainConsensus<Block>>>>>,
+	relay_chain_consensus: Arc<Mutex<Box<dyn ParachainConsensus<Block>>>>,
 }
 
 impl<Client> Clone for WaitForAuraConsensus<Client> {
@@ -895,7 +895,7 @@ impl<Client> Clone for WaitForAuraConsensus<Client> {
 }
 
 #[async_trait::async_trait]
-impl<Client> AllychainConsensus<Block> for WaitForAuraConsensus<Client>
+impl<Client> ParachainConsensus<Block> for WaitForAuraConsensus<Client>
 where
 	Client: sp_api::ProvideRuntimeApi<Block> + Send + Sync,
 	Client::Api: AuraApi<Block, AuraId>,
@@ -905,7 +905,7 @@ where
 		parent: &Header,
 		relay_parent: PHash,
 		validation_data: &PersistedValidationData,
-	) -> Option<AllychainCandidate<Block>> {
+	) -> Option<ParachainCandidate<Block>> {
 		let block_id = BlockId::hash(parent.hash());
 		if self
 			.client
@@ -1034,7 +1034,7 @@ where
 
 	Ok(BasicQueue::new(
 		verifier,
-		Box::new(AllychainBlockImport::new(client.clone())),
+		Box::new(ParachainBlockImport::new(client.clone())),
 		None,
 		&spawner,
 		registry,
@@ -1123,7 +1123,7 @@ where
 					proposer_factory,
 					create_inherent_data_providers: move |_, (relay_parent, validation_data)| {
 						let allychain_inherent =
-								cumulus_primitives_allychain_inherent::AllychainInherentData::create_at_with_client(
+								cumulus_primitives_allychain_inherent::ParachainInherentData::create_at_with_client(
 									relay_parent,
 									&relay_chain_client,
 									&*relay_chain_backend,
@@ -1186,7 +1186,7 @@ where
 						create_inherent_data_providers:
 							move |_, (relay_parent, validation_data)| {
 								let allychain_inherent =
-									cumulus_primitives_allychain_inherent::AllychainInherentData::create_at_with_client(
+									cumulus_primitives_allychain_inherent::ParachainInherentData::create_at_with_client(
 										relay_parent,
 										&relay_chain_client,
 										&*relay_chain_backend,

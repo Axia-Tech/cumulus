@@ -15,8 +15,8 @@
 // along with Cumulus.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::{Backend, Client};
-use cumulus_primitives_core::{AllychainBlockData, PersistedValidationData};
-use cumulus_primitives_allychain_inherent::{AllychainInherentData, INHERENT_IDENTIFIER};
+use cumulus_primitives_core::{ParachainBlockData, PersistedValidationData};
+use cumulus_primitives_allychain_inherent::{ParachainInherentData, INHERENT_IDENTIFIER};
 use cumulus_test_relay_sproof_builder::RelayStateSproofBuilder;
 use cumulus_test_runtime::{Block, GetLastTimestamp, Hash, Header};
 use axia_primitives::v1::{BlockNumber as PBlockNumber, Hash as PHash};
@@ -98,7 +98,7 @@ fn init_block_builder<'a>(
 	inherent_data
 		.put_data(
 			INHERENT_IDENTIFIER,
-			&AllychainInherentData {
+			&ParachainInherentData {
 				validation_data,
 				relay_chain_state,
 				downward_messages: Default::default(),
@@ -156,14 +156,14 @@ impl InitBlockBuilder for Client {
 }
 
 /// Extension trait for the [`BlockBuilder`](sc_block_builder::BlockBuilder) to build directly a
-/// [`AllychainBlockData`].
-pub trait BuildAllychainBlockData {
-	/// Directly build the [`AllychainBlockData`] from the block that comes out of the block builder.
-	fn build_allychain_block(self, parent_state_root: Hash) -> AllychainBlockData<Block>;
+/// [`ParachainBlockData`].
+pub trait BuildParachainBlockData {
+	/// Directly build the [`ParachainBlockData`] from the block that comes out of the block builder.
+	fn build_allychain_block(self, parent_state_root: Hash) -> ParachainBlockData<Block>;
 }
 
-impl<'a> BuildAllychainBlockData for sc_block_builder::BlockBuilder<'a, Block, Client, Backend> {
-	fn build_allychain_block(self, parent_state_root: Hash) -> AllychainBlockData<Block> {
+impl<'a> BuildParachainBlockData for sc_block_builder::BlockBuilder<'a, Block, Client, Backend> {
+	fn build_allychain_block(self, parent_state_root: Hash) -> ParachainBlockData<Block> {
 		let built_block = self.build().expect("Builds the block");
 
 		let storage_proof = built_block
@@ -173,6 +173,6 @@ impl<'a> BuildAllychainBlockData for sc_block_builder::BlockBuilder<'a, Block, C
 			.expect("Creates the compact proof");
 
 		let (header, extrinsics) = built_block.block.deconstruct();
-		AllychainBlockData::new(header, extrinsics, storage_proof)
+		ParachainBlockData::new(header, extrinsics, storage_proof)
 	}
 }

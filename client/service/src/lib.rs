@@ -1,12 +1,12 @@
 // Copyright 2020-2021 Parity Technologies (UK) Ltd.
 // This file is part of Cumulus.
 
-// Axlib is free software: you can redistribute it and/or modify
+// Substrate is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 
-// Axlib is distributed in the hope that it will be useful,
+// Substrate is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
@@ -18,7 +18,7 @@
 //!
 //! Provides functions for starting a collator node or a normal full node.
 
-use cumulus_client_consensus_common::AllychainConsensus;
+use cumulus_client_consensus_common::ParachainConsensus;
 use cumulus_primitives_core::{CollectCollationInfo, ParaId};
 use axia_overseer::Handle as OverseerHandle;
 use axia_primitives::v1::{Block as PBlock, CollatorPair};
@@ -69,7 +69,7 @@ pub struct StartCollatorParams<'a, Block: BlockT, BS, Client, Spawner, RClient, 
 	pub para_id: ParaId,
 	pub relay_chain_full_node: RFullNode<RClient>,
 	pub task_manager: &'a mut TaskManager,
-	pub allychain_consensus: Box<dyn AllychainConsensus<Block>>,
+	pub allychain_consensus: Box<dyn ParachainConsensus<Block>>,
 	pub import_queue: IQ,
 }
 
@@ -126,7 +126,7 @@ where
 		overseer_handle: relay_chain_full_node
 			.overseer_handle
 			.clone()
-			.ok_or_else(|| "Axia full node did not provide an `OverseerHandle`!")?,
+			.ok_or_else(|| "Polkadot full node did not provide an `OverseerHandle`!")?,
 		_phantom: PhantomData,
 	})?;
 
@@ -137,7 +137,7 @@ where
 		overseer_handle: relay_chain_full_node
 			.overseer_handle
 			.clone()
-			.ok_or_else(|| "Axia full node did not provide an `OverseerHandle`!")?,
+			.ok_or_else(|| "Polkadot full node did not provide an `OverseerHandle`!")?,
 		spawner,
 		para_id,
 		key: relay_chain_full_node.collator_key.clone(),
@@ -291,7 +291,7 @@ where
 
 /// Prepare the allychain's node condifugration
 ///
-/// This function will disable the default announcement of Axlib for the allychain in favor
+/// This function will disable the default announcement of Substrate for the allychain in favor
 /// of the one of Cumulus.
 pub fn prepare_node_config(mut allychain_config: Configuration) -> Configuration {
 	allychain_config.announce_block = false;
@@ -299,7 +299,7 @@ pub fn prepare_node_config(mut allychain_config: Configuration) -> Configuration
 	allychain_config
 }
 
-/// Build the Axia full node using the given `config`.
+/// Build the Polkadot full node using the given `config`.
 #[sc_tracing::logging::prefix_logs_with("Relaychain")]
 pub fn build_axia_full_node(
 	config: Configuration,
@@ -327,7 +327,7 @@ pub fn build_axia_full_node(
 
 /// A shared import queue
 ///
-/// This is basically a hack until the Axlib side is implemented properly.
+/// This is basically a hack until the Substrate side is implemented properly.
 #[derive(Clone)]
 pub struct SharedImportQueue<Block: BlockT>(Arc<parking_lot::Mutex<dyn ImportQueue<Block>>>);
 

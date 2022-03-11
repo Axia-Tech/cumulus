@@ -25,7 +25,7 @@ members = [
 	"axia-allychains/",
 	"axia-allychains/pallets/allychain-info",
 	"axia-allychains/pallets/ping",
-	"axia-allychains/betanet",
+	"axia-allychains/rococo",
 	"axia-allychains/shell",
 	"axia-allychains/allychains-common",
 	"axia-allychains/statemint",

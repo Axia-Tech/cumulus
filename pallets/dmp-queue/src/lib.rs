@@ -307,7 +307,7 @@ pub mod pallet {
 									id, remaining, required,
 								));
 							}
-						},
+						}
 					}
 				}
 				// Cannot be an `else` here since the `maybe_enqueue_page` may have changed.
@@ -372,7 +372,7 @@ mod tests {
 			apis: sp_version::create_apis_vec!([]),
 			transaction_version: 1,
 		};
-		pub const AllychainId: ParaId = ParaId::new(200);
+		pub const ParachainId: ParaId = ParaId::new(200);
 		pub const ReservedXcmpWeight: Weight = 0;
 		pub const ReservedDmpWeight: Weight = 0;
 	}

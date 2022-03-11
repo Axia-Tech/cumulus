@@ -1,12 +1,12 @@
 // Copyright 2020-2021 Parity Technologies (UK) Ltd.
 // This file is part of Cumulus.
 
-// Axlib is free software: you can redistribute it and/or modify
+// Substrate is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 
-// Axlib is distributed in the hope that it will be useful,
+// Substrate is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
@@ -20,7 +20,7 @@
 //! * `XcmpMessageSource`
 //!
 //! Also provides an implementation of `SendXcm` which can be placed in a router tuple for relaying
-//! XCM over XCMP if the destination is `Parent/Allychain`. It requires an implementation of
+//! XCM over XCMP if the destination is `Parent/Parachain`. It requires an implementation of
 //! `XcmExecutor` for dispatching incoming XCM messages.
 
 #![cfg_attr(not(feature = "std"), no_std)]
@@ -108,7 +108,7 @@ pub mod pallet {
 		BadFormat(Option<T::Hash>),
 		/// An upward message was sent to the relay chain.
 		UpwardMessageSent(Option<T::Hash>),
-		/// An HRMP message was sent to a sibling Allychain.
+		/// An HRMP message was sent to a sibling allychain.
 		XcmpMessageSent(Option<T::Hash>),
 	}
 
@@ -347,7 +347,7 @@ impl<T: Config> Pallet<T> {
 		log::debug!("Processing XCMP-XCM: {:?}", &hash);
 		let (result, event) = match Xcm::<T::Call>::try_from(xcm) {
 			Ok(xcm) => {
-				let location = (1, Allychain(sender.into()));
+				let location = (1, Parachain(sender.into()));
 				match T::XcmExecutor::execute_xcm(location, xcm, max_weight) {
 					Outcome::Error(e) => (Err(e.clone()), Event::Fail(Some(hash), e)),
 					Outcome::Complete(w) => (Ok(w), Event::Success(Some(hash))),
@@ -401,26 +401,23 @@ impl<T: Config> Pallet<T> {
 			XcmpMessageFormat::ConcatenatedEncodedBlob => {
 				while !remaining_fragments.is_empty() {
 					last_remaining_fragments = remaining_fragments;
-					match <Vec<u8>>::decode_all(&mut remaining_fragments) {
-						Ok(blob) if remaining_fragments.len() < last_remaining_fragments.len() => {
-							let weight = max_weight - weight_used;
-							match Self::handle_blob_message(sender, sent_at, blob, weight) {
-								Ok(used) => weight_used = weight_used.saturating_add(used),
-								Err(true) => {
-									// That message didn't get processed this time because of being
-									// too heavy. We leave it around for next time and bail.
-									remaining_fragments = last_remaining_fragments;
-									break
-								},
-								Err(false) => {
-									// Message invalid; don't attempt to retry
-								},
-							}
-						},
-						_ => {
-							debug_assert!(false, "Invalid incoming blob message data");
-							remaining_fragments = &b""[..];
-						},
+					if let Ok(blob) = <Vec<u8>>::decode_all(&mut remaining_fragments) {
+						let weight = max_weight - weight_used;
+						match Self::handle_blob_message(sender, sent_at, blob, weight) {
+							Ok(used) => weight_used = weight_used.saturating_add(used),
+							Err(true) => {
+								// That message didn't get processed this time because of being
+								// too heavy. We leave it around for next time and bail.
+								remaining_fragments = last_remaining_fragments;
+								break
+							},
+							Err(false) => {
+								// Message invalid; don't attempt to retry
+							},
+						}
+					} else {
+						debug_assert!(false, "Invalid incoming blob message data");
+						remaining_fragments = &b""[..];
 					}
 				}
 			},
@@ -755,14 +752,14 @@ impl<T: Config> XcmpMessageSource for Pallet<T> {
 	}
 }
 
-/// Xcm sender for sending to a sibling Allychain.
+/// Xcm sender for sending to a sibling allychain.
 impl<T: Config> SendXcm for Pallet<T> {
 	fn send_xcm(dest: impl Into<MultiLocation>, msg: Xcm<()>) -> Result<(), SendError> {
 		let dest = dest.into();
 
 		match &dest {
-			// An HRMP message for a sibling Allychain.
-			MultiLocation { parents: 1, interior: X1(Allychain(id)) } => {
+			// An HRMP message for a sibling allychain.
+			MultiLocation { parents: 1, interior: X1(Parachain(id)) } => {
 				let versioned_xcm = T::VersionWrapper::wrap_version(&dest, msg)
 					.map_err(|()| SendError::DestinationUnsupported)?;
 				let hash = T::Hashing::hash_of(&versioned_xcm);
