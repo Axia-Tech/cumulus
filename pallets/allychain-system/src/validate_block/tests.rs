@@ -15,10 +15,10 @@
 // along with Cumulus.  If not, see <http://www.gnu.org/licenses/>.
 
 use codec::{Decode, Encode};
-use cumulus_primitives_core::{AllychainBlockData, PersistedValidationData};
+use cumulus_primitives_core::{ParachainBlockData, PersistedValidationData};
 use cumulus_test_client::{
 	runtime::{Block, Hash, Header, UncheckedExtrinsic, WASM_BINARY},
-	transfer, BlockData, BuildAllychainBlockData, Client, DefaultTestClientBuilderExt, HeadData,
+	transfer, BlockData, BuildParachainBlockData, Client, DefaultTestClientBuilderExt, HeadData,
 	InitBlockBuilder, TestClientBuilder, TestClientBuilderExt, ValidationParams,
 };
 use cumulus_test_relay_sproof_builder::RelayStateSproofBuilder;
@@ -28,7 +28,7 @@ use std::{env, process::Command};
 
 fn call_validate_block(
 	parent_head: Header,
-	block_data: AllychainBlockData<Block>,
+	block_data: ParachainBlockData<Block>,
 	relay_parent_storage_root: Hash,
 ) -> cumulus_test_client::ExecutorResult<Header> {
 	cumulus_test_client::validate_block(
@@ -59,7 +59,7 @@ fn create_test_client() -> (Client, Header) {
 }
 
 struct TestBlockData {
-	block: AllychainBlockData<Block>,
+	block: ParachainBlockData<Block>,
 	validation_data: PersistedValidationData,
 }
 
@@ -137,7 +137,7 @@ fn validate_block_invalid_parent_hash() {
 		let (mut header, extrinsics, witness) = block.deconstruct();
 		header.set_parent_hash(Hash::from_low_u64_be(1));
 
-		let block_data = AllychainBlockData::new(header, extrinsics, witness);
+		let block_data = ParachainBlockData::new(header, extrinsics, witness);
 		call_validate_block(parent_head, block_data, validation_data.relay_parent_storage_root)
 			.unwrap_err();
 	} else {

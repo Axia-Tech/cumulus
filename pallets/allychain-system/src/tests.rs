@@ -49,7 +49,7 @@ frame_support::construct_runtime!(
 		UncheckedExtrinsic = UncheckedExtrinsic,
 	{
 		System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
-		AllychainSystem: allychain_system::{Pallet, Call, Config, Storage, Inherent, Event<T>, ValidateUnsigned},
+		ParachainSystem: allychain_system::{Pallet, Call, Config, Storage, Inherent, Event<T>, ValidateUnsigned},
 	}
 );
 
@@ -64,7 +64,7 @@ parameter_types! {
 		apis: sp_version::create_apis_vec!([]),
 		transaction_version: 1,
 	};
-	pub const AllychainId: ParaId = ParaId::new(200);
+	pub const ParachainId: ParaId = ParaId::new(200);
 	pub const ReservedXcmpWeight: Weight = 0;
 	pub const ReservedDmpWeight: Weight = 0;
 }
@@ -91,12 +91,12 @@ impl frame_system::Config for Test {
 	type BaseCallFilter = frame_support::traits::Everything;
 	type SystemWeightInfo = ();
 	type SS58Prefix = ();
-	type OnSetCode = AllychainSetCode<Self>;
+	type OnSetCode = ParachainSetCode<Self>;
 }
 impl Config for Test {
 	type Event = Event;
 	type OnValidationData = ();
-	type SelfParaId = AllychainId;
+	type SelfParaId = ParachainId;
 	type OutboundXcmpMessageSource = FromThreadLocal;
 	type DmpMessageHandler = SaveIntoThreadLocal;
 	type ReservedDmpWeight = ReservedDmpWeight;
@@ -224,7 +224,7 @@ struct BlockTests {
 	persisted_validation_data_hook:
 		Option<Box<dyn Fn(&BlockTests, RelayChainBlockNumber, &mut PersistedValidationData)>>,
 	inherent_data_hook:
-		Option<Box<dyn Fn(&BlockTests, RelayChainBlockNumber, &mut AllychainInherentData)>>,
+		Option<Box<dyn Fn(&BlockTests, RelayChainBlockNumber, &mut ParachainInherentData)>>,
 }
 
 impl BlockTests {
@@ -280,7 +280,7 @@ impl BlockTests {
 
 	fn with_inherent_data<F>(mut self, f: F) -> Self
 	where
-		F: 'static + Fn(&BlockTests, RelayChainBlockNumber, &mut AllychainInherentData),
+		F: 'static + Fn(&BlockTests, RelayChainBlockNumber, &mut ParachainInherentData),
 	{
 		self.inherent_data_hook = Some(Box::new(f));
 		self
@@ -323,7 +323,7 @@ impl BlockTests {
 				// to storage; they must also be included in the inherent data.
 				let inherent_data = {
 					let mut inherent_data = InherentData::default();
-					let mut system_inherent_data = AllychainInherentData {
+					let mut system_inherent_data = ParachainInherentData {
 						validation_data: vfp.clone(),
 						relay_chain_state,
 						downward_messages: Default::default(),
@@ -342,13 +342,13 @@ impl BlockTests {
 				};
 
 				// execute the block
-				AllychainSystem::on_initialize(*n);
-				AllychainSystem::create_inherent(&inherent_data)
+				ParachainSystem::on_initialize(*n);
+				ParachainSystem::create_inherent(&inherent_data)
 					.expect("got an inherent")
 					.dispatch_bypass_filter(RawOrigin::None.into())
 					.expect("dispatch succeeded");
 				within_block();
-				AllychainSystem::on_finalize(*n);
+				ParachainSystem::on_finalize(*n);
 
 				// did block execution set new validation code?
 				if NewValidationCode::<Test>::exists() {
@@ -398,7 +398,7 @@ fn events() {
 				let events = System::events();
 				assert_eq!(
 					events[0].event,
-					Event::AllychainSystem(crate::Event::ValidationFunctionStored.into())
+					Event::ParachainSystem(crate::Event::ValidationFunctionStored.into())
 				);
 			},
 		)
@@ -409,7 +409,7 @@ fn events() {
 				let events = System::events();
 				assert_eq!(
 					events[0].event,
-					Event::AllychainSystem(crate::Event::ValidationFunctionApplied(1234).into())
+					Event::ParachainSystem(crate::Event::ValidationFunctionApplied(1234).into())
 				);
 			},
 		);
@@ -482,7 +482,7 @@ fn aborted_upgrade() {
 				let events = System::events();
 				assert_eq!(
 					events[0].event,
-					Event::AllychainSystem(crate::Event::ValidationFunctionDiscarded.into())
+					Event::ParachainSystem(crate::Event::ValidationFunctionDiscarded.into())
 				);
 			},
 		);
@@ -512,8 +512,8 @@ fn send_upward_message_num_per_candidate() {
 		.add_with_post_test(
 			1,
 			|| {
-				AllychainSystem::send_upward_message(b"Mr F was here".to_vec()).unwrap();
-				AllychainSystem::send_upward_message(b"message 2".to_vec()).unwrap();
+				ParachainSystem::send_upward_message(b"Mr F was here".to_vec()).unwrap();
+				ParachainSystem::send_upward_message(b"message 2".to_vec()).unwrap();
 			},
 			|| {
 				let v = UpwardMessages::<Test>::get();
@@ -546,7 +546,7 @@ fn send_upward_message_relay_bottleneck() {
 		.add_with_post_test(
 			1,
 			|| {
-				AllychainSystem::send_upward_message(vec![0u8; 8]).unwrap();
+				ParachainSystem::send_upward_message(vec![0u8; 8]).unwrap();
 			},
 			|| {
 				// The message won't be sent because there is already one message in queue.

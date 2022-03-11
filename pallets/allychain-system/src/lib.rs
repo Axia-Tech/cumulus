@@ -33,7 +33,7 @@ use cumulus_primitives_core::{
 	OutboundHrmpMessage, ParaId, PersistedValidationData, UpwardMessage, UpwardMessageSender,
 	XcmpMessageHandler, XcmpMessageSource,
 };
-use cumulus_primitives_allychain_inherent::AllychainInherentData;
+use cumulus_primitives_allychain_inherent::ParachainInherentData;
 use frame_support::{
 	dispatch::{DispatchError, DispatchResult},
 	ensure,
@@ -99,7 +99,7 @@ pub mod pallet {
 	pub struct Pallet<T>(_);
 
 	#[pallet::config]
-	pub trait Config: frame_system::Config<OnSetCode = AllychainSetCode<Self>> {
+	pub trait Config: frame_system::Config<OnSetCode = ParachainSetCode<Self>> {
 		/// The overarching event type.
 		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 
@@ -288,7 +288,7 @@ pub mod pallet {
 		// TODO: This weight should be corrected.
 		pub fn set_validation_data(
 			origin: OriginFor<T>,
-			data: AllychainInherentData,
+			data: ParachainInherentData,
 		) -> DispatchResultWithPostInfo {
 			ensure_none(origin)?;
 			assert!(
@@ -296,7 +296,7 @@ pub mod pallet {
 				"ValidationData must be updated only once in a block",
 			);
 
-			let AllychainInherentData {
+			let ParachainInherentData {
 				validation_data: vfp,
 				relay_chain_state,
 				downward_messages,
@@ -575,7 +575,7 @@ pub mod pallet {
 			cumulus_primitives_allychain_inherent::INHERENT_IDENTIFIER;
 
 		fn create_inherent(data: &InherentData) -> Option<Self::Call> {
-			let data: AllychainInherentData =
+			let data: ParachainInherentData =
 				data.get_data(&Self::INHERENT_IDENTIFIER).ok().flatten().expect(
 					"validation function params are always injected into inherent data; qed",
 				);
@@ -909,9 +909,9 @@ impl<T: Config> Pallet<T> {
 	}
 }
 
-pub struct AllychainSetCode<T>(sp_std::marker::PhantomData<T>);
+pub struct ParachainSetCode<T>(sp_std::marker::PhantomData<T>);
 
-impl<T: Config> frame_system::SetCode<T> for AllychainSetCode<T> {
+impl<T: Config> frame_system::SetCode<T> for ParachainSetCode<T> {
 	fn set_code(code: Vec<u8>) -> DispatchResult {
 		Pallet::<T>::set_code_impl(code)
 	}

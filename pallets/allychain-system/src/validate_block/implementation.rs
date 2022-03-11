@@ -53,7 +53,7 @@ where
 	<B::Extrinsic as Extrinsic>::Call: IsSubType<crate::Call<PSC>>,
 {
 	let block_data =
-		cumulus_primitives_core::AllychainBlockData::<B>::decode(&mut &params.block_data.0[..])
+		cumulus_primitives_core::ParachainBlockData::<B>::decode(&mut &params.block_data.0[..])
 			.expect("Invalid allychain block data");
 
 	let parent_head =

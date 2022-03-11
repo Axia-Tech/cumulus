@@ -16,12 +16,12 @@
 
 //! Client side code for generating the allychain inherent.
 
-use crate::AllychainInherentData;
+use crate::ParachainInherentData;
 use codec::Decode;
 use cumulus_primitives_core::{
 	relay_chain::{
 		self,
-		v1::{HrmpChannelId, AllychainHost},
+		v1::{HrmpChannelId, ParachainHost},
 		Block as PBlock, Hash as PHash,
 	},
 	InboundDownwardMessage, InboundHrmpMessage, ParaId, PersistedValidationData,
@@ -46,7 +46,7 @@ fn retrieve_dmq_contents<PClient>(
 ) -> Option<Vec<InboundDownwardMessage>>
 where
 	PClient: ProvideRuntimeApi<PBlock>,
-	PClient::Api: AllychainHost<PBlock>,
+	PClient::Api: ParachainHost<PBlock>,
 {
 	axia_client
 		.runtime_api()
@@ -77,7 +77,7 @@ fn retrieve_all_inbound_hrmp_channel_contents<PClient>(
 ) -> Option<BTreeMap<ParaId, Vec<InboundHrmpMessage>>>
 where
 	PClient: ProvideRuntimeApi<PBlock>,
-	PClient::Api: AllychainHost<PBlock>,
+	PClient::Api: ParachainHost<PBlock>,
 {
 	axia_client
 		.runtime_api()
@@ -193,8 +193,8 @@ fn collect_relay_storage_proof(
 		.ok()
 }
 
-impl AllychainInherentData {
-	/// Create the [`AllychainInherentData`] at the given `relay_parent`.
+impl ParachainInherentData {
+	/// Create the [`ParachainInherentData`] at the given `relay_parent`.
 	///
 	/// Returns `None` if the creation failed.
 	pub fn create_at<PClient>(
@@ -203,10 +203,10 @@ impl AllychainInherentData {
 		axia_backend: &impl Backend<PBlock>,
 		validation_data: &PersistedValidationData,
 		para_id: ParaId,
-	) -> Option<AllychainInherentData>
+	) -> Option<ParachainInherentData>
 	where
 		PClient: ProvideRuntimeApi<PBlock>,
-		PClient::Api: AllychainHost<PBlock>,
+		PClient::Api: ParachainHost<PBlock>,
 	{
 		let relay_chain_state =
 			collect_relay_storage_proof(axia_backend, para_id, relay_parent)?;
@@ -214,7 +214,7 @@ impl AllychainInherentData {
 		let horizontal_messages =
 			retrieve_all_inbound_hrmp_channel_contents(axia_client, para_id, relay_parent)?;
 
-		Some(AllychainInherentData {
+		Some(ParachainInherentData {
 			downward_messages,
 			horizontal_messages,
 			validation_data: validation_data.clone(),
@@ -222,7 +222,7 @@ impl AllychainInherentData {
 		})
 	}
 
-	/// Create the [`AllychainInherentData`] at the given `relay_parent`.
+	/// Create the [`ParachainInherentData`] at the given `relay_parent`.
 	///
 	/// Returns `None` if the creation failed.
 	pub fn create_at_with_client(
@@ -231,7 +231,7 @@ impl AllychainInherentData {
 		relay_chain_backend: &impl Backend<PBlock>,
 		validation_data: &PersistedValidationData,
 		para_id: ParaId,
-	) -> Option<AllychainInherentData> {
+	) -> Option<ParachainInherentData> {
 		axia_client.execute_with(CreateAtWithClient {
 			relay_chain_backend,
 			validation_data,
@@ -242,7 +242,7 @@ impl AllychainInherentData {
 }
 
 #[async_trait::async_trait]
-impl sp_inherents::InherentDataProvider for AllychainInherentData {
+impl sp_inherents::InherentDataProvider for ParachainInherentData {
 	fn provide_inherent_data(
 		&self,
 		inherent_data: &mut sp_inherents::InherentData,
@@ -259,7 +259,7 @@ impl sp_inherents::InherentDataProvider for AllychainInherentData {
 	}
 }
 
-/// Special structure to run [`AllychainInherentData::create_at`] with a [`Client`].
+/// Special structure to run [`ParachainInherentData::create_at`] with a [`Client`].
 struct CreateAtWithClient<'a, B> {
 	relay_parent: PHash,
 	relay_chain_backend: &'a B,
@@ -271,7 +271,7 @@ impl<'a, B> ExecuteWithClient for CreateAtWithClient<'a, B>
 where
 	B: Backend<PBlock>,
 {
-	type Output = Option<AllychainInherentData>;
+	type Output = Option<ParachainInherentData>;
 
 	fn execute_with_client<Client, Api, Backend>(
 		self,
@@ -279,9 +279,9 @@ where
 	) -> Self::Output
 	where
 		Client: ProvideRuntimeApi<PBlock>,
-		Client::Api: AllychainHost<PBlock>,
+		Client::Api: ParachainHost<PBlock>,
 	{
-		AllychainInherentData::create_at(
+		ParachainInherentData::create_at(
 			self.relay_parent,
 			&*client,
 			self.relay_chain_backend,
