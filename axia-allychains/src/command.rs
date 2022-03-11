@@ -18,7 +18,7 @@ use crate::{
 	chain_spec,
 	cli::{Cli, RelayChainCli, Subcommand},
 	service::{
-		new_partial, Block, BETANETParachainRuntimeExecutor, ShellRuntimeExecutor,
+		new_partial, Block, BETANETAllychainRuntimeExecutor, ShellRuntimeExecutor,
 		StatemineRuntimeExecutor, StatemintRuntimeExecutor, WestmintRuntimeExecutor,
 	},
 };
@@ -271,7 +271,7 @@ macro_rules! construct_async_run {
 			runner.async_run(|$config| {
 				let $components = new_partial::<
 					betanet_allychain_runtime::RuntimeApi,
-					BETANETParachainRuntimeExecutor,
+					BETANETAllychainRuntimeExecutor,
 					_
 				>(
 					&$config,
@@ -428,9 +428,9 @@ pub fn run() -> Result<()> {
 					SubstrateCli::create_configuration(&axia_cli, &axia_cli, tokio_handle)
 						.map_err(|err| format!("Relay chain argument error: {}", err))?;
 
-				info!("Parachain id: {:?}", id);
-				info!("Parachain Account: {}", allychain_account);
-				info!("Parachain genesis state: {}", genesis_state);
+				info!("Allychain id: {:?}", id);
+				info!("Allychain Account: {}", allychain_account);
+				info!("Allychain genesis state: {}", genesis_state);
 				info!("Is collating: {}", if config.role.is_authority() { "yes" } else { "no" });
 
 				if config.chain_spec.is_statemint() {

@@ -18,7 +18,7 @@
 //!
 //! Provides functions for starting a collator node or a normal full node.
 
-use cumulus_client_consensus_common::ParachainConsensus;
+use cumulus_client_consensus_common::AllychainConsensus;
 use cumulus_primitives_core::{CollectCollationInfo, ParaId};
 use axia_overseer::Handle as OverseerHandle;
 use axia_primitives::v1::{Block as PBlock, CollatorPair};
@@ -69,7 +69,7 @@ pub struct StartCollatorParams<'a, Block: BlockT, BS, Client, Spawner, RClient, 
 	pub para_id: ParaId,
 	pub relay_chain_full_node: RFullNode<RClient>,
 	pub task_manager: &'a mut TaskManager,
-	pub allychain_consensus: Box<dyn ParachainConsensus<Block>>,
+	pub allychain_consensus: Box<dyn AllychainConsensus<Block>>,
 	pub import_queue: IQ,
 }
 

@@ -37,7 +37,7 @@ frame_support::construct_runtime!(
 	{
 		System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
 		Balances: pallet_balances::{Pallet, Call, Storage, Config<T>, Event<T>},
-		ParachainSystem: cumulus_pallet_allychain_system::{
+		AllychainSystem: cumulus_pallet_allychain_system::{
 			Pallet, Call, Config, Storage, Inherent, Event<T>, ValidateUnsigned,
 		},
 		XcmpQueue: xcmp_queue::{Pallet, Call, Storage, Event<T>},
@@ -74,7 +74,7 @@ impl frame_system::Config for Test {
 	type OnKilledAccount = ();
 	type SystemWeightInfo = ();
 	type SS58Prefix = SS58Prefix;
-	type OnSetCode = cumulus_pallet_allychain_system::ParachainSetCode<Test>;
+	type OnSetCode = cumulus_pallet_allychain_system::AllychainSetCode<Test>;
 }
 
 parameter_types! {
@@ -107,7 +107,7 @@ impl cumulus_pallet_allychain_system::Config for Test {
 
 parameter_types! {
 	pub const RelayChain: MultiLocation = MultiLocation::parent();
-	pub Ancestry: MultiLocation = X1(Parachain(1u32.into())).into();
+	pub Ancestry: MultiLocation = X1(Allychain(1u32.into())).into();
 	pub UnitWeightCost: Weight = 1_000_000;
 	pub const MaxInstructions: u32 = 100;
 }
@@ -155,7 +155,7 @@ pub type XcmRouter = (
 impl Config for Test {
 	type Event = Event;
 	type XcmExecutor = xcm_executor::XcmExecutor<XcmConfig>;
-	type ChannelInfo = ParachainSystem;
+	type ChannelInfo = AllychainSystem;
 	type VersionWrapper = ();
 }
 

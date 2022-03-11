@@ -149,7 +149,7 @@ impl frame_system::Config for Runtime {
 	type BlockWeights = RuntimeBlockWeights;
 	type BlockLength = RuntimeBlockLength;
 	type SS58Prefix = SS58Prefix;
-	type OnSetCode = cumulus_pallet_allychain_system::ParachainSetCode<Self>;
+	type OnSetCode = cumulus_pallet_allychain_system::AllychainSetCode<Self>;
 }
 
 parameter_types! {
@@ -173,7 +173,7 @@ impl allychain_info::Config for Runtime {}
 parameter_types! {
 	pub const BETANETLocation: MultiLocation = MultiLocation::parent();
 	pub const BETANETNetwork: NetworkId = NetworkId::AXIA;
-	pub Ancestry: MultiLocation = Parachain(ParachainInfo::allychain_id().into()).into();
+	pub Ancestry: MultiLocation = Allychain(AllychainInfo::allychain_id().into()).into();
 }
 
 /// This is the type we use to convert an (incoming) XCM origin into a local `Origin` instance,
@@ -229,10 +229,10 @@ construct_runtime! {
 		UncheckedExtrinsic = UncheckedExtrinsic,
 	{
 		System: frame_system::{Pallet, Call, Storage, Config, Event<T>},
-		ParachainSystem: cumulus_pallet_allychain_system::{
+		AllychainSystem: cumulus_pallet_allychain_system::{
 			Pallet, Call, Config, Storage, Inherent, Event<T>, ValidateUnsigned,
 		},
-		ParachainInfo: allychain_info::{Pallet, Storage, Config},
+		AllychainInfo: allychain_info::{Pallet, Storage, Config},
 
 		// DMP handler.
 		CumulusXcm: cumulus_pallet_xcm::{Pallet, Call, Storage, Event<T>, Origin},
@@ -370,7 +370,7 @@ impl_runtime_apis! {
 
 	impl cumulus_primitives_core::CollectCollationInfo<Block> for Runtime {
 		fn collect_collation_info() -> cumulus_primitives_core::CollationInfo {
-			ParachainSystem::collect_collation_info()
+			AllychainSystem::collect_collation_info()
 		}
 	}
 }

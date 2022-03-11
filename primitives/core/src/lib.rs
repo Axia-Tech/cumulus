@@ -149,7 +149,7 @@ pub trait OnValidationData {
 /// This is send as PoV (proof of validity block) to the relay-chain validators. There it will be
 /// passed to the allychain validation Wasm blob to be validated.
 #[derive(codec::Encode, codec::Decode, Clone)]
-pub struct ParachainBlockData<B: BlockT> {
+pub struct AllychainBlockData<B: BlockT> {
 	/// The header of the allychain block.
 	header: B::Header,
 	/// The extrinsics of the allychain block.
@@ -158,7 +158,7 @@ pub struct ParachainBlockData<B: BlockT> {
 	storage_proof: sp_trie::CompactProof,
 }
 
-impl<B: BlockT> ParachainBlockData<B> {
+impl<B: BlockT> AllychainBlockData<B> {
 	/// Creates a new instance of `Self`.
 	pub fn new(
 		header: <B as BlockT>::Header,

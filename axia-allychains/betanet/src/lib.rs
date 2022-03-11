@@ -70,8 +70,8 @@ use xcm::latest::prelude::*;
 use xcm_builder::{
 	AccountId32Aliases, AllowTopLevelPaidExecutionFrom, AllowUnpaidExecutionFrom, CurrencyAdapter,
 	EnsureXcmOrigin, FixedWeightBounds, IsConcrete, LocationInverter, NativeAsset,
-	ParentAsSuperuser, ParentIsDefault, RelayChainAsNative, SiblingParachainAsNative,
-	SiblingParachainConvertsVia, SignedAccountId32AsNative, SignedToAccountId32,
+	ParentAsSuperuser, ParentIsDefault, RelayChainAsNative, SiblingAllychainAsNative,
+	SiblingAllychainConvertsVia, SignedAccountId32AsNative, SignedToAccountId32,
 	SovereignSignedViaLocation, TakeWeightCredit, UsingComponents,
 };
 use xcm_executor::{Config, XcmExecutor};
@@ -191,7 +191,7 @@ impl frame_system::Config for Runtime {
 	type BlockWeights = RuntimeBlockWeights;
 	type BlockLength = RuntimeBlockLength;
 	type SS58Prefix = SS58Prefix;
-	type OnSetCode = cumulus_pallet_allychain_system::ParachainSetCode<Self>;
+	type OnSetCode = cumulus_pallet_allychain_system::AllychainSetCode<Self>;
 }
 
 parameter_types! {
@@ -272,7 +272,7 @@ parameter_types! {
 	pub const RocLocation: MultiLocation = MultiLocation::parent();
 	pub const BETANETNetwork: NetworkId = NetworkId::AXIA;
 	pub RelayChainOrigin: Origin = cumulus_pallet_xcm::Origin::Relay.into();
-	pub Ancestry: MultiLocation = Parachain(ParachainInfo::allychain_id().into()).into();
+	pub Ancestry: MultiLocation = Allychain(AllychainInfo::allychain_id().into()).into();
 	pub CheckingAccount: AccountId = AXIAXcm::check_account();
 }
 
@@ -283,7 +283,7 @@ pub type LocationToAccountId = (
 	// The parent (Relay-chain) origin converts to the default `AccountId`.
 	ParentIsDefault<AccountId>,
 	// Sibling allychain origins convert to AccountId via the `ParaId::into`.
-	SiblingParachainConvertsVia<Sibling, AccountId>,
+	SiblingAllychainConvertsVia<Sibling, AccountId>,
 	// Straight up local `AccountId32` origins just alias directly to `AccountId`.
 	AccountId32Aliases<BETANETNetwork, AccountId>,
 );
@@ -337,9 +337,9 @@ pub type XcmOriginToTransactDispatchOrigin = (
 	// Native converter for Relay-chain (Parent) location; will converts to a `Relay` origin when
 	// recognized.
 	RelayChainAsNative<RelayChainOrigin, Origin>,
-	// Native converter for sibling Parachains; will convert to a `SiblingPara` origin when
+	// Native converter for sibling Allychains; will convert to a `SiblingPara` origin when
 	// recognized.
-	SiblingParachainAsNative<cumulus_pallet_xcm::Origin, Origin>,
+	SiblingAllychainAsNative<cumulus_pallet_xcm::Origin, Origin>,
 	// Superuser converter for the Relay-chain (Parent) location. This will allow it to issue a
 	// transaction from the Root origin.
 	ParentAsSuperuser<Origin>,
@@ -366,7 +366,7 @@ match_type! {
 }
 match_type! {
 	pub type Statemint: impl Contains<MultiLocation> = {
-		MultiLocation { parents: 1, interior: X1(Parachain(1000)) }
+		MultiLocation { parents: 1, interior: X1(Allychain(1000)) }
 	};
 }
 
@@ -379,7 +379,7 @@ pub type Barrier = (
 );
 
 parameter_types! {
-	pub StatemintLocation: MultiLocation = MultiLocation::new(1, X1(Parachain(1000)));
+	pub StatemintLocation: MultiLocation = MultiLocation::new(1, X1(Allychain(1000)));
 }
 
 pub type Reserves = (NativeAsset, AssetsFrom<StatemintLocation>);
@@ -410,7 +410,7 @@ pub type LocalOriginToLocation = SignedToAccountId32<Origin, AccountId, BETANETN
 /// queues.
 pub type XcmRouter = (
 	// Two routers - use UMP to communicate with the relay chain:
-	cumulus_primitives_utility::ParentAsUmp<ParachainSystem, ()>,
+	cumulus_primitives_utility::ParentAsUmp<AllychainSystem, ()>,
 	// ..and XCMP to communicate with the sibling chains.
 	XcmpQueue,
 );
@@ -442,7 +442,7 @@ impl cumulus_pallet_xcm::Config for Runtime {
 impl cumulus_pallet_xcmp_queue::Config for Runtime {
 	type Event = Event;
 	type XcmExecutor = XcmExecutor<XcmConfig>;
-	type ChannelInfo = ParachainSystem;
+	type ChannelInfo = AllychainSystem;
 	type VersionWrapper = ();
 }
 
@@ -510,10 +510,10 @@ construct_runtime! {
 		RandomnessCollectiveFlip: pallet_randomness_collective_flip::{Pallet, Storage},
 		TransactionPayment: pallet_transaction_payment::{Pallet, Storage},
 
-		ParachainSystem: cumulus_pallet_allychain_system::{
+		AllychainSystem: cumulus_pallet_allychain_system::{
 			Pallet, Call, Config, Storage, Inherent, Event<T>, ValidateUnsigned,
 		} = 20,
-		ParachainInfo: allychain_info::{Pallet, Storage, Config} = 21,
+		AllychainInfo: allychain_info::{Pallet, Storage, Config} = 21,
 
 		Balances: pallet_balances::{Pallet, Call, Storage, Config<T>, Event<T>} = 30,
 		Assets: pallet_assets::{Pallet, Call, Storage, Event<T>} = 31,
@@ -678,7 +678,7 @@ impl_runtime_apis! {
 
 	impl cumulus_primitives_core::CollectCollationInfo<Block> for Runtime {
 		fn collect_collation_info() -> cumulus_primitives_core::CollationInfo {
-			ParachainSystem::collect_collation_info()
+			AllychainSystem::collect_collation_info()
 		}
 	}
 }

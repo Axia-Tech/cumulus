@@ -21,9 +21,9 @@ pub fn get_pair_from_seed<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, ChainSpecGroup, ChainSpecExtension)]
 #[serde(deny_unknown_fields)]
 pub struct Extensions {
-	/// The relay chain of the Parachain.
+	/// The relay chain of the Allychain.
 	pub relay_chain: String,
-	/// The id of the Parachain.
+	/// The id of the Allychain.
 	pub para_id: u32,
 }
 
@@ -186,7 +186,7 @@ fn testnet_genesis(
 		balances: allychain_template_runtime::BalancesConfig {
 			balances: endowed_accounts.iter().cloned().map(|k| (k, 1 << 60)).collect(),
 		},
-		allychain_info: allychain_template_runtime::ParachainInfoConfig { allychain_id: id },
+		allychain_info: allychain_template_runtime::AllychainInfoConfig { allychain_id: id },
 		collator_selection: allychain_template_runtime::CollatorSelectionConfig {
 			invulnerables: invulnerables.iter().cloned().map(|(acc, _)| acc).collect(),
 			candidacy_bond: EXISTENTIAL_DEPOSIT * 16,

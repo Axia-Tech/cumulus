@@ -186,7 +186,7 @@ impl frame_system::Config for Runtime {
 	type BlockWeights = RuntimeBlockWeights;
 	type BlockLength = RuntimeBlockLength;
 	type SS58Prefix = SS58Prefix;
-	type OnSetCode = cumulus_pallet_allychain_system::ParachainSetCode<Self>;
+	type OnSetCode = cumulus_pallet_allychain_system::AllychainSetCode<Self>;
 }
 
 parameter_types! {
@@ -243,7 +243,7 @@ impl pallet_sudo::Config for Runtime {
 }
 
 impl cumulus_pallet_allychain_system::Config for Runtime {
-	type SelfParaId = ParachainId;
+	type SelfParaId = AllychainId;
 	type Event = Event;
 	type OnValidationData = ();
 	type OutboundXcmpMessageSource = ();
@@ -254,7 +254,7 @@ impl cumulus_pallet_allychain_system::Config for Runtime {
 }
 
 parameter_types! {
-	pub storage ParachainId: cumulus_primitives_core::ParaId = 100.into();
+	pub storage AllychainId: cumulus_primitives_core::ParaId = 100.into();
 }
 
 construct_runtime! {
@@ -264,7 +264,7 @@ construct_runtime! {
 		UncheckedExtrinsic = UncheckedExtrinsic,
 	{
 		System: frame_system::{Pallet, Call, Storage, Config, Event<T>},
-		ParachainSystem: cumulus_pallet_allychain_system::{
+		AllychainSystem: cumulus_pallet_allychain_system::{
 			Pallet, Call, Config, Storage, Inherent, Event<T>, ValidateUnsigned,
 		},
 		Timestamp: pallet_timestamp::{Pallet, Call, Storage, Inherent},
@@ -409,7 +409,7 @@ impl_runtime_apis! {
 
 	impl cumulus_primitives_core::CollectCollationInfo<Block> for Runtime {
 		fn collect_collation_info() -> cumulus_primitives_core::CollationInfo {
-			ParachainSystem::collect_collation_info()
+			AllychainSystem::collect_collation_info()
 		}
 	}
 }

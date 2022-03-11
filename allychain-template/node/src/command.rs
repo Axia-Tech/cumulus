@@ -32,7 +32,7 @@ fn load_spec(
 
 impl SubstrateCli for Cli {
 	fn impl_name() -> String {
-		"Parachain Collator Template".into()
+		"Allychain Collator Template".into()
 	}
 
 	fn impl_version() -> String {
@@ -41,7 +41,7 @@ impl SubstrateCli for Cli {
 
 	fn description() -> String {
 		format!(
-			"Parachain Collator Template\n\nThe command-line arguments provided first will be \
+			"Allychain Collator Template\n\nThe command-line arguments provided first will be \
 		passed to the allychain node, while the arguments provided after -- will be passed \
 		to the relaychain node.\n\n\
 		{} [allychain-args] -- [relaychain-args]",
@@ -72,7 +72,7 @@ impl SubstrateCli for Cli {
 
 impl SubstrateCli for RelayChainCli {
 	fn impl_name() -> String {
-		"Parachain Collator Template".into()
+		"Allychain Collator Template".into()
 	}
 
 	fn impl_version() -> String {
@@ -80,7 +80,7 @@ impl SubstrateCli for RelayChainCli {
 	}
 
 	fn description() -> String {
-		"Parachain Collator Template\n\nThe command-line arguments provided first will be \
+		"Allychain Collator Template\n\nThe command-line arguments provided first will be \
 		passed to the allychain node, while the arguments provided after -- will be passed \
 		to the relaychain node.\n\n\
 		allychain-collator [allychain-args] -- [relaychain-args]"
@@ -270,9 +270,9 @@ pub fn run() -> Result<()> {
 					SubstrateCli::create_configuration(&axia_cli, &axia_cli, tokio_handle)
 						.map_err(|err| format!("Relay chain argument error: {}", err))?;
 
-				info!("Parachain id: {:?}", id);
-				info!("Parachain Account: {}", allychain_account);
-				info!("Parachain genesis state: {}", genesis_state);
+				info!("Allychain id: {:?}", id);
+				info!("Allychain Account: {}", allychain_account);
+				info!("Allychain genesis state: {}", genesis_state);
 				info!("Is collating: {}", if config.role.is_authority() { "yes" } else { "no" });
 
 				crate::service::start_allychain_node(config, axia_config, id)

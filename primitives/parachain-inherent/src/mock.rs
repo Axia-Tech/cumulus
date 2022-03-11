@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Cumulus.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::{ParachainInherentData, INHERENT_IDENTIFIER};
+use crate::{AllychainInherentData, INHERENT_IDENTIFIER};
 use cumulus_primitives_core::PersistedValidationData;
 use sp_inherents::{InherentData, InherentDataProvider};
 
@@ -54,7 +54,7 @@ impl InherentDataProvider for MockValidationDataInherentDataProvider {
 		let relay_parent_number =
 			self.relay_offset + self.relay_blocks_per_para_block * self.current_para_block;
 
-		let data = ParachainInherentData {
+		let data = AllychainInherentData {
 			validation_data: PersistedValidationData {
 				parent_head: Default::default(),
 				relay_parent_storage_root: relay_storage_root,

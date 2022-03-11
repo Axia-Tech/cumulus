@@ -77,8 +77,8 @@ mod tests {
 	use cumulus_primitives_core::{relay_chain::Hash as PHash, PersistedValidationData};
 	use cumulus_test_client::{
 		runtime::{Block, Header, WASM_BINARY},
-		BlockData, BuildParachainBlockData, Client, ClientBlockImportExt, ExecutorResult, HeadData,
-		InitBlockBuilder, ParachainBlockData, TestClientBuilder, TestClientBuilderExt,
+		BlockData, BuildAllychainBlockData, Client, ClientBlockImportExt, ExecutorResult, HeadData,
+		InitBlockBuilder, AllychainBlockData, TestClientBuilder, TestClientBuilderExt,
 		ValidationParams,
 	};
 	use cumulus_test_relay_sproof_builder::RelayStateSproofBuilder;
@@ -89,7 +89,7 @@ mod tests {
 
 	fn call_validate_block(
 		parent_head: Header,
-		block_data: ParachainBlockData,
+		block_data: AllychainBlockData,
 		relay_parent_storage_root: PHash,
 	) -> ExecutorResult<Header> {
 		cumulus_test_client::validate_block(
@@ -109,7 +109,7 @@ mod tests {
 		at: BlockId<Block>,
 		timestamp: u64,
 		relay_chain_slot: Slot,
-	) -> (ParachainBlockData, PHash) {
+	) -> (AllychainBlockData, PHash) {
 		let sproof_builder =
 			RelayStateSproofBuilder { current_slot: relay_chain_slot, ..Default::default() };
 

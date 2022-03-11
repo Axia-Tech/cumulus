@@ -18,7 +18,7 @@ serde = { version = "1.0.101", features = ["derive"] }
 hex-literal = "0.2.1"
 async-trait = "0.1.42"
 
-# Parachain runtimes
+# Allychain runtimes
 betanet-allychain-runtime = { package = "betanet-runtime", path = "betanet" }
 shell-runtime = { path = "shell" }
 statemint-runtime = { path = "statemint" }

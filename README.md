@@ -97,7 +97,7 @@ Once the executable is built, launch collators for each allychain (repeat once e
 ./target/release/axia-collator --chain $CHAIN --validator
 ```
 
-## Parachains
+## Allychains
 
 The allychains of BETANET all use the same runtime code. The only difference between them is the
 allychain ID used for registration with the relay chain:
@@ -112,7 +112,7 @@ chain, and from the relay chain to its destination allychain.
 
 ## Local Setup
 
-Launch a local setup including a Relay Chain and a Parachain.
+Launch a local setup including a Relay Chain and a Allychain.
 
 ### Launch the Relay Chain
 
@@ -131,7 +131,7 @@ cargo build --release
 ./target/release/axia --chain betanet-local-cfde.json --bob --tmp --port 30334
 ```
 
-### Launch the Parachain
+### Launch the Allychain
 
 ```bash
 # Compile
@@ -151,7 +151,7 @@ cargo build --release
 # Collator2
 ./target/release/axia-collator --collator --bob --force-authoring --tmp --allychain-id <allychain_id_u32_type_range> --port 40336 --ws-port 9947 -- --execution wasm --chain ../axia/betanet-local-cfde.json --port 30336
 
-# Parachain Full Node 1
+# Allychain Full Node 1
 ./target/release/axia-collator --tmp --allychain-id <allychain_id_u32_type_range> --port 40337 --ws-port 9948 -- --execution wasm --chain ../axia/betanet-local-cfde.json --port 30337
 ```
 ### Register the allychain

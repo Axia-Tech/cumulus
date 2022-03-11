@@ -29,7 +29,7 @@ fs.readFile(input, "utf8", (err, data) => {
     .map(toHex)
     .concat(
       // shell pallets
-      ["System", "ParachainSystem", "ParachainInfo", "CumulusXcm"].map((str) =>
+      ["System", "AllychainSystem", "AllychainInfo", "CumulusXcm"].map((str) =>
         xxhashAsHex(str)
       )
     )

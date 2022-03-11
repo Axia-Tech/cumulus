@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with AXIA.  If not, see <http://www.gnu.org/licenses/>.
 
-//! Parachain specific networking
+//! Allychain specific networking
 //!
 //! Provides a custom block announcement implementation for allychains
 //! that use the relay chain provided consensus. See [`BlockAnnounceValidator`]
@@ -38,7 +38,7 @@ use axia_node_primitives::{CollationSecondedSignal, Statement};
 use axia_allychain::primitives::HeadData;
 use axia_primitives::v1::{
 	Block as PBlock, CandidateReceipt, CompactStatement, Hash as PHash, Id as ParaId,
-	OccupiedCoreAssumption, ParachainHost, SigningContext, UncheckedSigned,
+	OccupiedCoreAssumption, AllychainHost, SigningContext, UncheckedSigned,
 };
 
 use codec::{Decode, DecodeAll, Encode};
@@ -141,7 +141,7 @@ impl BlockAnnounceData {
 	) -> Result<Validation, BlockAnnounceError>
 	where
 		P: ProvideRuntimeApi<PBlock> + Send + Sync + 'static,
-		P::Api: ParachainHost<PBlock>,
+		P::Api: AllychainHost<PBlock>,
 	{
 		let runtime_api = relay_chain_client.runtime_api();
 		let validator_index = self.statement.unchecked_validator_index();
@@ -203,7 +203,7 @@ impl TryFrom<&'_ CollationSecondedSignal> for BlockAnnounceData {
 	}
 }
 
-/// Parachain specific block announce validator.
+/// Allychain specific block announce validator.
 ///
 /// This block announce validator is required if the allychain is running
 /// with the relay chain provided consensus to make sure each node only
@@ -265,7 +265,7 @@ impl<Block, R, B, BCE> BlockAnnounceValidator<Block, R, B, BCE> {
 impl<Block: BlockT, R, B, BCE> BlockAnnounceValidator<Block, R, B, BCE>
 where
 	R: ProvideRuntimeApi<PBlock> + Send + Sync + 'static,
-	R::Api: ParachainHost<PBlock>,
+	R::Api: AllychainHost<PBlock>,
 	B: Backend<PBlock> + 'static,
 {
 	/// Get the included block of the given allychain in the relay chain.
@@ -352,7 +352,7 @@ impl<Block: BlockT, P, B, BCE> BlockAnnounceValidatorT<Block>
 	for BlockAnnounceValidator<Block, P, B, BCE>
 where
 	P: ProvideRuntimeApi<PBlock> + Send + Sync + 'static,
-	P::Api: ParachainHost<PBlock>,
+	P::Api: AllychainHost<PBlock>,
 	B: Backend<PBlock> + 'static,
 	BCE: BlockchainEvents<PBlock> + 'static + Send + Sync,
 {

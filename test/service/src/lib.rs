@@ -22,7 +22,7 @@ mod chain_spec;
 mod genesis;
 
 use core::future::Future;
-use cumulus_client_consensus_common::{ParachainCandidate, ParachainConsensus};
+use cumulus_client_consensus_common::{AllychainCandidate, AllychainConsensus};
 use cumulus_client_network::BlockAnnounceValidator;
 use cumulus_client_service::{
 	prepare_node_config, start_collator, start_full_node, StartCollatorParams, StartFullNodeParams,
@@ -62,13 +62,13 @@ pub use sp_keyring::Sr25519Keyring as Keyring;
 struct NullConsensus;
 
 #[async_trait::async_trait]
-impl ParachainConsensus<Block> for NullConsensus {
+impl AllychainConsensus<Block> for NullConsensus {
 	async fn produce_candidate(
 		&mut self,
 		_: &Header,
 		_: PHash,
 		_: &PersistedValidationData,
-	) -> Option<ParachainCandidate<Block>> {
+	) -> Option<AllychainCandidate<Block>> {
 		None
 	}
 }
@@ -261,7 +261,7 @@ where
 		.unwrap_or_else(|| announce_block);
 
 	if let Some(collator_key) = collator_key {
-		let allychain_consensus: Box<dyn ParachainConsensus<Block>> = match consensus {
+		let allychain_consensus: Box<dyn AllychainConsensus<Block>> = match consensus {
 			Consensus::RelayChain => {
 				let proposer_factory = sc_basic_authorship::ProposerFactory::with_proof_recording(
 					task_manager.spawn_handle(),
@@ -279,7 +279,7 @@ where
 					proposer_factory,
 					move |_, (relay_parent, validation_data)| {
 						let allychain_inherent =
-							cumulus_primitives_allychain_inherent::ParachainInherentData::create_at(
+							cumulus_primitives_allychain_inherent::AllychainInherentData::create_at(
 								relay_parent,
 								&*relay_chain_client,
 								&*relay_chain_backend,
@@ -416,7 +416,7 @@ impl TestNodeBuilder {
 
 	/// Instruct the node to exclusively connect to registered allychain nodes.
 	///
-	/// Parachain nodes can be registered using [`Self::connect_to_allychain_node`] and
+	/// Allychain nodes can be registered using [`Self::connect_to_allychain_node`] and
 	/// [`Self::connect_to_allychain_nodes`].
 	pub fn exclusively_connect_to_registered_allychain_nodes(mut self) -> Self {
 		self.allychain_nodes_exclusive = true;

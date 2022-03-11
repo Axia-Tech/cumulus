@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Cumulus.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::{ParachainInherentData, INHERENT_IDENTIFIER};
+use crate::{AllychainInherentData, INHERENT_IDENTIFIER};
 use codec::Decode;
 use cumulus_primitives_core::{
 	relay_chain, InboundDownwardMessage, InboundHrmpMessage, ParaId, PersistedValidationData,
@@ -74,13 +74,13 @@ pub struct MockXcmConfig {
 }
 
 /// The same string name that is used for the allychain system pallet in the
-/// runtime. The allychain template, and many other popular chains use `ParachainSystem`,
+/// runtime. The allychain template, and many other popular chains use `AllychainSystem`,
 /// and a corresponding `Default` implementation of this type exists.
-pub struct ParachainSystemName(pub &'static [u8]);
+pub struct AllychainSystemName(pub &'static [u8]);
 
-impl Default for ParachainSystemName {
+impl Default for AllychainSystemName {
 	fn default() -> Self {
-		Self(b"ParachainSystem")
+		Self(b"AllychainSystem")
 	}
 }
 
@@ -91,7 +91,7 @@ impl MockXcmConfig {
 		client: &C,
 		parent_block: B::Hash,
 		para_id: ParaId,
-		allychain_system_name: ParachainSystemName,
+		allychain_system_name: AllychainSystemName,
 	) -> Self {
 		let starting_dmq_mqc_head = client
 			.storage(
@@ -112,7 +112,7 @@ impl MockXcmConfig {
 			.storage(
 				&BlockId::Hash(parent_block),
 				&sp_storage::StorageKey(
-					[twox_128(b"ParachainSystem"), twox_128(b"LastHrmpMqcHeads")].concat().to_vec(),
+					[twox_128(b"AllychainSystem"), twox_128(b"LastHrmpMqcHeads")].concat().to_vec(),
 				),
 			)
 			.expect("We should be able to read storage from the parent block.")
@@ -185,7 +185,7 @@ impl InherentDataProvider for MockValidationDataInherentDataProvider {
 
 		inherent_data.put_data(
 			INHERENT_IDENTIFIER,
-			&ParachainInherentData {
+			&AllychainInherentData {
 				validation_data: PersistedValidationData {
 					parent_head: Default::default(),
 					relay_parent_storage_root,

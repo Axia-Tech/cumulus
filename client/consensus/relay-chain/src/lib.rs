@@ -34,10 +34,10 @@
 //! 5. After the allychain candidate got backed and included, all collators start at 1.
 
 use cumulus_client_consensus_common::{
-	ParachainBlockImport, ParachainCandidate, ParachainConsensus,
+	AllychainBlockImport, AllychainCandidate, AllychainConsensus,
 };
 use cumulus_primitives_core::{
-	relay_chain::v1::{Block as PBlock, Hash as PHash, ParachainHost},
+	relay_chain::v1::{Block as PBlock, Hash as PHash, AllychainHost},
 	ParaId, PersistedValidationData,
 };
 use parking_lot::Mutex;
@@ -63,7 +63,7 @@ pub struct RelayChainConsensus<B, PF, BI, RClient, RBackend, CIDP> {
 	_phantom: PhantomData<B>,
 	proposer_factory: Arc<Mutex<PF>>,
 	create_inherent_data_providers: Arc<CIDP>,
-	block_import: Arc<futures::lock::Mutex<ParachainBlockImport<BI>>>,
+	block_import: Arc<futures::lock::Mutex<AllychainBlockImport<BI>>>,
 	relay_chain_client: Arc<RClient>,
 	relay_chain_backend: Arc<RBackend>,
 }
@@ -88,7 +88,7 @@ impl<B, PF, BI, RClient, RBackend, CIDP> RelayChainConsensus<B, PF, BI, RClient,
 where
 	B: BlockT,
 	RClient: ProvideRuntimeApi<PBlock>,
-	RClient::Api: ParachainHost<PBlock>,
+	RClient::Api: AllychainHost<PBlock>,
 	RBackend: Backend<PBlock>,
 	CIDP: CreateInherentDataProviders<B, (PHash, PersistedValidationData)>,
 {
@@ -105,7 +105,7 @@ where
 			para_id,
 			proposer_factory: Arc::new(Mutex::new(proposer_factory)),
 			create_inherent_data_providers: Arc::new(create_inherent_data_providers),
-			block_import: Arc::new(futures::lock::Mutex::new(ParachainBlockImport::new(
+			block_import: Arc::new(futures::lock::Mutex::new(AllychainBlockImport::new(
 				block_import,
 			))),
 			relay_chain_backend: axia_backend,
@@ -148,12 +148,12 @@ where
 }
 
 #[async_trait::async_trait]
-impl<B, PF, BI, RClient, RBackend, CIDP> ParachainConsensus<B>
+impl<B, PF, BI, RClient, RBackend, CIDP> AllychainConsensus<B>
 	for RelayChainConsensus<B, PF, BI, RClient, RBackend, CIDP>
 where
 	B: BlockT,
 	RClient: ProvideRuntimeApi<PBlock> + Send + Sync,
-	RClient::Api: ParachainHost<PBlock>,
+	RClient::Api: AllychainHost<PBlock>,
 	RBackend: Backend<PBlock>,
 	BI: BlockImport<B> + Send + Sync,
 	PF: Environment<B> + Send + Sync,
@@ -170,7 +170,7 @@ where
 		parent: &B::Header,
 		relay_parent: PHash,
 		validation_data: &PersistedValidationData,
-	) -> Option<ParachainCandidate<B>> {
+	) -> Option<AllychainCandidate<B>> {
 		let proposer_future = self.proposer_factory.lock().init(&parent);
 
 		let proposer = proposer_future
@@ -224,7 +224,7 @@ where
 			return None
 		}
 
-		Some(ParachainCandidate { block, proof })
+		Some(AllychainCandidate { block, proof })
 	}
 }
 
@@ -240,7 +240,7 @@ pub struct BuildRelayChainConsensusParams<PF, BI, RBackend, CIDP> {
 
 /// Build the [`RelayChainConsensus`].
 ///
-/// Returns a boxed [`ParachainConsensus`].
+/// Returns a boxed [`AllychainConsensus`].
 pub fn build_relay_chain_consensus<Block, PF, BI, RBackend, CIDP>(
 	BuildRelayChainConsensusParams {
 		para_id,
@@ -250,7 +250,7 @@ pub fn build_relay_chain_consensus<Block, PF, BI, RBackend, CIDP>(
 		relay_chain_client,
 		relay_chain_backend,
 	}: BuildRelayChainConsensusParams<PF, BI, RBackend, CIDP>,
-) -> Box<dyn ParachainConsensus<Block>>
+) -> Box<dyn AllychainConsensus<Block>>
 where
 	Block: BlockT,
 	PF: Environment<Block> + Send + Sync + 'static,
@@ -326,7 +326,7 @@ where
 	}
 
 	/// Build the relay chain consensus.
-	fn build(self) -> Box<dyn ParachainConsensus<Block>> {
+	fn build(self) -> Box<dyn AllychainConsensus<Block>> {
 		self.relay_chain_client.clone().execute_with(self)
 	}
 }
@@ -346,7 +346,7 @@ where
 	RBackend: Backend<PBlock> + 'static,
 	CIDP: CreateInherentDataProviders<Block, (PHash, PersistedValidationData)> + 'static,
 {
-	type Output = Box<dyn ParachainConsensus<Block>>;
+	type Output = Box<dyn AllychainConsensus<Block>>;
 
 	fn execute_with_client<PClient, Api, PBackend>(self, client: Arc<PClient>) -> Self::Output
 	where

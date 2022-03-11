@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Cumulus.  If not, see <http://www.gnu.org/licenses/>.
 
-//! Parachain-specific RPCs implementation.
+//! Allychain-specific RPCs implementation.
 
 #![warn(missing_docs)]
 

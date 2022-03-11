@@ -41,9 +41,9 @@ pub fn get_from_seed<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Pu
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, ChainSpecGroup, ChainSpecExtension)]
 #[serde(deny_unknown_fields)]
 pub struct Extensions {
-	/// The relay chain of the Parachain.
+	/// The relay chain of the Allychain.
 	pub relay_chain: String,
-	/// The id of the Parachain.
+	/// The id of the Allychain.
 	pub para_id: u32,
 }
 
@@ -159,7 +159,7 @@ fn testnet_genesis(
 			balances: endowed_accounts.iter().cloned().map(|k| (k, 1 << 60)).collect(),
 		},
 		sudo: betanet_allychain_runtime::SudoConfig { key: root_key },
-		allychain_info: betanet_allychain_runtime::ParachainInfoConfig { allychain_id: id },
+		allychain_info: betanet_allychain_runtime::AllychainInfoConfig { allychain_id: id },
 		aura: betanet_allychain_runtime::AuraConfig { authorities: initial_authorities },
 		aura_ext: Default::default(),
 		allychain_system: Default::default(),
@@ -174,7 +174,7 @@ fn shell_testnet_genesis(allychain_id: ParaId) -> shell_runtime::GenesisConfig {
 				.to_vec(),
 			changes_trie_config: Default::default(),
 		},
-		allychain_info: shell_runtime::ParachainInfoConfig { allychain_id },
+		allychain_info: shell_runtime::AllychainInfoConfig { allychain_id },
 		allychain_system: Default::default(),
 	}
 }
@@ -327,7 +327,7 @@ fn statemint_genesis(
 		balances: statemint_runtime::BalancesConfig {
 			balances: endowed_accounts.iter().cloned().map(|k| (k, STATEMINT_ED * 4096)).collect(),
 		},
-		allychain_info: statemint_runtime::ParachainInfoConfig { allychain_id: id },
+		allychain_info: statemint_runtime::AllychainInfoConfig { allychain_id: id },
 		collator_selection: statemint_runtime::CollatorSelectionConfig {
 			invulnerables: invulnerables.iter().cloned().map(|(acc, _)| acc).collect(),
 			candidacy_bond: STATEMINT_ED * 16,
@@ -505,7 +505,7 @@ fn statemine_genesis(
 		balances: statemine_runtime::BalancesConfig {
 			balances: endowed_accounts.iter().cloned().map(|k| (k, STATEMINE_ED * 4096)).collect(),
 		},
-		allychain_info: statemine_runtime::ParachainInfoConfig { allychain_id: id },
+		allychain_info: statemine_runtime::AllychainInfoConfig { allychain_id: id },
 		collator_selection: statemine_runtime::CollatorSelectionConfig {
 			invulnerables: invulnerables.iter().cloned().map(|(acc, _)| acc).collect(),
 			candidacy_bond: STATEMINE_ED * 16,
@@ -687,7 +687,7 @@ fn westmint_genesis(
 			balances: endowed_accounts.iter().cloned().map(|k| (k, WESTMINT_ED * 4096)).collect(),
 		},
 		sudo: westmint_runtime::SudoConfig { key: root_key },
-		allychain_info: westmint_runtime::ParachainInfoConfig { allychain_id: id },
+		allychain_info: westmint_runtime::AllychainInfoConfig { allychain_id: id },
 		collator_selection: westmint_runtime::CollatorSelectionConfig {
 			invulnerables: invulnerables.iter().cloned().map(|(acc, _)| acc).collect(),
 			candidacy_bond: WESTMINT_ED * 16,

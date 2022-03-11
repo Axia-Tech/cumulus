@@ -16,13 +16,13 @@
 
 //! Cumulus allychain inherent
 //!
-//! The [`ParachainInherentData`] is the data that is passed by the collator to the allychain runtime.
+//! The [`AllychainInherentData`] is the data that is passed by the collator to the allychain runtime.
 //! The runtime will use this data to execute messages from other allychains/the relay chain or to
 //! read data from the relay chain state. When the allychain is validated by a allychain validator on
 //! the relay chain, this data is checked for correctnes. If the data passed by the collator to the
 //! runtime isn't correct, the allychain candidate is considered invalid.
 //!
-//! Use [`ParachainInherentData::create_at`] to create the [`ParachainInherentData`] at a given
+//! Use [`AllychainInherentData::create_at`] to create the [`AllychainInherentData`] at a given
 //! relay chain block to include it in a allychain block.
 
 #![cfg_attr(not(feature = "std"), no_std)]
@@ -49,7 +49,7 @@ pub const INHERENT_IDENTIFIER: InherentIdentifier = *b"sysi1337";
 
 /// The inherent data that is passed by the collator to the allychain runtime.
 #[derive(codec::Encode, codec::Decode, sp_core::RuntimeDebug, Clone, PartialEq, TypeInfo)]
-pub struct ParachainInherentData {
+pub struct AllychainInherentData {
 	pub validation_data: PersistedValidationData,
 	/// A storage proof of a predefined set of keys from the relay-chain.
 	///

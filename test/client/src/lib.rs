@@ -36,7 +36,7 @@ pub use axia_allychain::primitives::{BlockData, HeadData, ValidationParams, Vali
 pub use sc_executor::error::Result as ExecutorResult;
 pub use substrate_test_client::*;
 
-pub type ParachainBlockData = cumulus_primitives_core::ParachainBlockData<Block>;
+pub type AllychainBlockData = cumulus_primitives_core::AllychainBlockData<Block>;
 
 mod local_executor {
 	/// Native executor instance.

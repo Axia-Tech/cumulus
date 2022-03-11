@@ -27,7 +27,7 @@ use sp_runtime::{
 };
 
 use axia_primitives::v1::{
-	Block as PBlock, Id as ParaId, OccupiedCoreAssumption, ParachainHost,
+	Block as PBlock, Id as ParaId, OccupiedCoreAssumption, AllychainHost,
 };
 
 use codec::Decode;
@@ -149,7 +149,7 @@ pub async fn run_allychain_consensus<P, R, Block, B>(
 	}
 }
 
-/// Follow the relay chain new best head, to update the Parachain new best head.
+/// Follow the relay chain new best head, to update the Allychain new best head.
 async fn follow_new_best<P, R, Block, B>(
 	para_id: ParaId,
 	allychain: Arc<P>,
@@ -286,7 +286,7 @@ async fn handle_new_best_allychain_head<Block, P>(
 			tracing::debug!(
 				target: "cumulus-consensus",
 				error = ?err,
-				"Could not decode Parachain header while following best heads.",
+				"Could not decode Allychain header while following best heads.",
 			);
 			return
 		},
@@ -321,7 +321,7 @@ async fn handle_new_best_allychain_head<Block, P>(
 				tracing::debug!(
 					target: "cumulus-collator",
 					block_hash = ?hash,
-					"Parachain block not yet imported, waiting for import to enact as best block.",
+					"Allychain block not yet imported, waiting for import to enact as best block.",
 				);
 			},
 			Err(e) => {
@@ -373,7 +373,7 @@ where
 impl<T> RelaychainClient for Arc<T>
 where
 	T: sc_client_api::BlockchainEvents<PBlock> + ProvideRuntimeApi<PBlock> + 'static + Send + Sync,
-	<T as ProvideRuntimeApi<PBlock>>::Api: ParachainHost<PBlock>,
+	<T as ProvideRuntimeApi<PBlock>>::Api: AllychainHost<PBlock>,
 {
 	type Error = ClientError;
 

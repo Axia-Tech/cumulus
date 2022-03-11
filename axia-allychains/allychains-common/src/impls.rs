@@ -265,18 +265,18 @@ mod tests {
 	#[test]
 	fn assets_from_filters_correctly() {
 		parameter_types! {
-			pub SomeSiblingParachain: MultiLocation = MultiLocation::new(1, X1(Parachain(1234)));
+			pub SomeSiblingAllychain: MultiLocation = MultiLocation::new(1, X1(Allychain(1234)));
 		}
 
-		let asset_location = SomeSiblingParachain::get()
+		let asset_location = SomeSiblingAllychain::get()
 			.clone()
 			.pushed_with_interior(GeneralIndex(42))
 			.expect("multilocation will only have 2 junctions; qed");
 		let asset = MultiAsset { id: Concrete(asset_location), fun: 1_000_000.into() };
 		assert!(
-			AssetsFrom::<SomeSiblingParachain>::filter_asset_location(
+			AssetsFrom::<SomeSiblingAllychain>::filter_asset_location(
 				&asset,
-				&SomeSiblingParachain::get()
+				&SomeSiblingAllychain::get()
 			),
 			"AssetsFrom should allow assets from any of its interior locations"
 		);
