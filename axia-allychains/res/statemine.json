@@ -13,7 +13,7 @@
     "tokenDecimals": 12,
     "tokenSymbol": "KSM"
   },
-  "relay_chain": "kusama",
+  "relay_chain": "axiatest",
   "para_id": 1000,
   "consensusEngine": null,
   "genesis": {

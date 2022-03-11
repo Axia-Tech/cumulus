@@ -106,7 +106,7 @@ pub fn development_config(id: ParaId) -> ChainSpec {
 		None,
 		None,
 		Extensions {
-			relay_chain: "rococo-local".into(), // You MUST set this to the correct network!
+			relay_chain: "betanet-local".into(), // You MUST set this to the correct network!
 			para_id: id.into(),
 		},
 	)
@@ -165,7 +165,7 @@ pub fn local_testnet_config(id: ParaId) -> ChainSpec {
 		Some(properties),
 		// Extensions
 		Extensions {
-			relay_chain: "rococo-local".into(), // You MUST set this to the correct network!
+			relay_chain: "betanet-local".into(), // You MUST set this to the correct network!
 			para_id: id.into(),
 		},
 	)

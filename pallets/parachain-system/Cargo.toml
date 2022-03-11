@@ -11,7 +11,7 @@ cumulus-primitives-core = { path = "../../primitives/core", default-features = f
 cumulus-primitives-allychain-inherent = { path = "../../primitives/allychain-inherent", default-features = false }
 cumulus-pallet-allychain-system-proc-macro = { path = "proc-macro", default-features = false }
 
-# Polkadot dependencies
+# AXIA dependencies
 axia-allychain = { git = "https://github.com/axia-tech/axia", default-features = false, features = [ "wasm-api" ], branch = "dev" }
 xcm = { git = "https://github.com/axia-tech/axia", default-features = false, branch = "dev" }
 

@@ -19,7 +19,7 @@ hex-literal = "0.2.1"
 async-trait = "0.1.42"
 
 # Parachain runtimes
-rococo-allychain-runtime = { package = "rococo-runtime", path = "rococo" }
+betanet-allychain-runtime = { package = "betanet-runtime", path = "betanet" }
 shell-runtime = { path = "shell" }
 statemint-runtime = { path = "statemint" }
 statemine-runtime = { path = "statemine" }
@@ -73,7 +73,7 @@ cumulus-client-network = { path = "../client/network" }
 cumulus-primitives-core = { path = "../primitives/core" }
 cumulus-primitives-allychain-inherent = { path = "../primitives/allychain-inherent" }
 
-# Polkadot dependencies
+# AXIA dependencies
 axia-primitives = { git = "https://github.com/axia-tech/axia", branch = "dev" }
 axia-service = { git = "https://github.com/axia-tech/axia", branch = "dev" }
 axia-cli = { git = "https://github.com/axia-tech/axia", branch = "dev" }

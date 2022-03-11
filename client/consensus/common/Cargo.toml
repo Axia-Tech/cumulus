@@ -15,7 +15,7 @@ sp-blockchain = { git = "https://github.com/axia-tech/axia-core", branch = "dev"
 sp-api = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
 sp-trie = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
 
-# Polkadot deps
+# AXIA deps
 axia-primitives = { git = "https://github.com/axia-tech/axia", branch = "dev" }
 
 # Other deps

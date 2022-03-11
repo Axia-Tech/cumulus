@@ -14,7 +14,7 @@ sp-maybe-compressed-blob = { git = "https://github.com/axia-tech/axia-core", bra
 sc-client-api = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
 sc-consensus = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
 
-# Polkadot deps
+# AXIA deps
 axia-primitives = { git = "https://github.com/axia-tech/axia", branch = "dev" }
 axia-node-primitives = { git = "https://github.com/axia-tech/axia", branch = "dev" }
 axia-overseer = { git = "https://github.com/axia-tech/axia", branch = "dev" }

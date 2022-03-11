@@ -1,9 +1,9 @@
 [package]
-name = 'rococo-runtime'
+name = 'betanet-runtime'
 version = '0.1.0'
 authors = ["Parity Technologies <admin@parity.io>"]
 edition = '2018'
-description = "Simple runtime used by the rococo allychain(s)"
+description = "Simple runtime used by the betanet allychain(s)"
 
 [dependencies]
 codec = { package = "parity-scale-codec", version = "2.3.0", default-features = false, features = ["derive"] }
@@ -52,7 +52,7 @@ cumulus-pallet-xcmp-queue = { path = "../../pallets/xcmp-queue", default-feature
 cumulus-pallet-xcm = { path = "../../pallets/xcm", default-features = false }
 cumulus-ping = { path = "../pallets/ping", default-features = false }
 
-# Polkadot dependencies
+# AXIA dependencies
 axia-allychain = { git = "https://github.com/axia-tech/axia", default-features = false, branch = "dev" }
 xcm = { git = "https://github.com/axia-tech/axia", default-features = false, branch = "dev" }
 xcm-builder = { git = "https://github.com/axia-tech/axia", default-features = false, branch = "dev" }

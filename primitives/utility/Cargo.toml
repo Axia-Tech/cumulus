@@ -11,7 +11,7 @@ sp-runtime = { git = "https://github.com/axia-tech/axia-core", default-features 
 sp-trie = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
 frame-support = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
 
-# Polkadot dependencies
+# AXIA dependencies
 axia-allychain = { git = "https://github.com/axia-tech/axia", default-features = false, branch = "dev" }
 axia-primitives = { git = "https://github.com/axia-tech/axia", default-features = false, branch = "dev" }
 axia-core-primitives = { git = "https://github.com/axia-tech/axia", default-features = false, branch = "dev" }

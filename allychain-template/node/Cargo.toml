@@ -87,7 +87,7 @@ cumulus-client-service = { path = "../../client/service" }
 cumulus-primitives-core = { path = "../../primitives/core" }
 cumulus-primitives-allychain-inherent = { path = "../../primitives/allychain-inherent" }
 
-# Polkadot dependencies
+# AXIA dependencies
 axia-cli = { git = "https://github.com/axia-tech/axia", branch = "dev" }
 axia-allychain = { git = "https://github.com/axia-tech/axia", branch = "dev" }
 axia-primitives = { git = "https://github.com/axia-tech/axia", branch = "dev" }

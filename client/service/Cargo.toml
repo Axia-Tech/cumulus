@@ -25,7 +25,7 @@ sp-api = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
 sp-core = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
 sp-blockchain = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
 
-# Polkadot dependencies
+# AXIA dependencies
 axia-primitives = { git = "https://github.com/axia-tech/axia", branch = "dev" }
 axia-service = { git = "https://github.com/axia-tech/axia", branch = "dev" }
 axia-overseer = { git = "https://github.com/axia-tech/axia", branch = "dev" }

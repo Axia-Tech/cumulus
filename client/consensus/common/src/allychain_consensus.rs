@@ -37,7 +37,7 @@ use std::{pin::Pin, sync::Arc};
 
 /// Helper for the relay chain client. This is expected to be a lightweight handle like an `Arc`.
 pub trait RelaychainClient: Clone + 'static {
-	/// The error type for interacting with the Axia client.
+	/// The error type for interacting with the AXIA client.
 	type Error: std::fmt::Debug + Send;
 
 	/// A stream that yields head-data for a allychain.

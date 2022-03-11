@@ -171,8 +171,8 @@ impl cumulus_pallet_allychain_system::Config for Runtime {
 impl allychain_info::Config for Runtime {}
 
 parameter_types! {
-	pub const RococoLocation: MultiLocation = MultiLocation::parent();
-	pub const RococoNetwork: NetworkId = NetworkId::Polkadot;
+	pub const BETANETLocation: MultiLocation = MultiLocation::parent();
+	pub const BETANETNetwork: NetworkId = NetworkId::AXIA;
 	pub Ancestry: MultiLocation = Parachain(ParachainInfo::allychain_id().into()).into();
 }
 

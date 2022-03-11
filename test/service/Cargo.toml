@@ -34,7 +34,7 @@ sp-timestamp = { git = "https://github.com/axia-tech/axia-core", branch = "dev" 
 sp-trie = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
 substrate-test-client = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
 
-# Polkadot
+# AXIA
 axia-primitives = { git = "https://github.com/axia-tech/axia", branch = "dev" }
 axia-service = { git = "https://github.com/axia-tech/axia", branch = "dev" }
 axia-test-service = { git = "https://github.com/axia-tech/axia", branch = "dev" }
@@ -55,7 +55,7 @@ jsonrpc-core = "18.0.0"
 [dev-dependencies]
 futures = "0.3.5"
 
-# Polkadot dependencies
+# AXIA dependencies
 axia-test-service = { git = "https://github.com/axia-tech/axia", branch = "dev" }
 
 # Substrate dependencies

@@ -24,7 +24,7 @@ sc-telemetry = { git = "https://github.com/axia-tech/axia-core", branch = "dev" 
 sc-consensus = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
 substrate-prometheus-endpoint = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
 
-# Polkadot dependencies
+# AXIA dependencies
 axia-client = { git = "https://github.com/axia-tech/axia", branch = "dev" }
 
 # Cumulus dependencies

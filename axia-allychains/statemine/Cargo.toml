@@ -3,7 +3,7 @@ name = 'statemine-runtime'
 version = '2.0.0'
 authors = ["Parity Technologies <admin@parity.io>"]
 edition = '2018'
-description = "Kusama variant of Statemint allychain runtime"
+description = "AXIATEST variant of Statemint allychain runtime"
 
 [dependencies]
 codec = { package = "parity-scale-codec", version = "2.3.0", default-features = false, features = ["derive", "max-encoded-len"] }
@@ -66,7 +66,7 @@ pallet-asset-tx-payment = { path = "../../pallets/asset-tx-payment", default-fea
 pallet-collator-selection = { path = "../../pallets/collator-selection", default-features = false }
 allychains-common = { path = "../allychains-common", default-features = false }
 
-# Polkadot dependencies
+# AXIA dependencies
 axia-allychain = { git = "https://github.com/axia-tech/axia", default-features = false, branch = "dev" }
 axia-runtime-common = { git = "https://github.com/axia-tech/axia", default-features = false, branch = "dev" }
 xcm = { git = "https://github.com/axia-tech/axia", default-features = false, branch = "dev" }

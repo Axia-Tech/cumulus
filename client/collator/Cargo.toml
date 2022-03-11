@@ -12,7 +12,7 @@ sp-consensus = { git = "https://github.com/axia-tech/axia-core", branch = "dev" 
 sp-api = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
 sc-client-api = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
 
-# Polkadot dependencies
+# AXIA dependencies
 axia-primitives = { git = "https://github.com/axia-tech/axia", branch = "dev" }
 axia-node-primitives = { git = "https://github.com/axia-tech/axia", branch = "dev" }
 axia-overseer = { git = "https://github.com/axia-tech/axia", branch = "dev" }
@@ -30,7 +30,7 @@ parking_lot = "0.10.2"
 tracing = "0.1.25"
 
 [dev-dependencies]
-# Polkadot dependencies
+# AXIA dependencies
 axia-node-subsystem-test-helpers = { git = "https://github.com/axia-tech/axia", branch = "dev" }
 
 # Cumulus dependencies

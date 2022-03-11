@@ -16,7 +16,7 @@
 
 use cumulus_primitives_core::ParaId;
 use hex_literal::hex;
-use rococo_allychain_runtime::{AccountId, AuraId, Signature};
+use betanet_allychain_runtime::{AccountId, AuraId, Signature};
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
@@ -25,7 +25,7 @@ use sp_runtime::traits::{IdentifyAccount, Verify};
 
 /// Specialized `ChainSpec` for the normal allychain runtime.
 pub type ChainSpec =
-	sc_service::GenericChainSpec<rococo_allychain_runtime::GenesisConfig, Extensions>;
+	sc_service::GenericChainSpec<betanet_allychain_runtime::GenesisConfig, Extensions>;
 
 /// Specialized `ChainSpec` for the shell allychain runtime.
 pub type ShellChainSpec = sc_service::GenericChainSpec<shell_runtime::GenesisConfig, Extensions>;
@@ -94,7 +94,7 @@ pub fn get_chain_spec(id: ParaId) -> ChainSpec {
 		None,
 		None,
 		None,
-		Extensions { relay_chain: "westend".into(), para_id: id.into() },
+		Extensions { relay_chain: "alphanet".into(), para_id: id.into() },
 	)
 }
 
@@ -108,7 +108,7 @@ pub fn get_shell_chain_spec(id: ParaId) -> ShellChainSpec {
 		None,
 		None,
 		None,
-		Extensions { relay_chain: "westend".into(), para_id: id.into() },
+		Extensions { relay_chain: "alphanet".into(), para_id: id.into() },
 	)
 }
 
@@ -138,7 +138,7 @@ pub fn staging_test_net(id: ParaId) -> ChainSpec {
 		None,
 		None,
 		None,
-		Extensions { relay_chain: "westend".into(), para_id: id.into() },
+		Extensions { relay_chain: "alphanet".into(), para_id: id.into() },
 	)
 }
 
@@ -147,20 +147,20 @@ fn testnet_genesis(
 	initial_authorities: Vec<AuraId>,
 	endowed_accounts: Vec<AccountId>,
 	id: ParaId,
-) -> rococo_allychain_runtime::GenesisConfig {
-	rococo_allychain_runtime::GenesisConfig {
-		system: rococo_allychain_runtime::SystemConfig {
-			code: rococo_allychain_runtime::WASM_BINARY
+) -> betanet_allychain_runtime::GenesisConfig {
+	betanet_allychain_runtime::GenesisConfig {
+		system: betanet_allychain_runtime::SystemConfig {
+			code: betanet_allychain_runtime::WASM_BINARY
 				.expect("WASM binary was not build, please build it!")
 				.to_vec(),
 			changes_trie_config: Default::default(),
 		},
-		balances: rococo_allychain_runtime::BalancesConfig {
+		balances: betanet_allychain_runtime::BalancesConfig {
 			balances: endowed_accounts.iter().cloned().map(|k| (k, 1 << 60)).collect(),
 		},
-		sudo: rococo_allychain_runtime::SudoConfig { key: root_key },
-		allychain_info: rococo_allychain_runtime::ParachainInfoConfig { allychain_id: id },
-		aura: rococo_allychain_runtime::AuraConfig { authorities: initial_authorities },
+		sudo: betanet_allychain_runtime::SudoConfig { key: root_key },
+		allychain_info: betanet_allychain_runtime::ParachainInfoConfig { allychain_id: id },
+		aura: betanet_allychain_runtime::AuraConfig { authorities: initial_authorities },
 		aura_ext: Default::default(),
 		allychain_system: Default::default(),
 	}
@@ -230,7 +230,7 @@ pub fn westmint_session_keys(keys: AuraId) -> westmint_runtime::SessionKeys {
 
 pub fn statemint_development_config(id: ParaId) -> StatemintChainSpec {
 	let mut properties = sc_chain_spec::Properties::new();
-	properties.insert("tokenSymbol".into(), "DOT".into());
+	properties.insert("tokenSymbol".into(), "AXC".into());
 	properties.insert("tokenDecimals".into(), 10.into());
 
 	StatemintChainSpec::from_genesis(
@@ -265,7 +265,7 @@ pub fn statemint_development_config(id: ParaId) -> StatemintChainSpec {
 
 pub fn statemint_local_config(id: ParaId) -> StatemintChainSpec {
 	let mut properties = sc_chain_spec::Properties::new();
-	properties.insert("tokenSymbol".into(), "DOT".into());
+	properties.insert("tokenSymbol".into(), "AXC".into());
 	properties.insert("tokenDecimals".into(), 10.into());
 
 	StatemintChainSpec::from_genesis(
@@ -385,7 +385,7 @@ pub fn statemine_development_config(id: ParaId) -> StatemineChainSpec {
 		None,
 		None,
 		Some(properties),
-		Extensions { relay_chain: "kusama-dev".into(), para_id: id.into() },
+		Extensions { relay_chain: "axiatest-dev".into(), para_id: id.into() },
 	)
 }
 
@@ -434,7 +434,7 @@ pub fn statemine_local_config(id: ParaId) -> StatemineChainSpec {
 		None,
 		None,
 		Some(properties),
-		Extensions { relay_chain: "kusama-local".into(), para_id: id.into() },
+		Extensions { relay_chain: "axiatest-local".into(), para_id: id.into() },
 	)
 }
 
@@ -486,7 +486,7 @@ pub fn statemine_config(id: ParaId) -> StatemineChainSpec {
 		None,
 		None,
 		Some(properties),
-		Extensions { relay_chain: "kusama".into(), para_id: id.into() },
+		Extensions { relay_chain: "axiatest".into(), para_id: id.into() },
 	)
 }
 
@@ -562,7 +562,7 @@ pub fn westmint_development_config(id: ParaId) -> WestmintChainSpec {
 		None,
 		None,
 		Some(properties),
-		Extensions { relay_chain: "westend".into(), para_id: id.into() },
+		Extensions { relay_chain: "alphanet".into(), para_id: id.into() },
 	)
 }
 
@@ -612,7 +612,7 @@ pub fn westmint_local_config(id: ParaId) -> WestmintChainSpec {
 		None,
 		None,
 		Some(properties),
-		Extensions { relay_chain: "westend-local".into(), para_id: id.into() },
+		Extensions { relay_chain: "alphanet-local".into(), para_id: id.into() },
 	)
 }
 
@@ -657,7 +657,7 @@ pub fn westmint_config(id: ParaId) -> WestmintChainSpec {
 					),
 				],
 				vec![],
-				// re-use the Westend sudo key
+				// re-use the ALPHANET sudo key
 				hex!("6648d7f3382690650c681aba1b993cd11e54deb4df21a3a18c3e2177de9f7342").into(),
 				id,
 			)
@@ -666,7 +666,7 @@ pub fn westmint_config(id: ParaId) -> WestmintChainSpec {
 		None,
 		None,
 		Some(properties),
-		Extensions { relay_chain: "westend".into(), para_id: id.into() },
+		Extensions { relay_chain: "alphanet".into(), para_id: id.into() },
 	)
 }
 

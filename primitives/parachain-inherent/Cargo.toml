@@ -15,7 +15,7 @@ sp-state-machine = { git = "https://github.com/axia-tech/axia-core", optional = 
 sp-trie = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
 sp-api = { git = "https://github.com/axia-tech/axia-core", optional = true , branch = "dev" }
 
-# Polkadot dependencies
+# AXIA dependencies
 axia-client = { git = "https://github.com/axia-tech/axia", optional = true, branch = "dev" }
 
 # Cumulus dependencies

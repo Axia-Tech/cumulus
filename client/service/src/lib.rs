@@ -126,7 +126,7 @@ where
 		overseer_handle: relay_chain_full_node
 			.overseer_handle
 			.clone()
-			.ok_or_else(|| "Polkadot full node did not provide an `OverseerHandle`!")?,
+			.ok_or_else(|| "AXIA full node did not provide an `OverseerHandle`!")?,
 		_phantom: PhantomData,
 	})?;
 
@@ -137,7 +137,7 @@ where
 		overseer_handle: relay_chain_full_node
 			.overseer_handle
 			.clone()
-			.ok_or_else(|| "Polkadot full node did not provide an `OverseerHandle`!")?,
+			.ok_or_else(|| "AXIA full node did not provide an `OverseerHandle`!")?,
 		spawner,
 		para_id,
 		key: relay_chain_full_node.collator_key.clone(),
@@ -299,7 +299,7 @@ pub fn prepare_node_config(mut allychain_config: Configuration) -> Configuration
 	allychain_config
 }
 
-/// Build the Polkadot full node using the given `config`.
+/// Build the AXIA full node using the given `config`.
 #[sc_tracing::logging::prefix_logs_with("Relaychain")]
 pub fn build_axia_full_node(
 	config: Configuration,

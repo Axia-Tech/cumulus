@@ -16,7 +16,7 @@ sp-trie = { git = "https://github.com/axia-tech/axia-core", default-features = f
 sp-api = { git = "https://github.com/axia-tech/axia-core", optional = true , branch = "dev" }
 sp-storage = { git = "https://github.com/axia-tech/axia-core", optional = true , branch = "dev" }
 
-# Axia dependencies
+# AXIA dependencies
 axia-client = { git = "https://github.com/axia-tech/axia", optional = true, branch = "dev" }
 
 # Cumulus dependencies

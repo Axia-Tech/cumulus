@@ -70,7 +70,7 @@ cumulus-primitives-utility = { path = "../../primitives/utility", default-featur
 pallet-collator-selection = { path = "../../pallets/collator-selection", default-features = false }
 allychain-info = { path = "../../axia-allychains/pallets/allychain-info", default-features = false }
 
-# Polkadot Dependencies
+# AXIA Dependencies
 pallet-xcm = { git = "https://github.com/axia-tech/axia", default-features = false , branch = "dev" }
 axia-allychain = { git = "https://github.com/axia-tech/axia", default-features = false , branch = "dev" }
 axia-runtime-common = { git = "https://github.com/axia-tech/axia", default-features = false, branch = "dev" }

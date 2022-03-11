@@ -800,7 +800,7 @@ dependencies = [
  "nix",
  "pallet-transaction-payment-rpc",
  "parity-scale-codec",
- "rococo-runtime",
+ "betanet-runtime",
  "sc-basic-authorship",
  "sc-chain-spec",
  "sc-cli",
@@ -8427,7 +8427,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "rococo-runtime"
+name = "betanet-runtime"
 version = "0.1.0"
 dependencies = [
  "allychain-info",

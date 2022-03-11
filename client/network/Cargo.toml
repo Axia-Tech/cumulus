@@ -14,7 +14,7 @@ sp-api = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
 sp-core = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
 sc-client-api = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
 
-# Polkadot deps
+# AXIA deps
 axia-primitives = { git = "https://github.com/axia-tech/axia", branch = "dev" }
 axia-node-primitives = { git = "https://github.com/axia-tech/axia", branch = "dev" }
 axia-client = { git = "https://github.com/axia-tech/axia", branch = "dev" }
@@ -35,7 +35,7 @@ tokio = { version = "1.10", features = ["macros"] }
 cumulus-test-service = { path = "../../test/service" }
 cumulus-primitives-core = { path = "../../primitives/core" }
 
-# Polkadot deps
+# AXIA deps
 axia-test-client = { git = "https://github.com/axia-tech/axia", branch = "dev" }
 
 # substrate deps

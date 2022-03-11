@@ -30,7 +30,7 @@ cumulus-test-relay-sproof-builder = { path = "../relay-sproof-builder" }
 cumulus-primitives-core = { path = "../../primitives/core" }
 cumulus-primitives-allychain-inherent = { path = "../../primitives/allychain-inherent" }
 
-# Polkadot deps
+# AXIA deps
 axia-primitives = { git = "https://github.com/axia-tech/axia", branch = "dev" }
 axia-allychain = { git = "https://github.com/axia-tech/axia", branch = "dev" }
 

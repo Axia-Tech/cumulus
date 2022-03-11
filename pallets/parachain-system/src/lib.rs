@@ -424,9 +424,9 @@ pub mod pallet {
 	pub enum Error<T> {
 		/// Attempt to upgrade validation function while existing upgrade pending
 		OverlappingUpgrades,
-		/// Polkadot currently prohibits this allychain from upgrading its validation function
-		ProhibitedByPolkadot,
-		/// The supplied validation function has compiled into a blob larger than Polkadot is
+		/// AXIA currently prohibits this allychain from upgrading its validation function
+		ProhibitedByAXIA,
+		/// The supplied validation function has compiled into a blob larger than AXIA is
 		/// willing to run
 		TooBig,
 		/// The inherent which supplies the validation data did not run this block
@@ -874,7 +874,7 @@ impl<T: Config> Pallet<T> {
 		// Ensure that `ValidationData` exists. We do not care about the validation data per se,
 		// but we do care about the [`UpgradeRestrictionSignal`] which arrives with the same inherent.
 		ensure!(<ValidationData<T>>::exists(), Error::<T>::ValidationDataNotAvailable,);
-		ensure!(<UpgradeRestrictionSignal<T>>::get().is_none(), Error::<T>::ProhibitedByPolkadot);
+		ensure!(<UpgradeRestrictionSignal<T>>::get().is_none(), Error::<T>::ProhibitedByAXIA);
 
 		ensure!(!<PendingValidationCode<T>>::exists(), Error::<T>::OverlappingUpgrades);
 		let cfg = Self::host_configuration().ok_or(Error::<T>::HostConfigurationNotAvailable)?;

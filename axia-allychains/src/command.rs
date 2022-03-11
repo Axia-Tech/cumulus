@@ -18,7 +18,7 @@ use crate::{
 	chain_spec,
 	cli::{Cli, RelayChainCli, Subcommand},
 	service::{
-		new_partial, Block, RococoParachainRuntimeExecutor, ShellRuntimeExecutor,
+		new_partial, Block, BETANETParachainRuntimeExecutor, ShellRuntimeExecutor,
 		StatemineRuntimeExecutor, StatemintRuntimeExecutor, WestmintRuntimeExecutor,
 	},
 };
@@ -130,7 +130,7 @@ fn load_spec(
 
 impl SubstrateCli for Cli {
 	fn impl_name() -> String {
-		"Polkadot collator".into()
+		"AXIA collator".into()
 	}
 
 	fn impl_version() -> String {
@@ -139,7 +139,7 @@ impl SubstrateCli for Cli {
 
 	fn description() -> String {
 		format!(
-			"Polkadot collator\n\nThe command-line arguments provided first will be \
+			"AXIA collator\n\nThe command-line arguments provided first will be \
 		passed to the allychain node, while the arguments provided after -- will be passed \
 		to the relaychain node.\n\n\
 		{} [allychain-args] -- [relaychain-args]",
@@ -173,14 +173,14 @@ impl SubstrateCli for Cli {
 		} else if chain_spec.is_shell() {
 			&shell_runtime::VERSION
 		} else {
-			&rococo_allychain_runtime::VERSION
+			&betanet_allychain_runtime::VERSION
 		}
 	}
 }
 
 impl SubstrateCli for RelayChainCli {
 	fn impl_name() -> String {
-		"Polkadot collator".into()
+		"AXIA collator".into()
 	}
 
 	fn impl_version() -> String {
@@ -189,7 +189,7 @@ impl SubstrateCli for RelayChainCli {
 
 	fn description() -> String {
 		format!(
-			"Polkadot collator\n\nThe command-line arguments provided first will be \
+			"AXIA collator\n\nThe command-line arguments provided first will be \
 		passed to the allychain node, while the arguments provided after -- will be passed \
 		to the relaychain node.\n\n\
 		{} [allychain-args] -- [relaychain-args]",
@@ -270,12 +270,12 @@ macro_rules! construct_async_run {
 		} else {
 			runner.async_run(|$config| {
 				let $components = new_partial::<
-					rococo_allychain_runtime::RuntimeApi,
-					RococoParachainRuntimeExecutor,
+					betanet_allychain_runtime::RuntimeApi,
+					BETANETParachainRuntimeExecutor,
 					_
 				>(
 					&$config,
-					crate::service::rococo_allychain_build_import_queue,
+					crate::service::betanet_allychain_build_import_queue,
 				)?;
 				let task_manager = $components.task_manager;
 				{ $( $code )* }.map(|v| (v, task_manager))
@@ -463,7 +463,7 @@ pub fn run() -> Result<()> {
 						.map(|r| r.0)
 						.map_err(Into::into)
 				} else {
-					crate::service::start_rococo_allychain_node(config, axia_config, id)
+					crate::service::start_betanet_allychain_node(config, axia_config, id)
 						.await
 						.map(|r| r.0)
 						.map_err(Into::into)
@@ -532,7 +532,7 @@ impl CliConfiguration<Self> for RelayChainCli {
 	}
 
 	fn init<C: SubstrateCli>(&self) -> Result<()> {
-		unreachable!("PolkadotCli is never initialized; qed");
+		unreachable!("AXIACli is never initialized; qed");
 	}
 
 	fn chain_id(&self, is_dev: bool) -> Result<String> {

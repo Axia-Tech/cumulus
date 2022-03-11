@@ -26,7 +26,7 @@ pallet-balances = { git = "https://github.com/axia-tech/axia-core", default-feat
 sp-runtime = { git = "https://github.com/axia-tech/axia-core", default-features = false , branch = "dev" }
 sp-core = { git = "https://github.com/axia-tech/axia-core", default-features = false , branch = "dev" }
 
-# Polkadot dependencies
+# AXIA dependencies
 axia-runtime-common = { git = 'https://github.com/axia-tech/axia', default-features = false , branch = "dev" }
 axia-primitives = { git = 'https://github.com/axia-tech/axia', default-features = false , branch = "dev" }
 xcm = { git = 'https://github.com/axia-tech/axia', default-features = false , branch = "dev" }

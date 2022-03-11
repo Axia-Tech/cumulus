@@ -55,17 +55,17 @@ use std::sync::Arc;
 use substrate_prometheus_endpoint::Registry;
 
 /// Native executor instance.
-pub struct RococoParachainRuntimeExecutor;
+pub struct BETANETParachainRuntimeExecutor;
 
-impl sc_executor::NativeExecutionDispatch for RococoParachainRuntimeExecutor {
+impl sc_executor::NativeExecutionDispatch for BETANETParachainRuntimeExecutor {
 	type ExtendHostFunctions = ();
 
 	fn dispatch(method: &str, data: &[u8]) -> Option<Vec<u8>> {
-		rococo_allychain_runtime::api::dispatch(method, data)
+		betanet_allychain_runtime::api::dispatch(method, data)
 	}
 
 	fn native_version() -> sc_executor::NativeVersion {
-		rococo_allychain_runtime::native_version()
+		betanet_allychain_runtime::native_version()
 	}
 }
 
@@ -608,13 +608,13 @@ where
 	Ok((task_manager, client))
 }
 
-/// Build the import queue for the rococo allychain runtime.
-pub fn rococo_allychain_build_import_queue(
+/// Build the import queue for the betanet allychain runtime.
+pub fn betanet_allychain_build_import_queue(
 	client: Arc<
 		TFullClient<
 			Block,
-			rococo_allychain_runtime::RuntimeApi,
-			NativeElseWasmExecutor<RococoParachainRuntimeExecutor>,
+			betanet_allychain_runtime::RuntimeApi,
+			NativeElseWasmExecutor<BETANETParachainRuntimeExecutor>,
 		>,
 	>,
 	config: &Configuration,
@@ -625,8 +625,8 @@ pub fn rococo_allychain_build_import_queue(
 		Block,
 		TFullClient<
 			Block,
-			rococo_allychain_runtime::RuntimeApi,
-			NativeElseWasmExecutor<RococoParachainRuntimeExecutor>,
+			betanet_allychain_runtime::RuntimeApi,
+			NativeElseWasmExecutor<BETANETParachainRuntimeExecutor>,
 		>,
 	>,
 	sc_service::Error,
@@ -663,8 +663,8 @@ pub fn rococo_allychain_build_import_queue(
 	.map_err(Into::into)
 }
 
-/// Start a rococo allychain node.
-pub async fn start_rococo_allychain_node(
+/// Start a betanet allychain node.
+pub async fn start_betanet_allychain_node(
 	allychain_config: Configuration,
 	axia_config: Configuration,
 	id: ParaId,
@@ -673,17 +673,17 @@ pub async fn start_rococo_allychain_node(
 	Arc<
 		TFullClient<
 			Block,
-			rococo_allychain_runtime::RuntimeApi,
-			NativeElseWasmExecutor<RococoParachainRuntimeExecutor>,
+			betanet_allychain_runtime::RuntimeApi,
+			NativeElseWasmExecutor<BETANETParachainRuntimeExecutor>,
 		>,
 	>,
 )> {
-	start_node_impl::<rococo_allychain_runtime::RuntimeApi, RococoParachainRuntimeExecutor, _, _, _>(
+	start_node_impl::<betanet_allychain_runtime::RuntimeApi, BETANETParachainRuntimeExecutor, _, _, _>(
 		allychain_config,
 		axia_config,
 		id,
 		|_| Ok(Default::default()),
-		rococo_allychain_build_import_queue,
+		betanet_allychain_build_import_queue,
 		|client,
 		 prometheus_registry,
 		 telemetry,

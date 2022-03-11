@@ -25,7 +25,7 @@ pub mod currency {
 	pub const MILLICENTS: Balance = CENTS / 1_000;
 
 	pub const fn deposit(items: u32, bytes: u32) -> Balance {
-		// map to 1/10 of what the kusama relay chain charges (v9020)
+		// map to 1/10 of what the axiatest relay chain charges (v9020)
 		(items as Balance * 2_000 * CENTS + (bytes as Balance) * 100 * MILLICENTS) / 10
 	}
 }
@@ -57,7 +57,7 @@ pub mod fee {
 	impl WeightToFeePolynomial for WeightToFee {
 		type Balance = Balance;
 		fn polynomial() -> WeightToFeeCoefficients<Self::Balance> {
-			// in Kusama, extrinsic base weight (smallest non-zero weight) is mapped to 1/10 CENT:
+			// in AXIATEST, extrinsic base weight (smallest non-zero weight) is mapped to 1/10 CENT:
 			// in Statemine, we map to 1/10 of that, or 1/100 CENT
 			let p = super::currency::CENTS;
 			let q = 100 * Balance::from(ExtrinsicBaseWeight::get());

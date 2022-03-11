@@ -13,7 +13,7 @@ sp-state-machine = { git = "https://github.com/axia-tech/axia-core", default-fea
 sp-runtime = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
 sp-std = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
 
-# Polkadot dependencies
+# AXIA dependencies
 axia-primitives = { git = "https://github.com/axia-tech/axia", default-features = false, branch = "dev" }
 
 # Cumulus dependencies
