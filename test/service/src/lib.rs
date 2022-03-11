@@ -450,7 +450,7 @@ impl TestNodeBuilder {
 	/// node.
 	pub fn connect_to_relay_chain_node(
 		mut self,
-		node: &axia_test_service::AXIATestNode,
+		node: &axia_test_service::AXIATESTNode,
 	) -> Self {
 		self.relay_chain_nodes.push(node.addr.clone());
 		self
@@ -462,7 +462,7 @@ impl TestNodeBuilder {
 	/// node.
 	pub fn connect_to_relay_chain_nodes<'a>(
 		mut self,
-		nodes: impl IntoIterator<Item = &'a axia_test_service::AXIATestNode>,
+		nodes: impl IntoIterator<Item = &'a axia_test_service::AXIATESTNode>,
 	) -> Self {
 		self.relay_chain_nodes.extend(nodes.into_iter().map(|n| n.addr.clone()));
 		self
@@ -719,7 +719,7 @@ pub fn run_relay_chain_validator_node(
 	key: Sr25519Keyring,
 	storage_update_func: impl Fn(),
 	boot_nodes: Vec<MultiaddrWithPeerId>,
-) -> axia_test_service::AXIATestNode {
+) -> axia_test_service::AXIATESTNode {
 	axia_test_service::run_validator_node(
 		tokio_handle,
 		key,
