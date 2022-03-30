@@ -1,4 +1,4 @@
-// Copyright (C) 2021 Parity Technologies (UK) Ltd.
+// Copyright (C) 2021 Axia Technologies (UK) Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -47,6 +47,16 @@ fn it_should_set_invulnerables() {
 		assert_noop!(
 			CollatorSelection::set_invulnerables(Origin::signed(1), new_set.clone()),
 			BadOrigin
+		);
+
+		// cannot set invulnerables without associated validator keys
+		let invulnerables = vec![7];
+		assert_noop!(
+			CollatorSelection::set_invulnerables(
+				Origin::signed(RootAccount::get()),
+				invulnerables.clone()
+			),
+			Error::<Test>::ValidatorNotRegistered
 		);
 	});
 }
@@ -188,7 +198,7 @@ fn register_as_candidate_works() {
 		// given
 		assert_eq!(CollatorSelection::desired_candidates(), 2);
 		assert_eq!(CollatorSelection::candidacy_bond(), 10);
-		assert_eq!(CollatorSelection::candidates(), vec![]);
+		assert_eq!(CollatorSelection::candidates(), Vec::new());
 		assert_eq!(CollatorSelection::invulnerables(), vec![1, 2]);
 
 		// take two endowed, non-invulnerables accounts.

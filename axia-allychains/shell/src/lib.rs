@@ -1,4 +1,4 @@
-// Copyright 2019-2021 Parity Technologies (UK) Ltd.
+// Copyright 2019-2021 Axia Technologies (UK) Ltd.
 // This file is part of Cumulus.
 
 // Cumulus is free software: you can redistribute it and/or modify
@@ -22,13 +22,16 @@
 #[cfg(feature = "std")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
+pub mod xcm_config;
+
 use codec::{Decode, Encode};
+use frame_support::unsigned::TransactionValidityError;
 use scale_info::TypeInfo;
 use sp_api::impl_runtime_apis;
 use sp_core::OpaqueMetadata;
 use sp_runtime::{
 	create_runtime_str, generic,
-	traits::{AccountIdLookup, BlakeTwo256, Block as BlockT},
+	traits::{AccountIdLookup, BlakeTwo256, Block as BlockT, DispatchInfoOf},
 	transaction_validity::{TransactionSource, TransactionValidity},
 	ApplyExtrinsicResult,
 };
@@ -52,14 +55,6 @@ use frame_system::limits::{BlockLength, BlockWeights};
 pub use sp_runtime::BuildStorage;
 pub use sp_runtime::{Perbill, Permill};
 
-// XCM imports
-use xcm::latest::prelude::*;
-use xcm_builder::{
-	AllowUnpaidExecutionFrom, FixedWeightBounds, LocationInverter, ParentAsSuperuser,
-	ParentIsDefault, SovereignSignedViaLocation,
-};
-use xcm_executor::{Config, XcmExecutor};
-
 /// This runtime version.
 #[sp_version::runtime_version]
 pub const VERSION: RuntimeVersion = RuntimeVersion {
@@ -70,6 +65,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	impl_version: 0,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
+	state_version: 0,
 };
 
 /// The version information used to identify this runtime when compiled natively.
@@ -150,6 +146,7 @@ impl frame_system::Config for Runtime {
 	type BlockLength = RuntimeBlockLength;
 	type SS58Prefix = SS58Prefix;
 	type OnSetCode = cumulus_pallet_allychain_system::AllychainSetCode<Self>;
+	type MaxConsumers = frame_support::traits::ConstU32<16>;
 }
 
 parameter_types! {
@@ -159,7 +156,7 @@ parameter_types! {
 
 impl cumulus_pallet_allychain_system::Config for Runtime {
 	type Event = Event;
-	type OnValidationData = ();
+	type OnSystemEvent = ();
 	type SelfParaId = allychain_info::Pallet<Runtime>;
 	type OutboundXcmpMessageSource = ();
 	type DmpMessageHandler = cumulus_pallet_xcm::UnlimitedDmpExecution<Runtime>;
@@ -169,58 +166,6 @@ impl cumulus_pallet_allychain_system::Config for Runtime {
 }
 
 impl allychain_info::Config for Runtime {}
-
-parameter_types! {
-	pub const BETANETLocation: MultiLocation = MultiLocation::parent();
-	pub const BETANETNetwork: NetworkId = NetworkId::AXIA;
-	pub Ancestry: MultiLocation = Allychain(AllychainInfo::allychain_id().into()).into();
-}
-
-/// This is the type we use to convert an (incoming) XCM origin into a local `Origin` instance,
-/// ready for dispatching a transaction with Xcm's `Transact`. There is an `OriginKind` which can
-/// bias the kind of local `Origin` it will become.
-pub type XcmOriginToTransactDispatchOrigin = (
-	// Sovereign account converter; this attempts to derive an `AccountId` from the origin location
-	// using `LocationToAccountId` and then turn that into the usual `Signed` origin. Useful for
-	// foreign chains who want to have a local sovereign account on this chain which they control.
-	SovereignSignedViaLocation<ParentIsDefault<AccountId>, Origin>,
-	// Superuser converter for the Relay-chain (Parent) location. This will allow it to issue a
-	// transaction from the Root origin.
-	ParentAsSuperuser<Origin>,
-);
-
-match_type! {
-	pub type JustTheParent: impl Contains<MultiLocation> = { MultiLocation { parents:1, interior: Here } };
-}
-
-parameter_types! {
-	// One XCM operation is 1_000_000 weight - almost certainly a conservative estimate.
-	pub UnitWeightCost: Weight = 1_000_000;
-	pub const MaxInstructions: u32 = 100;
-}
-
-pub struct XcmConfig;
-impl Config for XcmConfig {
-	type Call = Call;
-	type XcmSender = (); // sending XCM not supported
-	type AssetTransactor = (); // balances not supported
-	type OriginConverter = XcmOriginToTransactDispatchOrigin;
-	type IsReserve = (); // balances not supported
-	type IsTeleporter = (); // balances not supported
-	type LocationInverter = LocationInverter<Ancestry>;
-	type Barrier = AllowUnpaidExecutionFrom<JustTheParent>;
-	type Weigher = FixedWeightBounds<UnitWeightCost, Call, MaxInstructions>; // balances not supported
-	type Trader = (); // balances not supported
-	type ResponseHandler = (); // Don't handle responses for now.
-	type AssetTrap = (); // don't trap for now
-	type AssetClaims = (); // don't claim for now
-	type SubscriptionService = (); // don't handle subscriptions for now
-}
-
-impl cumulus_pallet_xcm::Config for Runtime {
-	type Event = Event;
-	type XcmExecutor = XcmExecutor<XcmConfig>;
-}
 
 construct_runtime! {
 	pub enum Runtime where
@@ -252,6 +197,15 @@ impl sp_runtime::traits::SignedExtension for DisallowSigned {
 		&self,
 	) -> sp_std::result::Result<(), sp_runtime::transaction_validity::TransactionValidityError> {
 		Ok(())
+	}
+	fn pre_dispatch(
+		self,
+		who: &Self::AccountId,
+		call: &Self::Call,
+		info: &DispatchInfoOf<Self::Call>,
+		len: usize,
+	) -> Result<Self::Pre, TransactionValidityError> {
+		Ok(self.validate(who, call, info, len).map(|_| ())?)
 	}
 	fn validate(
 		&self,
@@ -298,7 +252,7 @@ pub type Executive = frame_executive::Executive<
 	Block,
 	frame_system::ChainContext<Runtime>,
 	Runtime,
-	AllPallets,
+	AllPalletsWithSystem,
 >;
 
 impl_runtime_apis! {
@@ -369,8 +323,8 @@ impl_runtime_apis! {
 	}
 
 	impl cumulus_primitives_core::CollectCollationInfo<Block> for Runtime {
-		fn collect_collation_info() -> cumulus_primitives_core::CollationInfo {
-			AllychainSystem::collect_collation_info()
+		fn collect_collation_info(header: &<Block as BlockT>::Header) -> cumulus_primitives_core::CollationInfo {
+			AllychainSystem::collect_collation_info(header)
 		}
 	}
 }

@@ -1,36 +1,36 @@
 [package]
 name = "cumulus-client-service"
 version = "0.1.0"
-authors = ["Parity Technologies <admin@parity.io>"]
-edition = "2018"
+authors = ["Axia Technologies <admin@axia.io>"]
+edition = "2021"
 
 [dependencies]
 # Cumulus dependencies
 cumulus-client-consensus-common = { path = "../consensus/common" }
 cumulus-client-collator = { path = "../collator" }
 cumulus-client-pov-recovery = { path = "../pov-recovery" }
+cumulus-relay-chain-interface = { path = "../relay-chain-interface" }
 cumulus-primitives-core = { path = "../../primitives/core" }
 
 # Substrate dependencies
-sc-chain-spec = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
-sc-client-api = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
-sc-service = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
-sc-telemetry = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
-sc-tracing = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
-sc-consensus-babe = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
-sc-consensus = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
-sp-consensus = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
-sp-runtime = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
-sp-api = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
-sp-core = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
-sp-blockchain = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
+sc-chain-spec = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+sc-client-api = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+sc-service = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+sc-telemetry = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+sc-tracing = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+sc-consensus-babe = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+sc-consensus = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+sp-consensus = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+sp-runtime = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+sp-api = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+sp-core = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+sp-blockchain = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
 
-# AXIA dependencies
-axia-primitives = { git = "https://github.com/axia-tech/axia", branch = "dev" }
-axia-service = { git = "https://github.com/axia-tech/axia", branch = "dev" }
-axia-overseer = { git = "https://github.com/axia-tech/axia", branch = "dev" }
+# Axia dependencies
+axia-primitives = { git = "https://github.com/axia-tech/axia", branch = "axia" }
+axia-overseer = { git = "https://github.com/axia-tech/axia", branch = "axia" }
 
 # Other deps
-tracing = "0.1.22"
+tracing = "0.1.31"
 codec = { package = "parity-scale-codec", version = "2.3.0" }
-parking_lot = "0.10.2"
+parking_lot = "0.12.0"

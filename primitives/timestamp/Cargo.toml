@@ -1,24 +1,24 @@
 [package]
 name = "cumulus-primitives-timestamp"
 version = "0.1.0"
-authors = ["Parity Technologies <admin@parity.io>"]
-edition = "2018"
+authors = ["Axia Technologies <admin@axia.io>"]
+edition = "2021"
 description = "Provides timestamp related functionality for allychains."
 
 [dependencies]
 # Substrate dependencies
-sp-timestamp = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
-sp-inherents = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
-sp-std = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
+sp-timestamp = { git = "https://github.com/axia-tech/axlib", default-features = false, branch = "axlib" }
+sp-inherents = { git = "https://github.com/axia-tech/axlib", default-features = false, branch = "axlib" }
+sp-std = { git = "https://github.com/axia-tech/axlib", default-features = false, branch = "axlib" }
 
 # Cumulus dependencies
 cumulus-primitives-core = { path = "../core", default-features = false }
 
 [dev-dependencies]
 # Substrate dependencies
-sp-tracing = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
-sp-runtime = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
-sp-consensus = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
+sp-tracing = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+sp-runtime = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+sp-consensus = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
 
 # Cumulus dependencies
 cumulus-test-client = { path = "../../test/client" }

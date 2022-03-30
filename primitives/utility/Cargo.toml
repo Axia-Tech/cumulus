@@ -1,21 +1,21 @@
 [package]
 name = "cumulus-primitives-utility"
 version = "0.1.0"
-authors = ["Parity Technologies <admin@parity.io>"]
-edition = "2018"
+authors = ["Axia Technologies <admin@axia.io>"]
+edition = "2021"
 
 [dependencies]
 # Substrate dependencies
-sp-std = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
-sp-runtime = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
-sp-trie = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
-frame-support = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
+sp-std = { git = "https://github.com/axia-tech/axlib", default-features = false, branch = "axlib" }
+sp-runtime = { git = "https://github.com/axia-tech/axlib", default-features = false, branch = "axlib" }
+sp-trie = { git = "https://github.com/axia-tech/axlib", default-features = false, branch = "axlib" }
+frame-support = { git = "https://github.com/axia-tech/axlib", default-features = false, branch = "axlib" }
 
-# AXIA dependencies
-axia-allychain = { git = "https://github.com/axia-tech/axia", default-features = false, branch = "dev" }
-axia-primitives = { git = "https://github.com/axia-tech/axia", default-features = false, branch = "dev" }
-axia-core-primitives = { git = "https://github.com/axia-tech/axia", default-features = false, branch = "dev" }
-xcm = { git = "https://github.com/axia-tech/axia", default-features = false, branch = "dev" }
+# Axia dependencies
+axia-allychain = { git = "https://github.com/axia-tech/axia", default-features = false, branch = "axia" }
+axia-primitives = { git = "https://github.com/axia-tech/axia", default-features = false, branch = "axia" }
+axia-core-primitives = { git = "https://github.com/axia-tech/axia", default-features = false, branch = "axia" }
+xcm = { git = "https://github.com/axia-tech/axia", default-features = false, branch = "axia" }
 
 cumulus-primitives-core = { path = "../core", default-features = false }
 

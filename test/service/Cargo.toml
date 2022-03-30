@@ -1,43 +1,47 @@
 [package]
 name = "cumulus-test-service"
 version = "0.1.0"
-authors = ["Parity Technologies <admin@parity.io>"]
-edition = "2018"
+authors = ["Axia Technologies <admin@axia.io>"]
+edition = "2021"
 
 [dependencies]
 codec = { package = "parity-scale-codec", version = "2.3.0" }
-rand = "0.7.3"
-serde = { version = "1.0.101", features = ["derive"] }
+rand = "0.8.5"
+serde = { version = "1.0.132", features = ["derive"] }
 async-trait = "0.1.42"
-tokio = { version = "1.10", features = ["macros"] }
+tokio = { version = "1.17.0", features = ["macros"] }
 
 # Substrate
-frame-system = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
-pallet-transaction-payment = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
-sc-basic-authorship = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
-sc-chain-spec = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
-sc-client-api = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
-sc-consensus = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
-sc-executor = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
-sc-network = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
-sc-rpc = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
-sc-service = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
-sc-tracing = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
-sc-transaction-pool = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
-sp-arithmetic = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
-sp-blockchain = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
-sp-core = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
-sp-keyring = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
-sp-runtime = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
-sp-state-machine = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
-sp-timestamp = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
-sp-trie = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
-substrate-test-client = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
+frame-system = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+pallet-transaction-payment = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+frame-system-rpc-runtime-api = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+sc-basic-authorship = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+sc-chain-spec = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+sc-client-api = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+sc-transaction-pool-api = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+sc-consensus = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+sc-executor = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+sc-network = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+sc-rpc = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+sc-service = { git = "https://github.com/axia-tech/axlib", branch = "axlib", features = [ "wasmtime" ] }
+sc-tracing = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+sc-transaction-pool = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+sp-arithmetic = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+sp-blockchain = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+sp-core = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+sp-io = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+sp-keyring = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+sp-runtime = { git = "https://github.com/axia-tech/axlib", default-features = false, branch = "axlib" }
+sp-state-machine = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+sp-timestamp = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+sp-trie = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+sp-tracing = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+substrate-test-client = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
 
-# AXIA
-axia-primitives = { git = "https://github.com/axia-tech/axia", branch = "dev" }
-axia-service = { git = "https://github.com/axia-tech/axia", branch = "dev" }
-axia-test-service = { git = "https://github.com/axia-tech/axia", branch = "dev" }
+# Axia
+axia-primitives = { git = "https://github.com/axia-tech/axia", branch = "axia" }
+axia-service = { git = "https://github.com/axia-tech/axia", branch = "axia" }
+axia-test-service = { git = "https://github.com/axia-tech/axia", branch = "axia" }
 
 # Cumulus
 cumulus-client-consensus-relay-chain = { path = "../../client/consensus/relay-chain" }
@@ -48,6 +52,11 @@ cumulus-primitives-core = { path = "../../primitives/core" }
 cumulus-primitives-allychain-inherent = { path = "../../primitives/allychain-inherent" }
 cumulus-test-runtime = { path = "../runtime" }
 cumulus-test-relay-validation-worker-provider = { path = "../relay-validation-worker-provider" }
+cumulus-relay-chain-local = { path = "../../client/relay-chain-local" }
+
+criterion = { version = "0.3.5", features = [ "async_tokio" ] }
+
+parking_lot = "0.12.0"
 
 # RPC related dependencies
 jsonrpc-core = "18.0.0"
@@ -55,14 +64,13 @@ jsonrpc-core = "18.0.0"
 [dev-dependencies]
 futures = "0.3.5"
 
-# AXIA dependencies
-axia-test-service = { git = "https://github.com/axia-tech/axia", branch = "dev" }
+# Axia dependencies
+axia-test-service = { git = "https://github.com/axia-tech/axia", branch = "axia" }
 
 # Substrate dependencies
-sc-cli = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
-substrate-test-utils = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
-sp-maybe-compressed-blob = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
-sp-version = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
+sc-cli = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+substrate-test-utils = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
 
-# Cumulus
-cumulus-test-runtime-upgrade = { path = "../runtime-upgrade" }
+[[bench]]
+name = "transaction_throughput"
+harness = false

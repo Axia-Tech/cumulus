@@ -1,0 +1,43 @@
+[package]
+authors = ["Axia Technologies <admin@axia.io>"]
+name = "cumulus-relay-chain-local"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+axia-client = { git = "https://github.com/axia-tech/axia", branch = "axia" }
+axia-service = { git = "https://github.com/axia-tech/axia", branch = "axia" }
+
+cumulus-primitives-core = { path = "../../primitives/core" }
+cumulus-relay-chain-interface = { path = "../relay-chain-interface" }
+
+sp-core = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+sp-api = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+sp-runtime = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+sp-blockchain = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+sp-consensus = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+sp-state-machine = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+
+sc-client-api = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+sc-consensus-babe = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+sc-network = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+sc-service = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+sc-telemetry = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+sc-tracing = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+
+parking_lot = "0.12.0"
+tracing = "0.1.31"
+async-trait = "0.1.52"
+futures = { version = "0.3.1", features = ["compat"] }
+futures-timer = "3.0.2"
+
+[dev-dependencies]
+# Cumulus deps
+cumulus-test-service = { path = "../../test/service" }
+
+# Axia deps
+axia-test-client = { git = "https://github.com/axia-tech/axia", branch = "axia" }
+axia-primitives = { git = "https://github.com/axia-tech/axia", branch = "axia" }
+
+# substrate deps
+sp-keyring = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }

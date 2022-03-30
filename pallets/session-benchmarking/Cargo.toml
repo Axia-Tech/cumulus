@@ -1,11 +1,11 @@
 [package]
 name = "cumulus-pallet-session-benchmarking"
 version = "3.0.0"
-authors = ["Parity Technologies <admin@parity.io>"]
-edition = "2018"
+authors = ["Axia Technologies <admin@axia.io>"]
+edition = "2021"
 license = "Apache-2.0"
 homepage = "https://substrate.io"
-repository = "https://github.com/paritytech/cumulus/"
+repository = "https://github.com/axiatech/cumulus/"
 description = "FRAME sessions pallet benchmarking for statemint"
 readme = "README.md"
 
@@ -13,21 +13,23 @@ readme = "README.md"
 targets = ["x86_64-unknown-linux-gnu"]
 
 [dependencies]
-sp-std = { default-features = false, git = "https://github.com/axia-tech/axia-core", branch = "dev" }
-sp-runtime = { default-features = false, git = "https://github.com/axia-tech/axia-core", branch = "dev" }
-frame-support = { default-features = false, git = "https://github.com/axia-tech/axia-core", branch = "dev" }
-frame-system = { default-features = false, git = "https://github.com/axia-tech/axia-core", branch = "dev" }
-frame-benchmarking = { default-features = false, optional = true, git = "https://github.com/axia-tech/axia-core", branch = "dev" }
-pallet-session = { default-features = false, git = "https://github.com/axia-tech/axia-core", branch = "dev" }
+parity-scale-codec = { version = "2.3.1", default-features = false }
+sp-std = { default-features = false, git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+sp-runtime = { default-features = false, git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+frame-support = { default-features = false, git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+frame-system = { default-features = false, git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+frame-benchmarking = { default-features = false, optional = true, git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+pallet-session = { default-features = false, git = "https://github.com/axia-tech/axlib", branch = "axlib" }
 
 [features]
 default = ["std"]
 runtime-benchmarks = [
-	'frame-benchmarking',
-	'frame-support/runtime-benchmarks',
-	'frame-system/runtime-benchmarks',
+	"frame-benchmarking/runtime-benchmarks",
+	"frame-support/runtime-benchmarks",
+	"frame-system/runtime-benchmarks",
 ]
 std = [
+	"parity-scale-codec/std",
 	"sp-std/std",
 	"sp-runtime/std",
 	"frame-system/std",

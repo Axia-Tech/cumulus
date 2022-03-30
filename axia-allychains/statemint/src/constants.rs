@@ -1,4 +1,4 @@
-// Copyright (C) 2021 Parity Technologies (UK) Ltd.
+// Copyright (C) 2021 Axia Technologies (UK) Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,19 +14,20 @@
 // limitations under the License.
 
 pub mod currency {
-	use node_primitives::Balance;
+	use axia_core_primitives::Balance;
+	use axia_runtime_constants as constants;
 
 	/// The existential deposit. Set to 1/10 of its parent Relay Chain (v9010).
-	pub const EXISTENTIAL_DEPOSIT: Balance = 10 * CENTS;
+	pub const EXISTENTIAL_DEPOSIT: Balance = constants::currency::EXISTENTIAL_DEPOSIT / 10;
 
-	pub const UNITS: Balance = 10_000_000_000;
-	pub const DOLLARS: Balance = UNITS;
-	pub const CENTS: Balance = UNITS / 100; // 100_000_000
-	pub const MILLICENTS: Balance = CENTS / 1_000; // 100_000
+	pub const UNITS: Balance = constants::currency::UNITS;
+	pub const DOLLARS: Balance = constants::currency::DOLLARS;
+	pub const CENTS: Balance = constants::currency::CENTS;
+	pub const MILLICENTS: Balance = constants::currency::MILLICENTS;
 
 	pub const fn deposit(items: u32, bytes: u32) -> Balance {
-		// 1/10 of AXIA v9010
-		(items as Balance * 20 * DOLLARS + (bytes as Balance) * 100 * MILLICENTS) / 10
+		// 1/10 of Axia v9010
+		constants::currency::deposit(items, bytes) / 10
 	}
 }
 
@@ -36,7 +37,7 @@ pub mod fee {
 		constants::ExtrinsicBaseWeight, WeightToFeeCoefficient, WeightToFeeCoefficients,
 		WeightToFeePolynomial,
 	};
-	use node_primitives::Balance;
+	use axia_core_primitives::Balance;
 	use smallvec::smallvec;
 	pub use sp_runtime::Perbill;
 
@@ -57,7 +58,7 @@ pub mod fee {
 	impl WeightToFeePolynomial for WeightToFee {
 		type Balance = Balance;
 		fn polynomial() -> WeightToFeeCoefficients<Self::Balance> {
-			// in AXIA, extrinsic base weight (smallest non-zero weight) is mapped to 1/10 CENT:
+			// in Axia, extrinsic base weight (smallest non-zero weight) is mapped to 1/10 CENT:
 			// in Statemint, we map to 1/10 of that, or 1/100 CENT
 			let p = super::currency::CENTS;
 			let q = 100 * Balance::from(ExtrinsicBaseWeight::get());

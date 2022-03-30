@@ -1,4 +1,4 @@
-// Copyright 2021 Parity Technologies (UK) Ltd.
+// Copyright 2021 Axia Technologies (UK) Ltd.
 // This file is part of Cumulus.
 
 // Cumulus is free software: you can redistribute it and/or modify
@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Cumulus.  If not, see <http://www.gnu.org/licenses/>.
 
-//! The relay-chain provided consensus algoritm for allychains.
+//! The relay-chain provided consensus algorithm for allychains.
 //!
 //! This is the simplest consensus algorithm you can use when developing a allychain. It is a
 //! permission-less consensus algorithm that doesn't require any staking or similar to join as a
@@ -28,7 +28,7 @@
 //! 3. The allychain validators validate at most X different allychain candidates, where X is the
 //! total number of allychain validators.
 //!
-//! 4. The allychain candidate that is backed by the most validators is choosen by the relay-chain
+//! 4. The allychain candidate that is backed by the most validators is chosen by the relay-chain
 //! block producer to be added as backed candidate on chain.
 //!
 //! 5. After the allychain candidate got backed and included, all collators start at 1.
@@ -36,20 +36,16 @@
 use cumulus_client_consensus_common::{
 	AllychainBlockImport, AllychainCandidate, AllychainConsensus,
 };
-use cumulus_primitives_core::{
-	relay_chain::v1::{Block as PBlock, Hash as PHash, AllychainHost},
-	ParaId, PersistedValidationData,
-};
+use cumulus_primitives_core::{relay_chain::v1::Hash as PHash, ParaId, PersistedValidationData};
+use cumulus_relay_chain_interface::RelayChainInterface;
 use parking_lot::Mutex;
-use axia_client::ClientHandle;
-use sc_client_api::Backend;
+
 use sc_consensus::{BlockImport, BlockImportParams};
-use sp_api::ProvideRuntimeApi;
 use sp_consensus::{
 	BlockOrigin, EnableProofRecording, Environment, ProofRecording, Proposal, Proposer,
 };
 use sp_inherents::{CreateInherentDataProviders, InherentData, InherentDataProvider};
-use sp_runtime::traits::{Block as BlockT, HashFor, Header as HeaderT};
+use sp_runtime::traits::{Block as BlockT, Header as HeaderT};
 use std::{marker::PhantomData, sync::Arc, time::Duration};
 
 mod import_queue;
@@ -58,18 +54,18 @@ pub use import_queue::{import_queue, Verifier};
 const LOG_TARGET: &str = "cumulus-consensus-relay-chain";
 
 /// The implementation of the relay-chain provided consensus for allychains.
-pub struct RelayChainConsensus<B, PF, BI, RClient, RBackend, CIDP> {
+pub struct RelayChainConsensus<B, PF, BI, RCInterface, CIDP> {
 	para_id: ParaId,
 	_phantom: PhantomData<B>,
 	proposer_factory: Arc<Mutex<PF>>,
 	create_inherent_data_providers: Arc<CIDP>,
 	block_import: Arc<futures::lock::Mutex<AllychainBlockImport<BI>>>,
-	relay_chain_client: Arc<RClient>,
-	relay_chain_backend: Arc<RBackend>,
+	relay_chain_interface: RCInterface,
 }
 
-impl<B, PF, BI, RClient, RBackend, CIDP> Clone
-	for RelayChainConsensus<B, PF, BI, RClient, RBackend, CIDP>
+impl<B, PF, BI, RCInterface, CIDP> Clone for RelayChainConsensus<B, PF, BI, RCInterface, CIDP>
+where
+	RCInterface: Clone,
 {
 	fn clone(&self) -> Self {
 		Self {
@@ -78,18 +74,15 @@ impl<B, PF, BI, RClient, RBackend, CIDP> Clone
 			proposer_factory: self.proposer_factory.clone(),
 			create_inherent_data_providers: self.create_inherent_data_providers.clone(),
 			block_import: self.block_import.clone(),
-			relay_chain_backend: self.relay_chain_backend.clone(),
-			relay_chain_client: self.relay_chain_client.clone(),
+			relay_chain_interface: self.relay_chain_interface.clone(),
 		}
 	}
 }
 
-impl<B, PF, BI, RClient, RBackend, CIDP> RelayChainConsensus<B, PF, BI, RClient, RBackend, CIDP>
+impl<B, PF, BI, RCInterface, CIDP> RelayChainConsensus<B, PF, BI, RCInterface, CIDP>
 where
 	B: BlockT,
-	RClient: ProvideRuntimeApi<PBlock>,
-	RClient::Api: AllychainHost<PBlock>,
-	RBackend: Backend<PBlock>,
+	RCInterface: RelayChainInterface,
 	CIDP: CreateInherentDataProviders<B, (PHash, PersistedValidationData)>,
 {
 	/// Create a new instance of relay-chain provided consensus.
@@ -98,8 +91,7 @@ where
 		proposer_factory: PF,
 		create_inherent_data_providers: CIDP,
 		block_import: BI,
-		axia_client: Arc<RClient>,
-		axia_backend: Arc<RBackend>,
+		relay_chain_interface: RCInterface,
 	) -> Self {
 		Self {
 			para_id,
@@ -108,8 +100,7 @@ where
 			block_import: Arc::new(futures::lock::Mutex::new(AllychainBlockImport::new(
 				block_import,
 			))),
-			relay_chain_backend: axia_backend,
-			relay_chain_client: axia_client,
+			relay_chain_interface,
 			_phantom: PhantomData,
 		}
 	}
@@ -148,13 +139,11 @@ where
 }
 
 #[async_trait::async_trait]
-impl<B, PF, BI, RClient, RBackend, CIDP> AllychainConsensus<B>
-	for RelayChainConsensus<B, PF, BI, RClient, RBackend, CIDP>
+impl<B, PF, BI, RCInterface, CIDP> AllychainConsensus<B>
+	for RelayChainConsensus<B, PF, BI, RCInterface, CIDP>
 where
 	B: BlockT,
-	RClient: ProvideRuntimeApi<PBlock> + Send + Sync,
-	RClient::Api: AllychainHost<PBlock>,
-	RBackend: Backend<PBlock>,
+	RCInterface: RelayChainInterface + Clone,
 	BI: BlockImport<B> + Send + Sync,
 	PF: Environment<B> + Send + Sync,
 	PF::Proposer: Proposer<
@@ -187,7 +176,7 @@ where
 			.propose(
 				inherent_data,
 				Default::default(),
-				//TODO: Fix this.
+				// TODO: Fix this.
 				Duration::from_millis(500),
 				// Set the block limit to 50% of the maximum PoV size.
 				//
@@ -228,28 +217,26 @@ where
 	}
 }
 
-/// Paramaters of [`build_relay_chain_consensus`].
-pub struct BuildRelayChainConsensusParams<PF, BI, RBackend, CIDP> {
+/// Parameters of [`build_relay_chain_consensus`].
+pub struct BuildRelayChainConsensusParams<PF, BI, CIDP, RCInterface> {
 	pub para_id: ParaId,
 	pub proposer_factory: PF,
 	pub create_inherent_data_providers: CIDP,
 	pub block_import: BI,
-	pub relay_chain_client: axia_client::Client,
-	pub relay_chain_backend: Arc<RBackend>,
+	pub relay_chain_interface: RCInterface,
 }
 
 /// Build the [`RelayChainConsensus`].
 ///
 /// Returns a boxed [`AllychainConsensus`].
-pub fn build_relay_chain_consensus<Block, PF, BI, RBackend, CIDP>(
+pub fn build_relay_chain_consensus<Block, PF, BI, CIDP, RCInterface>(
 	BuildRelayChainConsensusParams {
 		para_id,
 		proposer_factory,
 		create_inherent_data_providers,
 		block_import,
-		relay_chain_client,
-		relay_chain_backend,
-	}: BuildRelayChainConsensusParams<PF, BI, RBackend, CIDP>,
+		relay_chain_interface,
+	}: BuildRelayChainConsensusParams<PF, BI, CIDP, RCInterface>,
 ) -> Box<dyn AllychainConsensus<Block>>
 where
 	Block: BlockT,
@@ -261,108 +248,14 @@ where
 		Proof = <EnableProofRecording as ProofRecording>::Proof,
 	>,
 	BI: BlockImport<Block> + Send + Sync + 'static,
-	RBackend: Backend<PBlock> + 'static,
 	CIDP: CreateInherentDataProviders<Block, (PHash, PersistedValidationData)> + 'static,
+	RCInterface: RelayChainInterface + Clone + 'static,
 {
-	RelayChainConsensusBuilder::new(
+	Box::new(RelayChainConsensus::new(
 		para_id,
 		proposer_factory,
-		block_import,
 		create_inherent_data_providers,
-		relay_chain_client,
-		relay_chain_backend,
-	)
-	.build()
-}
-
-/// Relay chain consensus builder.
-///
-/// Builds a [`RelayChainConsensus`] for a allychain. As this requires
-/// a concrete relay chain client instance, the builder takes a [`axia_client::Client`]
-/// that wraps this concrete instanace. By using [`axia_client::ExecuteWithClient`]
-/// the builder gets access to this concrete instance.
-struct RelayChainConsensusBuilder<Block, PF, BI, RBackend, CIDP> {
-	para_id: ParaId,
-	_phantom: PhantomData<Block>,
-	proposer_factory: PF,
-	create_inherent_data_providers: CIDP,
-	block_import: BI,
-	relay_chain_backend: Arc<RBackend>,
-	relay_chain_client: axia_client::Client,
-}
-
-impl<Block, PF, BI, RBackend, CIDP> RelayChainConsensusBuilder<Block, PF, BI, RBackend, CIDP>
-where
-	Block: BlockT,
-	PF: Environment<Block> + Send + Sync + 'static,
-	PF::Proposer: Proposer<
-		Block,
-		Transaction = BI::Transaction,
-		ProofRecording = EnableProofRecording,
-		Proof = <EnableProofRecording as ProofRecording>::Proof,
-	>,
-	BI: BlockImport<Block> + Send + Sync + 'static,
-	RBackend: Backend<PBlock> + 'static,
-	CIDP: CreateInherentDataProviders<Block, (PHash, PersistedValidationData)> + 'static,
-{
-	/// Create a new instance of the builder.
-	fn new(
-		para_id: ParaId,
-		proposer_factory: PF,
-		block_import: BI,
-		create_inherent_data_providers: CIDP,
-		relay_chain_client: axia_client::Client,
-		relay_chain_backend: Arc<RBackend>,
-	) -> Self {
-		Self {
-			para_id,
-			_phantom: PhantomData,
-			proposer_factory,
-			block_import,
-			create_inherent_data_providers,
-			relay_chain_backend,
-			relay_chain_client,
-		}
-	}
-
-	/// Build the relay chain consensus.
-	fn build(self) -> Box<dyn AllychainConsensus<Block>> {
-		self.relay_chain_client.clone().execute_with(self)
-	}
-}
-
-impl<Block, PF, BI, RBackend, CIDP> axia_client::ExecuteWithClient
-	for RelayChainConsensusBuilder<Block, PF, BI, RBackend, CIDP>
-where
-	Block: BlockT,
-	PF: Environment<Block> + Send + Sync + 'static,
-	PF::Proposer: Proposer<
-		Block,
-		Transaction = BI::Transaction,
-		ProofRecording = EnableProofRecording,
-		Proof = <EnableProofRecording as ProofRecording>::Proof,
-	>,
-	BI: BlockImport<Block> + Send + Sync + 'static,
-	RBackend: Backend<PBlock> + 'static,
-	CIDP: CreateInherentDataProviders<Block, (PHash, PersistedValidationData)> + 'static,
-{
-	type Output = Box<dyn AllychainConsensus<Block>>;
-
-	fn execute_with_client<PClient, Api, PBackend>(self, client: Arc<PClient>) -> Self::Output
-	where
-		<Api as sp_api::ApiExt<PBlock>>::StateBackend: sp_api::StateBackend<HashFor<PBlock>>,
-		PBackend: Backend<PBlock>,
-		PBackend::State: sp_api::StateBackend<sp_runtime::traits::BlakeTwo256>,
-		Api: axia_client::RuntimeApiCollection<StateBackend = PBackend::State>,
-		PClient: axia_client::AbstractClient<PBlock, PBackend, Api = Api> + 'static,
-	{
-		Box::new(RelayChainConsensus::new(
-			self.para_id,
-			self.proposer_factory,
-			self.create_inherent_data_providers,
-			self.block_import,
-			client.clone(),
-			self.relay_chain_backend,
-		))
-	}
+		block_import,
+		relay_chain_interface,
+	))
 }

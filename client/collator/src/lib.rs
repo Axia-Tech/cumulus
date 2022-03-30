@@ -1,4 +1,4 @@
-// Copyright 2019-2021 Parity Technologies (UK) Ltd.
+// Copyright 2019-2021 Axia Technologies (UK) Ltd.
 // This file is part of Cumulus.
 
 // Substrate is free software: you can redistribute it and/or modify
@@ -17,10 +17,13 @@
 //! Cumulus Collator implementation for Substrate.
 
 use cumulus_client_network::WaitToAnnounce;
-use cumulus_primitives_core::{CollectCollationInfo, AllychainBlockData, PersistedValidationData};
+use cumulus_primitives_core::{
+	relay_chain::Hash as PHash, CollationInfo, CollectCollationInfo, AllychainBlockData,
+	PersistedValidationData,
+};
 
 use sc_client_api::BlockBackend;
-use sp_api::ProvideRuntimeApi;
+use sp_api::{ApiExt, ProvideRuntimeApi};
 use sp_consensus::BlockStatus;
 use sp_core::traits::SpawnNamed;
 use sp_runtime::{
@@ -30,11 +33,11 @@ use sp_runtime::{
 
 use cumulus_client_consensus_common::AllychainConsensus;
 use axia_node_primitives::{
-	BlockData, Collation, CollationGenerationConfig, CollationResult, PoV,
+	BlockData, Collation, CollationGenerationConfig, CollationResult, MaybeCompressedPoV, PoV,
 };
 use axia_node_subsystem::messages::{CollationGenerationMessage, CollatorProtocolMessage};
 use axia_overseer::Handle as OverseerHandle;
-use axia_primitives::v1::{CollatorPair, Hash as PHash, HeadData, Id as ParaId};
+use axia_primitives::v1::{CollatorPair, Id as ParaId};
 
 use codec::{Decode, Encode};
 use futures::{channel::oneshot, FutureExt};
@@ -142,30 +145,58 @@ where
 		}
 	}
 
+	/// Fetch the collation info from the runtime.
+	///
+	/// Returns `Ok(Some(_))` on success, `Err(_)` on error or `Ok(None)` if the runtime api isn't implemented by the runtime.
+	fn fetch_collation_info(
+		&self,
+		block_hash: Block::Hash,
+		header: &Block::Header,
+	) -> Result<Option<CollationInfo>, sp_api::ApiError> {
+		let runtime_api = self.runtime_api.runtime_api();
+		let block_id = BlockId::Hash(block_hash);
+
+		let api_version =
+			match runtime_api.api_version::<dyn CollectCollationInfo<Block>>(&block_id)? {
+				Some(version) => version,
+				None => {
+					tracing::error!(
+						target: LOG_TARGET,
+						"Could not fetch `CollectCollationInfo` runtime api version."
+					);
+					return Ok(None)
+				},
+			};
+
+		let collation_info = if api_version < 2 {
+			#[allow(deprecated)]
+			runtime_api
+				.collect_collation_info_before_version_2(&block_id)?
+				.into_latest(header.encode().into())
+		} else {
+			runtime_api.collect_collation_info(&block_id, header)?
+		};
+
+		Ok(Some(collation_info))
+	}
+
 	fn build_collation(
-		&mut self,
+		&self,
 		block: AllychainBlockData<Block>,
 		block_hash: Block::Hash,
+		pov: PoV,
 	) -> Option<Collation> {
-		let block_data = BlockData(block.encode());
-		let header = block.into_header();
-		let head_data = HeadData(header.encode());
-
-		let collation_info = match self
-			.runtime_api
-			.runtime_api()
-			.collect_collation_info(&BlockId::Hash(block_hash))
-		{
-			Ok(ci) => ci,
-			Err(e) => {
+		let collation_info = self
+			.fetch_collation_info(block_hash, block.header())
+			.map_err(|e| {
 				tracing::error!(
 					target: LOG_TARGET,
 					error = ?e,
 					"Failed to collect collation info.",
-				);
-				return None
-			},
-		};
+				)
+			})
+			.ok()
+			.flatten()?;
 
 		Some(Collation {
 			upward_messages: collation_info.upward_messages,
@@ -173,8 +204,8 @@ where
 			processed_downward_messages: collation_info.processed_downward_messages,
 			horizontal_messages: collation_info.horizontal_messages,
 			hrmp_watermark: collation_info.hrmp_watermark,
-			head_data,
-			proof_of_validity: PoV { block_data },
+			head_data: collation_info.head_data,
+			proof_of_validity: MaybeCompressedPoV::Compressed(pov),
 		})
 	}
 
@@ -242,8 +273,17 @@ where
 			b.storage_proof().encode().len() as f64 / 1024f64,
 		);
 
+		let pov =
+			axia_node_primitives::maybe_compress_pov(PoV { block_data: BlockData(b.encode()) });
+
+		tracing::info!(
+			target: LOG_TARGET,
+			"Compressed PoV size: {}kb",
+			pov.block_data.0.len() as f64 / 1024f64,
+		);
+
 		let block_hash = b.header().hash();
-		let collation = self.build_collation(b, block_hash)?;
+		let collation = self.build_collation(b, block_hash, pov)?;
 
 		let (result_sender, signed_stmt_recv) = oneshot::channel();
 
@@ -390,7 +430,7 @@ mod tests {
 				.build()
 				.expect("Builds overseer");
 
-		spawner.spawn("overseer", overseer.run().then(|_| async { () }).boxed());
+		spawner.spawn("overseer", None, overseer.run().then(|_| async { () }).boxed());
 
 		let collator_start = start_collator(StartCollatorParams {
 			runtime_api: client.clone(),
@@ -420,16 +460,19 @@ mod tests {
 			.expect("Collation is build")
 			.collation;
 
-		let block_data = collation.proof_of_validity.block_data;
+		let pov = collation.proof_of_validity.into_compressed();
+
+		let decompressed =
+			sp_maybe_compressed_blob::decompress(&pov.block_data.0, 1024 * 1024 * 10).unwrap();
 
 		let block =
-			AllychainBlockData::<Block>::decode(&mut &block_data.0[..]).expect("Is a valid block");
+			AllychainBlockData::<Block>::decode(&mut &decompressed[..]).expect("Is a valid block");
 
 		assert_eq!(1, *block.header().number());
 
 		// Ensure that we did not include `:code` in the proof.
-		let db = block
-			.storage_proof()
+		let proof = block.storage_proof();
+		let db = proof
 			.to_storage_proof::<BlakeTwo256>(Some(header.state_root()))
 			.unwrap()
 			.0

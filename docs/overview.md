@@ -6,7 +6,7 @@ This document provides high-level documentation for Cumulus.
 
 Each Substrate blockchain provides a runtime. The runtime is the state transition function of the
 blockchain. Cumulus provides interfaces and extensions to convert a Substrate FRAME runtime into a
-Allychain runtime. AXIA expects each runtime exposes an interface for validating a
+Allychain runtime. Axia expects each runtime exposes an interface for validating a
 Allychain's state transition and also provides interfaces for the Allychain to send and receive
 messages of other Allychains.
 
@@ -17,7 +17,7 @@ cumulus_pallet_allychain_system::register_validate_block!(Block, Executive);
 ```
 
 This macro call expects the `Block` and `Executive` type. It generates the `validate_block` function
-that is expected by AXIA to validate the state transition.
+that is expected by Axia to validate the state transition.
 
 When compiling a runtime that uses Cumulus, a WASM binary is generated that contains the *full* code
 of the Allychain runtime plus the `validate_block` functionality. This binary is required to
@@ -34,7 +34,7 @@ Allychain header is returned as part of the `validate_block` result.
 ## Node
 
 Allychains support light-clients, full nodes, and authority nodes. Authority nodes are called
-Collators in the AXIA ecosystem. Cumulus provides the consensus implementation for a
+Collators in the Axia ecosystem. Cumulus provides the consensus implementation for a
 Allychain and the block production logic.
 
 The Allychain consensus will follow the relay chain to get notified about which Allychain blocks are
@@ -59,10 +59,10 @@ consensus and the block production logic.
 
 ## Block Building
 
-AXIA requires that a Allychain block is transmitted in a fixed format. These blocks sent by a
+Axia requires that a Allychain block is transmitted in a fixed format. These blocks sent by a
 Allychain to the Allychain validators are called proof-of-validity blocks (PoVBlock). Such a
 PoVBlock contains the header and the transactions of the Allychain as opaque blobs (`Vec<u8>`). They
-are opaque, because AXIA can not and should not support all kinds of possible Allychain block
+are opaque, because Axia can not and should not support all kinds of possible Allychain block
 formats. Besides the header and the transactions, it also contains the witness data and the outgoing
 messages.
 
@@ -79,7 +79,7 @@ the block is built for to other Allychains or to the relay chain itself.
 
 Every Substrate blockchain supports runtime upgrades. Runtime upgrades enable a blockchain to update
 its state transition function without requiring any client update. Such a runtime upgrade is applied
-by a special transaction in a Substrate runtime. AXIA and Cumulus provide support for these
+by a special transaction in a Substrate runtime. Axia and Cumulus provide support for these
 runtime upgrades, but updating a Allychain runtime is not as easy as updating a standalone
 blockchain runtime. In a standalone blockchain, the special transaction needs to be included in a
 block and the runtime is updated.

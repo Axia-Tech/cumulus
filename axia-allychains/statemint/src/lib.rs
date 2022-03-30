@@ -1,4 +1,4 @@
-// Copyright (C) 2021 Parity Technologies (UK) Ltd.
+// Copyright (C) 2021 Axia Technologies (UK) Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,6 +24,7 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 pub mod constants;
 mod weights;
+pub mod xcm_config;
 
 use sp_api::impl_runtime_apis;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
@@ -42,42 +43,35 @@ use sp_version::RuntimeVersion;
 use codec::{Decode, Encode, MaxEncodedLen};
 use constants::{currency::*, fee::WeightToFee};
 use frame_support::{
-	construct_runtime, match_type, parameter_types,
-	traits::{Everything, InstanceFilter, Nothing},
+	construct_runtime, parameter_types,
+	traits::{Contains, EnsureOneOf, InstanceFilter},
 	weights::{
 		constants::{BlockExecutionWeight, ExtrinsicBaseWeight},
-		DispatchClass, IdentityFee, Weight,
+		DispatchClass, Weight,
 	},
 	PalletId, RuntimeDebug,
 };
 use frame_system::{
 	limits::{BlockLength, BlockWeights},
-	EnsureOneOf, EnsureRoot,
+	EnsureRoot,
 };
 pub use allychains_common as common;
 use allychains_common::{
-	impls::{AssetsToBlockAuthor, DealWithFees, NonZeroIssuance},
-	opaque, AccountId, AssetId, AuraId, Balance, BlockNumber, Hash, Header, Index, Signature,
-	AVERAGE_ON_INITIALIZE_RATIO, HOURS, MAXIMUM_BLOCK_WEIGHT, NORMAL_DISPATCH_RATIO, SLOT_DURATION,
+	impls::{AssetsToBlockAuthor, DealWithFees},
+	opaque, AccountId, AssetId, Balance, BlockNumber, Hash, Header, Index, Signature,
+	StatemintAuraId as AuraId, AVERAGE_ON_INITIALIZE_RATIO, HOURS, MAXIMUM_BLOCK_WEIGHT,
+	NORMAL_DISPATCH_RATIO, SLOT_DURATION,
 };
+use xcm_config::{DotLocation, XcmConfig, XcmOriginToTransactDispatchOrigin};
 
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
 
-// AXIA imports
-use pallet_xcm::{EnsureXcm, IsMajorityOfBody, XcmPassthrough};
-use axia_allychain::primitives::Sibling;
+// Axia imports
+use pallet_xcm::{EnsureXcm, IsMajorityOfBody};
 use axia_runtime_common::{BlockHashCount, RocksDbWeight, SlowAdjustingFeeUpdate};
-use xcm::latest::prelude::*;
-use xcm_builder::{
-	AccountId32Aliases, AllowTopLevelPaidExecutionFrom, AllowUnpaidExecutionFrom,
-	AsPrefixedGeneralIndex, ConvertedConcreteAssetId, CurrencyAdapter, EnsureXcmOrigin,
-	FixedWeightBounds, FungiblesAdapter, IsConcrete, LocationInverter, NativeAsset,
-	ParentAsSuperuser, ParentIsDefault, RelayChainAsNative, SiblingAllychainAsNative,
-	SiblingAllychainConvertsVia, SignedAccountId32AsNative, SovereignSignedViaLocation,
-	TakeWeightCredit, UsingComponents,
-};
-use xcm_executor::{traits::JustTry, Config, XcmExecutor};
+use xcm::latest::BodyId;
+use xcm_executor::XcmExecutor;
 
 impl_opaque_keys! {
 	pub struct SessionKeys {
@@ -90,10 +84,11 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("statemint"),
 	impl_name: create_runtime_str!("statemint"),
 	authoring_version: 1,
-	spec_version: 100,
+	spec_version: 700,
 	impl_version: 0,
 	apis: RUNTIME_API_VERSIONS,
-	transaction_version: 2,
+	transaction_version: 5,
+	state_version: 0,
 };
 
 /// The version information used to identify this runtime when compiled natively.
@@ -127,9 +122,21 @@ parameter_types! {
 	pub const SS58Prefix: u8 = 0;
 }
 
+pub struct BaseFilter;
+impl Contains<Call> for BaseFilter {
+	fn contains(c: &Call) -> bool {
+		// Disable permissionless asset creation.
+		!matches!(
+			c,
+			Call::Assets(pallet_assets::Call::create { .. }) |
+				Call::Uniques(pallet_uniques::Call::create { .. })
+		)
+	}
+}
+
 // Configure FRAME pallets to include in runtime.
 impl frame_system::Config for Runtime {
-	type BaseCallFilter = frame_support::traits::Everything;
+	type BaseCallFilter = BaseFilter;
 	type BlockWeights = RuntimeBlockWeights;
 	type BlockLength = RuntimeBlockLength;
 	type AccountId = AccountId;
@@ -149,9 +156,10 @@ impl frame_system::Config for Runtime {
 	type OnNewAccount = ();
 	type OnKilledAccount = ();
 	type AccountData = pallet_balances::AccountData<Balance>;
-	type SystemWeightInfo = ();
+	type SystemWeightInfo = weights::frame_system::WeightInfo<Runtime>;
 	type SS58Prefix = SS58Prefix;
 	type OnSetCode = cumulus_pallet_allychain_system::AllychainSetCode<Self>;
+	type MaxConsumers = frame_support::traits::ConstU32<16>;
 }
 
 parameter_types! {
@@ -212,25 +220,21 @@ impl pallet_transaction_payment::Config for Runtime {
 	type OperationalFeeMultiplier = OperationalFeeMultiplier;
 }
 
-impl pallet_randomness_collective_flip::Config for Runtime {}
-
 parameter_types! {
 	pub const AssetDeposit: Balance = 100 * DOLLARS; // 100 DOLLARS deposit to create asset
+	pub const AssetAccountDeposit: Balance = deposit(1, 16);
 	pub const ApprovalDeposit: Balance = EXISTENTIAL_DEPOSIT;
 	pub const AssetsStringLimit: u32 = 50;
 	/// Key = 32 bytes, Value = 36 bytes (32+1+1+1+1)
-	// https://github.com/paritytech/substrate/blob/069917b/frame/assets/src/lib.rs#L257L271
+	// https://github.com/axiatech/substrate/blob/069917b/frame/assets/src/lib.rs#L257L271
 	pub const MetadataDepositBase: Balance = deposit(1, 68);
 	pub const MetadataDepositPerByte: Balance = deposit(0, 1);
 	pub const ExecutiveBody: BodyId = BodyId::Executive;
 }
 
 /// We allow root and the Relay Chain council to execute privileged asset operations.
-pub type AssetsForceOrigin = EnsureOneOf<
-	AccountId,
-	EnsureRoot<AccountId>,
-	EnsureXcm<IsMajorityOfBody<DotLocation, ExecutiveBody>>,
->;
+pub type AssetsForceOrigin =
+	EnsureOneOf<EnsureRoot<AccountId>, EnsureXcm<IsMajorityOfBody<DotLocation, ExecutiveBody>>>;
 
 impl pallet_assets::Config for Runtime {
 	type Event = Event;
@@ -246,6 +250,7 @@ impl pallet_assets::Config for Runtime {
 	type Freezer = ();
 	type Extra = ();
 	type WeightInfo = weights::pallet_assets::WeightInfo<Runtime>;
+	type AssetAccountDeposit = AssetAccountDeposit;
 }
 
 parameter_types! {
@@ -269,6 +274,7 @@ impl pallet_multisig::Config for Runtime {
 impl pallet_utility::Config for Runtime {
 	type Event = Event;
 	type Call = Call;
+	type PalletsOrigin = OriginCaller;
 	type WeightInfo = weights::pallet_utility::WeightInfo<Runtime>;
 }
 
@@ -311,7 +317,7 @@ pub enum ProxyType {
 	AssetOwner,
 	/// Asset manager. Can execute calls related to asset management.
 	AssetManager,
-	// Collator selection proxy. Can execute calls related to collator selection mechanism.
+	/// Collator selection proxy. Can execute calls related to collator selection mechanism.
 	Collator,
 }
 impl Default for ProxyType {
@@ -414,7 +420,7 @@ parameter_types! {
 
 impl cumulus_pallet_allychain_system::Config for Runtime {
 	type Event = Event;
-	type OnValidationData = ();
+	type OnSystemEvent = ();
 	type SelfParaId = allychain_info::Pallet<Runtime>;
 	type DmpMessageHandler = DmpQueue;
 	type ReservedDmpWeight = ReservedDmpWeight;
@@ -427,172 +433,15 @@ impl allychain_info::Config for Runtime {}
 
 impl cumulus_pallet_aura_ext::Config for Runtime {}
 
-parameter_types! {
-	pub const DotLocation: MultiLocation = MultiLocation::parent();
-	pub const RelayNetwork: NetworkId = NetworkId::AXIA;
-	pub RelayChainOrigin: Origin = cumulus_pallet_xcm::Origin::Relay.into();
-	pub Ancestry: MultiLocation = Allychain(AllychainInfo::allychain_id().into()).into();
-	pub const Local: MultiLocation = Here.into();
-	pub CheckingAccount: AccountId = AXIAXcm::check_account();
-}
-
-/// Type for specifying how a `MultiLocation` can be converted into an `AccountId`. This is used
-/// when determining ownership of accounts for asset transacting and when attempting to use XCM
-/// `Transact` in order to determine the dispatch Origin.
-pub type LocationToAccountId = (
-	// The parent (Relay-chain) origin converts to the default `AccountId`.
-	ParentIsDefault<AccountId>,
-	// Sibling allychain origins convert to AccountId via the `ParaId::into`.
-	SiblingAllychainConvertsVia<Sibling, AccountId>,
-	// Straight up local `AccountId32` origins just alias directly to `AccountId`.
-	AccountId32Aliases<RelayNetwork, AccountId>,
-);
-
-/// Means for transacting the native currency on this chain.
-pub type CurrencyTransactor = CurrencyAdapter<
-	// Use this currency:
-	Balances,
-	// Use this currency when it is a fungible asset matching the given location or name:
-	IsConcrete<DotLocation>,
-	// Convert an XCM MultiLocation into a local account id:
-	LocationToAccountId,
-	// Our chain's account ID type (we can't get away without mentioning it explicitly):
-	AccountId,
-	// We don't track any teleports of `Balances`.
-	(),
->;
-
-/// Means for transacting assets besides the native currency on this chain.
-pub type FungiblesTransactor = FungiblesAdapter<
-	// Use this fungibles implementation:
-	Assets,
-	// Use this currency when it is a fungible asset matching the given location or name:
-	ConvertedConcreteAssetId<
-		AssetId,
-		Balance,
-		AsPrefixedGeneralIndex<Local, AssetId, JustTry>,
-		JustTry,
-	>,
-	// Convert an XCM MultiLocation into a local account id:
-	LocationToAccountId,
-	// Our chain's account ID type (we can't get away without mentioning it explicitly):
-	AccountId,
-	// We only want to allow teleports of known assets. We use non-zero issuance as an indication
-	// that this asset is known.
-	NonZeroIssuance<AccountId, Assets>,
-	// The account to use for tracking teleports.
-	CheckingAccount,
->;
-/// Means for transacting assets on this chain.
-pub type AssetTransactors = (CurrencyTransactor, FungiblesTransactor);
-
-/// This is the type we use to convert an (incoming) XCM origin into a local `Origin` instance,
-/// ready for dispatching a transaction with Xcm's `Transact`. There is an `OriginKind` which can
-/// biases the kind of local `Origin` it will become.
-pub type XcmOriginToTransactDispatchOrigin = (
-	// Sovereign account converter; this attempts to derive an `AccountId` from the origin location
-	// using `LocationToAccountId` and then turn that into the usual `Signed` origin. Useful for
-	// foreign chains who want to have a local sovereign account on this chain which they control.
-	SovereignSignedViaLocation<LocationToAccountId, Origin>,
-	// Native converter for Relay-chain (Parent) location; will converts to a `Relay` origin when
-	// recognized.
-	RelayChainAsNative<RelayChainOrigin, Origin>,
-	// Native converter for sibling Allychains; will convert to a `SiblingPara` origin when
-	// recognized.
-	SiblingAllychainAsNative<cumulus_pallet_xcm::Origin, Origin>,
-	// Superuser converter for the Relay-chain (Parent) location. This will allow it to issue a
-	// transaction from the Root origin.
-	ParentAsSuperuser<Origin>,
-	// Native signed account converter; this just converts an `AccountId32` origin into a normal
-	// `Origin::Signed` origin of the same 32-byte value.
-	SignedAccountId32AsNative<RelayNetwork, Origin>,
-	// Xcm origins can be represented natively under the Xcm pallet's Xcm origin.
-	XcmPassthrough<Origin>,
-);
-
-parameter_types! {
-	// One XCM operation is 1_000_000 weight - almost certainly a conservative estimate.
-	pub UnitWeightCost: Weight = 1_000_000;
-	pub const MaxInstructions: u32 = 100;
-}
-
-match_type! {
-	pub type ParentOrParentsExecutivePlurality: impl Contains<MultiLocation> = {
-		MultiLocation { parents: 1, interior: Here } |
-		MultiLocation { parents: 1, interior: X1(Plurality { id: BodyId::Executive, .. }) }
-	};
-}
-
-pub type Barrier = (
-	TakeWeightCredit,
-	AllowTopLevelPaidExecutionFrom<Everything>,
-	AllowUnpaidExecutionFrom<ParentOrParentsExecutivePlurality>,
-	// ^^^ Parent and its exec plurality get free execution
-);
-
-pub struct XcmConfig;
-impl Config for XcmConfig {
-	type Call = Call;
-	type XcmSender = XcmRouter;
-	type AssetTransactor = AssetTransactors;
-	type OriginConverter = XcmOriginToTransactDispatchOrigin;
-	type IsReserve = NativeAsset;
-	type IsTeleporter = NativeAsset; // <- should be enough to allow teleportation of AXC
-	type LocationInverter = LocationInverter<Ancestry>;
-	type Barrier = Barrier;
-	type Weigher = FixedWeightBounds<UnitWeightCost, Call, MaxInstructions>;
-	type Trader = UsingComponents<IdentityFee<Balance>, DotLocation, AccountId, Balances, ()>;
-	type ResponseHandler = AXIAXcm;
-	type AssetTrap = AXIAXcm;
-	type AssetClaims = AXIAXcm;
-	type SubscriptionService = AXIAXcm;
-}
-
-parameter_types! {
-	pub const MaxDownwardMessageWeight: Weight = MAXIMUM_BLOCK_WEIGHT / 10;
-}
-
-/// No local origins on this chain are allowed to dispatch XCM sends/executions.
-pub type LocalOriginToLocation = ();
-
-/// The means for routing XCM messages which are not for local execution into the right message
-/// queues.
-pub type XcmRouter = (
-	// Two routers - use UMP to communicate with the relay chain:
-	cumulus_primitives_utility::ParentAsUmp<AllychainSystem, ()>,
-	// ..and XCMP to communicate with the sibling chains.
-	XcmpQueue,
-);
-
-impl pallet_xcm::Config for Runtime {
-	type Event = Event;
-	type SendXcmOrigin = EnsureXcmOrigin<Origin, LocalOriginToLocation>;
-	type XcmRouter = XcmRouter;
-	type ExecuteXcmOrigin = EnsureXcmOrigin<Origin, LocalOriginToLocation>;
-	type XcmExecuteFilter = Nothing;
-	type XcmExecutor = XcmExecutor<XcmConfig>;
-	type XcmTeleportFilter = Everything;
-	type XcmReserveTransferFilter = Everything;
-	type Weigher = FixedWeightBounds<UnitWeightCost, Call, MaxInstructions>;
-	type LocationInverter = LocationInverter<Ancestry>;
-	type Origin = Origin;
-	type Call = Call;
-
-	const VERSION_DISCOVERY_QUEUE_SIZE: u32 = 100;
-	// Override for AdvertisedXcmVersion default
-	type AdvertisedXcmVersion = pallet_xcm::CurrentXcmVersion;
-}
-
-impl cumulus_pallet_xcm::Config for Runtime {
-	type Event = Event;
-	type XcmExecutor = XcmExecutor<XcmConfig>;
-}
-
 impl cumulus_pallet_xcmp_queue::Config for Runtime {
 	type Event = Event;
 	type XcmExecutor = XcmExecutor<XcmConfig>;
 	type ChannelInfo = AllychainSystem;
-	type VersionWrapper = ();
+	type VersionWrapper = AxiaXcm;
+	type ExecuteOverweightOrigin = EnsureRoot<AccountId>;
+	type ControllerOrigin =
+		EnsureOneOf<EnsureRoot<AccountId>, EnsureXcm<IsMajorityOfBody<DotLocation, ExecutiveBody>>>;
+	type ControllerOriginConverter = XcmOriginToTransactDispatchOrigin;
 }
 
 impl cumulus_pallet_dmp_queue::Config for Runtime {
@@ -636,11 +485,8 @@ parameter_types! {
 }
 
 /// We allow root and the Relay Chain council to execute privileged collator selection operations.
-pub type CollatorSelectionUpdateOrigin = EnsureOneOf<
-	AccountId,
-	EnsureRoot<AccountId>,
-	EnsureXcm<IsMajorityOfBody<DotLocation, ExecutiveBody>>,
->;
+pub type CollatorSelectionUpdateOrigin =
+	EnsureOneOf<EnsureRoot<AccountId>, EnsureXcm<IsMajorityOfBody<DotLocation, ExecutiveBody>>>;
 
 impl pallet_collator_selection::Config for Runtime {
 	type Event = Event;
@@ -706,7 +552,7 @@ construct_runtime!(
 		AllychainSystem: cumulus_pallet_allychain_system::{
 			Pallet, Call, Config, Storage, Inherent, Event<T>, ValidateUnsigned,
 		} = 1,
-		RandomnessCollectiveFlip: pallet_randomness_collective_flip::{Pallet, Storage} = 2,
+		// RandomnessCollectiveFlip = 2 removed
 		Timestamp: pallet_timestamp::{Pallet, Call, Storage, Inherent} = 3,
 		AllychainInfo: allychain_info::{Pallet, Storage, Config} = 4,
 
@@ -715,7 +561,7 @@ construct_runtime!(
 		TransactionPayment: pallet_transaction_payment::{Pallet, Storage} = 11,
 		AssetTxPayment: pallet_asset_tx_payment::{Pallet} = 12,
 
-		// Collator support. the order of these 4 are important and shall not change.
+		// Collator support. the order of these 5 are important and shall not change.
 		Authorship: pallet_authorship::{Pallet, Call, Storage} = 20,
 		CollatorSelection: pallet_collator_selection::{Pallet, Call, Storage, Event<T>, Config<T>} = 21,
 		Session: pallet_session::{Pallet, Call, Storage, Event, Config<T>} = 22,
@@ -724,7 +570,7 @@ construct_runtime!(
 
 		// XCM helpers.
 		XcmpQueue: cumulus_pallet_xcmp_queue::{Pallet, Call, Storage, Event<T>} = 30,
-		AXIAXcm: pallet_xcm::{Pallet, Call, Event<T>, Origin} = 31,
+		AxiaXcm: pallet_xcm::{Pallet, Call, Storage, Event<T>, Origin, Config} = 31,
 		CumulusXcm: cumulus_pallet_xcm::{Pallet, Event<T>, Origin} = 32,
 		DmpQueue: cumulus_pallet_dmp_queue::{Pallet, Call, Storage, Event<T>} = 33,
 
@@ -733,7 +579,7 @@ construct_runtime!(
 		Multisig: pallet_multisig::{Pallet, Call, Storage, Event<T>} = 41,
 		Proxy: pallet_proxy::{Pallet, Call, Storage, Event<T>} = 42,
 
-		// The main stage. To include pallet-assets-freezer and pallet-uniques.
+		// The main stage.
 		Assets: pallet_assets::{Pallet, Call, Storage, Event<T>} = 50,
 		Uniques: pallet_uniques::{Pallet, Call, Storage, Event<T>} = 51,
 	}
@@ -749,6 +595,7 @@ pub type SignedBlock = generic::SignedBlock<Block>;
 pub type BlockId = generic::BlockId<Block>;
 /// The SignedExtension to the basic transaction logic.
 pub type SignedExtra = (
+	frame_system::CheckNonZeroSender<Runtime>,
 	frame_system::CheckSpecVersion<Runtime>,
 	frame_system::CheckTxVersion<Runtime>,
 	frame_system::CheckGenesis<Runtime>,
@@ -767,8 +614,28 @@ pub type Executive = frame_executive::Executive<
 	Block,
 	frame_system::ChainContext<Runtime>,
 	Runtime,
-	AllPallets,
+	AllPalletsWithSystem,
 >;
+
+#[cfg(feature = "runtime-benchmarks")]
+#[macro_use]
+extern crate frame_benchmarking;
+
+#[cfg(feature = "runtime-benchmarks")]
+mod benches {
+	define_benchmarks!(
+		[frame_system, SystemBench::<Runtime>]
+		[pallet_assets, Assets]
+		[pallet_balances, Balances]
+		[pallet_multisig, Multisig]
+		[pallet_proxy, Proxy]
+		[pallet_session, SessionBench::<Runtime>]
+		[pallet_uniques, Uniques]
+		[pallet_utility, Utility]
+		[pallet_timestamp, Timestamp]
+		[pallet_collator_selection, CollatorSelection]
+	);
+}
 
 impl_runtime_apis! {
 	impl sp_consensus_aura::AuraApi<Block, AuraId> for Runtime {
@@ -872,8 +739,21 @@ impl_runtime_apis! {
 	}
 
 	impl cumulus_primitives_core::CollectCollationInfo<Block> for Runtime {
-		fn collect_collation_info() -> cumulus_primitives_core::CollationInfo {
-			AllychainSystem::collect_collation_info()
+		fn collect_collation_info(header: &<Block as BlockT>::Header) -> cumulus_primitives_core::CollationInfo {
+			AllychainSystem::collect_collation_info(header)
+		}
+	}
+
+	#[cfg(feature = "try-runtime")]
+	impl frame_try_runtime::TryRuntime<Block> for Runtime {
+		fn on_runtime_upgrade() -> (Weight, Weight) {
+			log::info!("try-runtime::on_runtime_upgrade statemint.");
+			let weight = Executive::try_runtime_upgrade().unwrap();
+			(weight, RuntimeBlockWeights::get().max_block)
+		}
+
+		fn execute_block_no_check(block: Block) -> Weight {
+			Executive::execute_block_no_check(block)
 		}
 	}
 
@@ -883,33 +763,22 @@ impl_runtime_apis! {
 			Vec<frame_benchmarking::BenchmarkList>,
 			Vec<frame_support::traits::StorageInfo>,
 		) {
-			use frame_benchmarking::{list_benchmark, Benchmarking, BenchmarkList};
+			use frame_benchmarking::{Benchmarking, BenchmarkList};
 			use frame_support::traits::StorageInfoTrait;
 			use frame_system_benchmarking::Pallet as SystemBench;
 			use cumulus_pallet_session_benchmarking::Pallet as SessionBench;
 
 			let mut list = Vec::<BenchmarkList>::new();
-
-			list_benchmark!(list, extra, frame_system, SystemBench::<Runtime>);
-			list_benchmark!(list, extra, pallet_assets, Assets);
-			list_benchmark!(list, extra, pallet_balances, Balances);
-			list_benchmark!(list, extra, pallet_multisig, Multisig);
-			list_benchmark!(list, extra, pallet_proxy, Proxy);
-			list_benchmark!(list, extra, pallet_session, SessionBench::<Runtime>);
-			list_benchmark!(list, extra, pallet_uniques, Uniques);
-			list_benchmark!(list, extra, pallet_utility, Utility);
-			list_benchmark!(list, extra, pallet_timestamp, Timestamp);
-			list_benchmark!(list, extra, pallet_collator_selection, CollatorSelection);
+			list_benchmarks!(list, extra);
 
 			let storage_info = AllPalletsWithSystem::storage_info();
-
 			return (list, storage_info)
 		}
 
 		fn dispatch_benchmark(
 			config: frame_benchmarking::BenchmarkConfig
 		) -> Result<Vec<frame_benchmarking::BenchmarkBatch>, sp_runtime::RuntimeString> {
-			use frame_benchmarking::{Benchmarking, BenchmarkBatch, add_benchmark, TrackedStorageKey};
+			use frame_benchmarking::{Benchmarking, BenchmarkBatch, TrackedStorageKey};
 
 			use frame_system_benchmarking::Pallet as SystemBench;
 			impl frame_system_benchmarking::Config for Runtime {}
@@ -932,16 +801,7 @@ impl_runtime_apis! {
 
 			let mut batches = Vec::<BenchmarkBatch>::new();
 			let params = (&config, &whitelist);
-
-			add_benchmark!(params, batches, frame_system, SystemBench::<Runtime>);
-			add_benchmark!(params, batches, pallet_assets, Assets);
-			add_benchmark!(params, batches, pallet_balances, Balances);
-			add_benchmark!(params, batches, pallet_multisig, Multisig);
-			add_benchmark!(params, batches, pallet_proxy, Proxy);
-			add_benchmark!(params, batches, pallet_session, SessionBench::<Runtime>);
-			add_benchmark!(params, batches, pallet_utility, Utility);
-			add_benchmark!(params, batches, pallet_timestamp, Timestamp);
-			add_benchmark!(params, batches, pallet_collator_selection, CollatorSelection);
+			add_benchmarks!(params, batches);
 
 			if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }
 			Ok(batches)

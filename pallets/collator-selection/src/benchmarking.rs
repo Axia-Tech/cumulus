@@ -1,4 +1,4 @@
-// Copyright (C) 2021 Parity Technologies (UK) Ltd.
+// Copyright (C) 2021 Axia Technologies (UK) Ltd.
 // SPDX-License-Identifier: Apache-2.0
 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -88,7 +88,7 @@ fn register_validators<T: Config + session::Config>(count: u32) {
 	let validators = (0..count).map(|c| validator::<T>(c)).collect::<Vec<_>>();
 
 	for (who, keys) in validators {
-		<session::Module<T>>::set_keys(RawOrigin::Signed(who).into(), keys, vec![]).unwrap();
+		<session::Pallet<T>>::set_keys(RawOrigin::Signed(who).into(), keys, Vec::new()).unwrap();
 	}
 }
 
@@ -157,10 +157,10 @@ benchmarks! {
 		let bond: BalanceOf<T> = T::Currency::minimum_balance() * 2u32.into();
 		T::Currency::make_free_balance_be(&caller, bond.clone());
 
-		<session::Module<T>>::set_keys(
+		<session::Pallet<T>>::set_keys(
 			RawOrigin::Signed(caller.clone()).into(),
 			keys::<T>(c + 1),
-			vec![]
+			Vec::new()
 		).unwrap();
 
 	}: _(RawOrigin::Signed(caller.clone()))

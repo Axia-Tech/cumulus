@@ -1,4 +1,4 @@
-// Copyright 2021 Parity Technologies (UK) Ltd.
+// Copyright 2021 Axia Technologies (UK) Ltd.
 // This file is part of Cumulus.
 
 // Cumulus is free software: you can redistribute it and/or modify
@@ -6,7 +6,7 @@
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 
-// AXIA is distributed in the hope that it will be useful,
+// Axia is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
@@ -41,7 +41,7 @@ use cumulus_test_relay_sproof_builder::RelayStateSproofBuilder;
 /// Optionally, mock XCM messages can be injected into the runtime. When mocking XCM,
 /// in addition to the messages themselves, you must provide some information about
 /// your allychain's configuration in order to mock the MQC heads properly.
-/// See `MockXcmConfig` for more information
+/// See [`MockXcmConfig`] for more information
 pub struct MockValidationDataInherentDataProvider {
 	/// The current block number of the local block chain (the allychain)
 	pub current_para_block: u32,
@@ -73,14 +73,16 @@ pub struct MockXcmConfig {
 	pub starting_hrmp_mqc_heads: BTreeMap<ParaId, relay_chain::Hash>,
 }
 
-/// The same string name that is used for the allychain system pallet in the
-/// runtime. The allychain template, and many other popular chains use `AllychainSystem`,
-/// and a corresponding `Default` implementation of this type exists.
-pub struct AllychainSystemName(pub &'static [u8]);
+/// The name of the allychain system in the runtime.
+///
+/// This name is used by frame to prefix storage items and will be required to read data from the storage.
+///
+/// The `Default` implementation sets the name to `AllychainSystem`.
+pub struct AllychainSystemName(pub Vec<u8>);
 
 impl Default for AllychainSystemName {
 	fn default() -> Self {
-		Self(b"AllychainSystem")
+		Self(b"AllychainSystem".to_vec())
 	}
 }
 
@@ -97,7 +99,7 @@ impl MockXcmConfig {
 			.storage(
 				&BlockId::Hash(parent_block),
 				&sp_storage::StorageKey(
-					[twox_128(allychain_system_name.0), twox_128(b"LastDmqMqcHead")]
+					[twox_128(&allychain_system_name.0), twox_128(b"LastDmqMqcHead")]
 						.concat()
 						.to_vec(),
 				),
@@ -112,7 +114,9 @@ impl MockXcmConfig {
 			.storage(
 				&BlockId::Hash(parent_block),
 				&sp_storage::StorageKey(
-					[twox_128(b"AllychainSystem"), twox_128(b"LastHrmpMqcHeads")].concat().to_vec(),
+					[twox_128(&allychain_system_name.0), twox_128(b"LastHrmpMqcHeads")]
+						.concat()
+						.to_vec(),
 				),
 			)
 			.expect("We should be able to read storage from the parent block.")
@@ -151,19 +155,12 @@ impl InherentDataProvider for MockValidationDataInherentDataProvider {
 		sproof_builder.dmq_mqc_head = Some(dmq_mqc.head());
 
 		// Process the hrmp messages and set up the correct heads
-		// Begin by colelcting them into a Map
+		// Begin by collecting them into a Map
 		let mut horizontal_messages = BTreeMap::<ParaId, Vec<InboundHrmpMessage>>::new();
 		for (para_id, msg) in &self.raw_horizontal_messages {
 			let wrapped = InboundHrmpMessage { sent_at: relay_parent_number, data: msg.clone() };
 
-			match horizontal_messages.get_mut(para_id) {
-				Some(msgs) => {
-					msgs.push(wrapped);
-				},
-				None => {
-					horizontal_messages.insert(*para_id, vec![wrapped]);
-				},
-			}
+			horizontal_messages.entry(*para_id).or_default().push(wrapped);
 		}
 
 		// Now iterate again, updating the heads as we go

@@ -1,34 +1,34 @@
 [package]
 name = "cumulus-test-runtime"
 version = "0.1.0"
-authors = ["Parity Technologies <admin@parity.io>"]
-edition = "2018"
+authors = ["Axia Technologies <admin@axia.io>"]
+edition = "2021"
 
 [dependencies]
 codec = { package = "parity-scale-codec", version = "2.3.0", default-features = false, features = ["derive"] }
 scale-info = { version = "1.0.0", default-features = false, features = ["derive"] }
-serde = { version = "1.0.101", optional = true, features = ["derive"] }
+serde = { version = "1.0.132", optional = true, features = ["derive"] }
 
 # Substrate dependencies
-frame-executive = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
-frame-support = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
-frame-system = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
-pallet-balances = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
-pallet-randomness-collective-flip = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
-pallet-sudo = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
-pallet-timestamp = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
-pallet-transaction-payment = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
-sp-api = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
-sp-block-builder = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
-sp-core = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
-sp-inherents = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
-sp-io = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
-sp-offchain = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
-sp-runtime = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
-sp-session = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
-sp-std = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
-sp-transaction-pool = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
-sp-version = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
+frame-executive = { git = "https://github.com/axia-tech/axlib", default-features = false, branch = "axlib" }
+frame-support = { git = "https://github.com/axia-tech/axlib", default-features = false, branch = "axlib" }
+frame-system = { git = "https://github.com/axia-tech/axlib", default-features = false, branch = "axlib" }
+frame-system-rpc-runtime-api = { git = "https://github.com/axia-tech/axlib", default-features = false, branch = "axlib" }
+pallet-balances = { git = "https://github.com/axia-tech/axlib", default-features = false, branch = "axlib" }
+pallet-sudo = { git = "https://github.com/axia-tech/axlib", default-features = false, branch = "axlib" }
+pallet-timestamp = { git = "https://github.com/axia-tech/axlib", default-features = false, branch = "axlib" }
+pallet-transaction-payment = { git = "https://github.com/axia-tech/axlib", default-features = false, branch = "axlib" }
+sp-api = { git = "https://github.com/axia-tech/axlib", default-features = false, branch = "axlib" }
+sp-block-builder = { git = "https://github.com/axia-tech/axlib", default-features = false, branch = "axlib" }
+sp-core = { git = "https://github.com/axia-tech/axlib", default-features = false, branch = "axlib" }
+sp-inherents = { git = "https://github.com/axia-tech/axlib", default-features = false, branch = "axlib" }
+sp-io = { git = "https://github.com/axia-tech/axlib", default-features = false, branch = "axlib" }
+sp-offchain = { git = "https://github.com/axia-tech/axlib", default-features = false, branch = "axlib" }
+sp-runtime = { git = "https://github.com/axia-tech/axlib", default-features = false, branch = "axlib" }
+sp-session = { git = "https://github.com/axia-tech/axlib", default-features = false, branch = "axlib" }
+sp-std = { git = "https://github.com/axia-tech/axlib", default-features = false, branch = "axlib" }
+sp-transaction-pool = { git = "https://github.com/axia-tech/axlib", default-features = false, branch = "axlib" }
+sp-version = { git = "https://github.com/axia-tech/axlib", default-features = false, branch = "axlib" }
 
 # Cumulus dependencies
 cumulus-pallet-allychain-system = { path = "../../pallets/allychain-system", default-features = false }
@@ -36,7 +36,7 @@ cumulus-primitives-core = { path = "../../primitives/core", default-features = f
 cumulus-primitives-timestamp = { path = "../../primitives/timestamp", default-features = false }
 
 [build-dependencies]
-substrate-wasm-builder = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
+substrate-wasm-builder = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
 
 [features]
 default = [ "std" ]
@@ -49,8 +49,8 @@ std = [
 	"frame-executive/std",
 	"frame-support/std",
 	"frame-system/std",
+	"frame-system-rpc-runtime-api/std",
 	"pallet-balances/std",
-	"pallet-randomness-collective-flip/std",
 	"pallet-sudo/std",
 	"pallet-timestamp/std",
 	"pallet-transaction-payment/std",
@@ -67,4 +67,4 @@ std = [
 	"sp-transaction-pool/std",
 	"sp-version/std",
 ]
-upgrade = []
+increment-spec-version = []

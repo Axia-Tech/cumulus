@@ -2,32 +2,35 @@
 name = "cumulus-client-consensus-common"
 description = "Cumulus specific common consensus implementations"
 version = "0.1.0"
-authors = ["Parity Technologies <admin@parity.io>"]
-edition = "2018"
+authors = ["Axia Technologies <admin@axia.io>"]
+edition = "2021"
 
 [dependencies]
 # Substrate deps
-sc-consensus = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
-sc-client-api = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
-sp-consensus = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
-sp-runtime = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
-sp-blockchain = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
-sp-api = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
-sp-trie = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
+sc-consensus = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+sc-client-api = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+sp-consensus = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+sp-runtime = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+sp-blockchain = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+sp-api = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
+sp-trie = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
 
-# AXIA deps
-axia-primitives = { git = "https://github.com/axia-tech/axia", branch = "dev" }
+# Axia deps
+axia-primitives = { git = "https://github.com/axia-tech/axia", branch = "axia" }
+
+# Cumulus deps
+cumulus-relay-chain-interface = { path = "../../relay-chain-interface" }
 
 # Other deps
 futures = { version = "0.3.8", features = ["compat"] }
 codec = { package = "parity-scale-codec", version = "2.3.0", features = [ "derive" ] }
-tracing = "0.1.25"
-async-trait = "0.1.42"
+tracing = "0.1.31"
+async-trait = "0.1.52"
 dyn-clone = "1.0.4"
 
 [dev-dependencies]
 # Substrate deps
-sp-tracing = { git = "https://github.com/axia-tech/axia-core", branch = "dev" }
+sp-tracing = { git = "https://github.com/axia-tech/axlib", branch = "axlib" }
 # Cumulus dependencies
 cumulus-test-client = { path = "../../../test/client" }
 # Other deps

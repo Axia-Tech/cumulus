@@ -14,9 +14,10 @@ variables:                         &default-vars
   GIT_DEPTH:                       100
   CARGO_INCREMENTAL:               0
   CARGO_TARGET_DIR:                "/ci-cache/${CI_PROJECT_NAME}/targets/${CI_COMMIT_REF_NAME}/${CI_JOB_NAME}"
-  CI_IMAGE:                        "paritytech/ci-linux:production"
+  CI_IMAGE:                        "axiatech/ci-linux:production"
   DOCKER_OS:                       "debian:stretch"
   ARCH:                            "x86_64"
+  WASM_BUILD_WORKSPACE_HINT:       "/builds/axia/cumulus/"
 
 .rust-info-script:                 &rust-info-script
   - rustup show
@@ -57,7 +58,7 @@ variables:                         &default-vars
       - api_failure
   interruptible:                   true
   tags:
-    - kubernetes-parity-build
+    - kubernetes-axia-build
 
 .collect-artifacts:                &collect-artifacts
   artifacts:
@@ -107,16 +108,54 @@ test-linux-stable:
       fi
     - sccache -s
 
+check-runtime-benchmarks:
+  stage:                           test
+  <<:                              *docker-env
+  script:
+    # Check that the node will compile with `runtime-benchmarks` feature flag.
+    - time cargo check --all --features runtime-benchmarks
+    # Check that allychain-template will compile with `runtime-benchmarks` feature flag.
+    - time cargo check -p allychain-template-node --features runtime-benchmarks
+    - sccache -s
+
+cargo-check-try-runtime:
+  stage:                           test
+  <<:                              *docker-env
+  script:
+    # Check that the node will compile with `try-runtime` feature flag.
+    - time cargo check --all --features try-runtime
+    # Check that allychain-template will compile with `try-runtime` feature flag.
+    - time cargo check -p allychain-template-node --features try-runtime
+    - sccache -s
+
+cargo-check-benches:
+  stage:                           test
+  <<:                              *docker-env
+  script:
+    - time cargo check --all --benches
+    - sccache -s
+
+check-rustdoc:
+  stage:                           test
+  <<:                              *docker-env
+  variables:
+    <<:                            *default-vars
+    SKIP_WASM_BUILD:               1
+    RUSTDOCFLAGS:                  "-Dwarnings"
+  script:
+    - time cargo +nightly doc --workspace --all-features --verbose --no-deps
+    - sccache -s
+
 #### stage:                        publish
 
 publish-s3:
   stage:                           publish
   <<:                              *kubernetes-env
-  image:                           paritytech/awscli:latest
+  image:                           axiatech/awscli:latest
   <<:                              *publish-refs
   variables:
     GIT_STRATEGY:                  none
-    BUCKET:                        "releases.parity.io"
+    BUCKET:                        "releases.axia.io"
     PREFIX:                        "cumulus/${ARCH}-${DOCKER_OS}"
   before_script:
     # Job will fail if no artifacts were provided by test-linux-stable job. It's only possible for

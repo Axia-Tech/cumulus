@@ -7,7 +7,8 @@ members = [
 	"client/network",
 	"client/pov-recovery",
 	"client/service",
-	"pallets/asset-tx-payment",
+	"client/relay-chain-interface",
+	"client/relay-chain-local",
 	"pallets/aura-ext",
 	"pallets/collator-selection",
 	"pallets/dmp-queue",
@@ -25,19 +26,25 @@ members = [
 	"axia-allychains/",
 	"axia-allychains/pallets/allychain-info",
 	"axia-allychains/pallets/ping",
-	"axia-allychains/betanet",
+	"axia-allychains/betanet-allychain",
 	"axia-allychains/shell",
 	"axia-allychains/allychains-common",
 	"axia-allychains/statemint",
 	"axia-allychains/statemine",
 	"axia-allychains/westmint",
+	"axia-allychains/canvas-axctest",
 	"test/client",
 	"test/relay-sproof-builder",
 	"test/relay-validation-worker-provider",
 	"test/runtime",
-	"test/runtime-upgrade",
 	"test/service",
 ]
 
 [profile.release]
 panic = "unwind"
+opt-level = 3
+
+[profile.production]
+inherits = "release"
+lto = true
+codegen-units = 1

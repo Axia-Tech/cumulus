@@ -1,4 +1,4 @@
-// Copyright 2019-2021 Parity Technologies (UK) Ltd.
+// Copyright 2019-2021 Axia Technologies (UK) Ltd.
 // This file is part of Cumulus.
 
 // Cumulus is free software: you can redistribute it and/or modify
@@ -18,37 +18,44 @@ use crate::{
 	chain_spec,
 	cli::{Cli, RelayChainCli, Subcommand},
 	service::{
-		new_partial, Block, BETANETAllychainRuntimeExecutor, ShellRuntimeExecutor,
-		StatemineRuntimeExecutor, StatemintRuntimeExecutor, WestmintRuntimeExecutor,
+		new_partial, Block, CanvasAxiaTestRuntimeExecutor, BetanetAllychainRuntimeExecutor,
+		SeedlingRuntimeExecutor, ShellRuntimeExecutor, StatemineRuntimeExecutor,
+		StatemintRuntimeExecutor, WestmintRuntimeExecutor,
 	},
 };
 use codec::Encode;
 use cumulus_client_service::genesis::generate_genesis_block;
 use cumulus_primitives_core::ParaId;
 use log::info;
+use allychains_common::{AuraId, StatemintAuraId};
 use axia_allychain::primitives::AccountIdConversion;
 use sc_cli::{
 	ChainSpec, CliConfiguration, DefaultConfigurationValues, ImportParams, KeystoreParams,
 	NetworkParams, Result, RuntimeVersion, SharedParams, SubstrateCli,
 };
-use sc_service::config::{BasePath, PrometheusConfig};
+use sc_service::{
+	config::{BasePath, PrometheusConfig},
+	TaskManager,
+};
 use sp_core::hexdisplay::HexDisplay;
 use sp_runtime::traits::Block as BlockT;
 use std::{io::Write, net::SocketAddr};
 
-// default to the Statemint/Statemine/Westmint id
-const DEFAULT_PARA_ID: u32 = 1000;
-
 trait IdentifyChain {
 	fn is_shell(&self) -> bool;
+	fn is_seedling(&self) -> bool;
 	fn is_statemint(&self) -> bool;
 	fn is_statemine(&self) -> bool;
 	fn is_westmint(&self) -> bool;
+	fn is_canvas_axctest(&self) -> bool;
 }
 
 impl IdentifyChain for dyn sc_service::ChainSpec {
 	fn is_shell(&self) -> bool {
 		self.id().starts_with("shell")
+	}
+	fn is_seedling(&self) -> bool {
+		self.id().starts_with("seedling")
 	}
 	fn is_statemint(&self) -> bool {
 		self.id().starts_with("statemint")
@@ -59,11 +66,18 @@ impl IdentifyChain for dyn sc_service::ChainSpec {
 	fn is_westmint(&self) -> bool {
 		self.id().starts_with("westmint")
 	}
+	fn is_canvas_axctest(&self) -> bool {
+		// we use the same runtime on betanet and axctest
+		self.id().starts_with("canvas-axctest") || self.id().starts_with("canvas-betanet")
+	}
 }
 
 impl<T: sc_service::ChainSpec + 'static> IdentifyChain for T {
 	fn is_shell(&self) -> bool {
 		<dyn sc_service::ChainSpec>::is_shell(self)
+	}
+	fn is_seedling(&self) -> bool {
+		<dyn sc_service::ChainSpec>::is_seedling(self)
 	}
 	fn is_statemint(&self) -> bool {
 		<dyn sc_service::ChainSpec>::is_statemint(self)
@@ -74,14 +88,14 @@ impl<T: sc_service::ChainSpec + 'static> IdentifyChain for T {
 	fn is_westmint(&self) -> bool {
 		<dyn sc_service::ChainSpec>::is_westmint(self)
 	}
+	fn is_canvas_axctest(&self) -> bool {
+		<dyn sc_service::ChainSpec>::is_canvas_axctest(self)
+	}
 }
 
-fn load_spec(
-	id: &str,
-	para_id: ParaId,
-) -> std::result::Result<Box<dyn sc_service::ChainSpec>, String> {
+fn load_spec(id: &str) -> std::result::Result<Box<dyn sc_service::ChainSpec>, String> {
 	Ok(match id {
-		"staging" => Box::new(chain_spec::staging_test_net(para_id)),
+		"staging" => Box::new(chain_spec::staging_test_net()),
 		"tick" => Box::new(chain_spec::ChainSpec::from_json_bytes(
 			&include_bytes!("../res/tick.json")[..],
 		)?),
@@ -91,26 +105,45 @@ fn load_spec(
 		"track" => Box::new(chain_spec::ChainSpec::from_json_bytes(
 			&include_bytes!("../res/track.json")[..],
 		)?),
-		"shell" => Box::new(chain_spec::get_shell_chain_spec(para_id)),
-		"statemint-dev" => Box::new(chain_spec::statemint_development_config(para_id)),
-		"statemint-local" => Box::new(chain_spec::statemint_local_config(para_id)),
-		"statemine-dev" => Box::new(chain_spec::statemine_development_config(para_id)),
-		"statemine-local" => Box::new(chain_spec::statemine_local_config(para_id)),
+		"shell" => Box::new(chain_spec::get_shell_chain_spec()),
+		// -- Statemint
+		"seedling" => Box::new(chain_spec::get_seedling_chain_spec()),
+		"statemint-dev" => Box::new(chain_spec::statemint_development_config()),
+		"statemint-local" => Box::new(chain_spec::statemint_local_config()),
 		// the chain spec as used for generating the upgrade genesis values
-		"statemine-genesis" => Box::new(chain_spec::statemine_config(para_id)),
+		"statemint-genesis" => Box::new(chain_spec::statemint_config()),
+		// the shell-based chain spec as used for syncing
+		"statemint" => Box::new(chain_spec::ChainSpec::from_json_bytes(
+			&include_bytes!("../res/statemint.json")[..],
+		)?),
+		// -- Statemine
+		"statemine-dev" => Box::new(chain_spec::statemine_development_config()),
+		"statemine-local" => Box::new(chain_spec::statemine_local_config()),
+		// the chain spec as used for generating the upgrade genesis values
+		"statemine-genesis" => Box::new(chain_spec::statemine_config()),
 		// the shell-based chain spec as used for syncing
 		"statemine" => Box::new(chain_spec::ChainSpec::from_json_bytes(
 			&include_bytes!("../res/statemine.json")[..],
 		)?),
-		"westmint-dev" => Box::new(chain_spec::westmint_development_config(para_id)),
-		"westmint-local" => Box::new(chain_spec::westmint_local_config(para_id)),
+		// -- Westmint
+		"westmint-dev" => Box::new(chain_spec::westmint_development_config()),
+		"westmint-local" => Box::new(chain_spec::westmint_local_config()),
 		// the chain spec as used for generating the upgrade genesis values
-		"westmint-genesis" => Box::new(chain_spec::westmint_config(para_id)),
+		"westmint-genesis" => Box::new(chain_spec::westmint_config()),
 		// the shell-based chain spec as used for syncing
 		"westmint" => Box::new(chain_spec::ChainSpec::from_json_bytes(
 			&include_bytes!("../res/westmint.json")[..],
 		)?),
-		"" => Box::new(chain_spec::get_chain_spec(para_id)),
+		// -- Canvas on Betanet
+		"canvas-betanet-dev" => Box::new(chain_spec::canvas_betanet_development_config()),
+		"canvas-betanet-local" => Box::new(chain_spec::canvas_betanet_local_config()),
+		"canvas-betanet-genesis" => Box::new(chain_spec::canvas_betanet_config()),
+		"canvas-betanet" => Box::new(chain_spec::ChainSpec::from_json_bytes(
+			&include_bytes!("../res/canvas-betanet.json")[..],
+		)?),
+		// -- Fallback (generic chainspec)
+		"" => Box::new(chain_spec::get_chain_spec()),
+		// -- Loading a specific spec from disk
 		path => {
 			let chain_spec = chain_spec::ChainSpec::from_json_file(path.into())?;
 			if chain_spec.is_statemint() {
@@ -121,6 +154,10 @@ fn load_spec(
 				Box::new(chain_spec::WestmintChainSpec::from_json_file(path.into())?)
 			} else if chain_spec.is_shell() {
 				Box::new(chain_spec::ShellChainSpec::from_json_file(path.into())?)
+			} else if chain_spec.is_seedling() {
+				Box::new(chain_spec::SeedlingChainSpec::from_json_file(path.into())?)
+			} else if chain_spec.is_canvas_axctest() {
+				Box::new(chain_spec::CanvasAxiaTestChainSpec::from_json_file(path.into())?)
 			} else {
 				Box::new(chain_spec)
 			}
@@ -130,16 +167,16 @@ fn load_spec(
 
 impl SubstrateCli for Cli {
 	fn impl_name() -> String {
-		"AXIA collator".into()
+		"Axia collator".into()
 	}
 
 	fn impl_version() -> String {
-		env!("SUBSTRATE_CLI_IMPL_VERSION").into()
+		env!("AXLIB_CLI_IMPL_VERSION").into()
 	}
 
 	fn description() -> String {
 		format!(
-			"AXIA collator\n\nThe command-line arguments provided first will be \
+			"Axia collator\n\nThe command-line arguments provided first will be \
 		passed to the allychain node, while the arguments provided after -- will be passed \
 		to the relaychain node.\n\n\
 		{} [allychain-args] -- [relaychain-args]",
@@ -152,7 +189,7 @@ impl SubstrateCli for Cli {
 	}
 
 	fn support_url() -> String {
-		"https://github.com/paritytech/cumulus/issues/new".into()
+		"https://github.com/axiatech/cumulus/issues/new".into()
 	}
 
 	fn copyright_start_year() -> i32 {
@@ -160,7 +197,7 @@ impl SubstrateCli for Cli {
 	}
 
 	fn load_spec(&self, id: &str) -> std::result::Result<Box<dyn sc_service::ChainSpec>, String> {
-		load_spec(id, self.run.allychain_id.unwrap_or(DEFAULT_PARA_ID).into())
+		load_spec(id)
 	}
 
 	fn native_runtime_version(chain_spec: &Box<dyn ChainSpec>) -> &'static RuntimeVersion {
@@ -172,6 +209,10 @@ impl SubstrateCli for Cli {
 			&westmint_runtime::VERSION
 		} else if chain_spec.is_shell() {
 			&shell_runtime::VERSION
+		} else if chain_spec.is_seedling() {
+			&seedling_runtime::VERSION
+		} else if chain_spec.is_canvas_axctest() {
+			&canvas_axctest_runtime::VERSION
 		} else {
 			&betanet_allychain_runtime::VERSION
 		}
@@ -180,19 +221,19 @@ impl SubstrateCli for Cli {
 
 impl SubstrateCli for RelayChainCli {
 	fn impl_name() -> String {
-		"AXIA collator".into()
+		"Axia collator".into()
 	}
 
 	fn impl_version() -> String {
-		env!("SUBSTRATE_CLI_IMPL_VERSION").into()
+		env!("AXLIB_CLI_IMPL_VERSION").into()
 	}
 
 	fn description() -> String {
 		format!(
-			"AXIA collator\n\nThe command-line arguments provided first will be \
+			"Axia collator\n\nThe command-line arguments provided first will be \
 		passed to the allychain node, while the arguments provided after -- will be passed \
-		to the relaychain node.\n\n\
-		{} [allychain-args] -- [relaychain-args]",
+		to the relay chain node.\n\n\
+		{} [allychain-args] -- [relay_chain-args]",
 			Self::executable_name()
 		)
 	}
@@ -202,7 +243,7 @@ impl SubstrateCli for RelayChainCli {
 	}
 
 	fn support_url() -> String {
-		"https://github.com/paritytech/cumulus/issues/new".into()
+		"https://github.com/axiatech/cumulus/issues/new".into()
 	}
 
 	fn copyright_start_year() -> i32 {
@@ -235,7 +276,7 @@ macro_rules! construct_async_run {
 			runner.async_run(|$config| {
 				let $components = new_partial::<westmint_runtime::RuntimeApi, WestmintRuntimeExecutor, _>(
 					&$config,
-					crate::service::statemint_build_import_queue,
+					crate::service::statemint_build_import_queue::<_, _, AuraId>,
 				)?;
 				let task_manager = $components.task_manager;
 				{ $( $code )* }.map(|v| (v, task_manager))
@@ -244,7 +285,7 @@ macro_rules! construct_async_run {
 			runner.async_run(|$config| {
 				let $components = new_partial::<statemine_runtime::RuntimeApi, StatemineRuntimeExecutor, _>(
 					&$config,
-					crate::service::statemint_build_import_queue,
+					crate::service::statemint_build_import_queue::<_, _, AuraId>,
 				)?;
 				let task_manager = $components.task_manager;
 				{ $( $code )* }.map(|v| (v, task_manager))
@@ -253,7 +294,7 @@ macro_rules! construct_async_run {
 			runner.async_run(|$config| {
 				let $components = new_partial::<statemint_runtime::RuntimeApi, StatemintRuntimeExecutor, _>(
 					&$config,
-					crate::service::statemint_build_import_queue,
+					crate::service::statemint_build_import_queue::<_, _, StatemintAuraId>,
 				)?;
 				let task_manager = $components.task_manager;
 				{ $( $code )* }.map(|v| (v, task_manager))
@@ -267,11 +308,29 @@ macro_rules! construct_async_run {
 				let task_manager = $components.task_manager;
 				{ $( $code )* }.map(|v| (v, task_manager))
 			})
+		} else if runner.config().chain_spec.is_seedling() {
+			runner.async_run(|$config| {
+				let $components = new_partial::<seedling_runtime::RuntimeApi, SeedlingRuntimeExecutor, _>(
+					&$config,
+					crate::service::shell_build_import_queue,
+				)?;
+				let task_manager = $components.task_manager;
+				{ $( $code )* }.map(|v| (v, task_manager))
+			})
+		} else if runner.config().chain_spec.is_canvas_axctest() {
+			runner.async_run(|$config| {
+				let $components = new_partial::<canvas_axctest_runtime::RuntimeApi, CanvasAxiaTestRuntimeExecutor, _>(
+					&$config,
+					crate::service::canvas_axctest_build_import_queue,
+				)?;
+				let task_manager = $components.task_manager;
+				{ $( $code )* }.map(|v| (v, task_manager))
+			})
 		} else {
 			runner.async_run(|$config| {
 				let $components = new_partial::<
 					betanet_allychain_runtime::RuntimeApi,
-					BETANETAllychainRuntimeExecutor,
+					BetanetAllychainRuntimeExecutor,
 					_
 				>(
 					&$config,
@@ -342,10 +401,10 @@ pub fn run() -> Result<()> {
 			builder.with_profiling(sc_tracing::TracingReceiver::Log, "");
 			let _ = builder.init();
 
-			let block: crate::service::Block = generate_genesis_block(&load_spec(
-				&params.chain.clone().unwrap_or_default(),
-				params.allychain_id.unwrap_or(DEFAULT_PARA_ID).into(),
-			)?)?;
+			let spec = load_spec(&params.chain.clone().unwrap_or_default())?;
+			let state_version = Cli::native_runtime_version(&spec).state_version();
+
+			let block: crate::service::Block = generate_genesis_block(&spec, state_version)?;
 			let raw_header = block.header().encode();
 			let output_buf = if params.raw {
 				raw_header
@@ -399,13 +458,46 @@ pub fn run() -> Result<()> {
 				You can enable it with `--features runtime-benchmarks`."
 					.into())
 			},
+		Some(Subcommand::TryRuntime(cmd)) => {
+			if cfg!(feature = "try-runtime") {
+				// grab the task manager.
+				let runner = cli.create_runner(cmd)?;
+				let registry = &runner.config().prometheus_config.as_ref().map(|cfg| &cfg.registry);
+				let task_manager =
+					TaskManager::new(runner.config().tokio_handle.clone(), *registry)
+						.map_err(|e| format!("Error: {:?}", e))?;
+
+				if runner.config().chain_spec.is_statemine() {
+					runner.async_run(|config| {
+						Ok((cmd.run::<Block, StatemineRuntimeExecutor>(config), task_manager))
+					})
+				} else if runner.config().chain_spec.is_westmint() {
+					runner.async_run(|config| {
+						Ok((cmd.run::<Block, WestmintRuntimeExecutor>(config), task_manager))
+					})
+				} else if runner.config().chain_spec.is_statemint() {
+					runner.async_run(|config| {
+						Ok((cmd.run::<Block, StatemintRuntimeExecutor>(config), task_manager))
+					})
+				} else if runner.config().chain_spec.is_shell() {
+					runner.async_run(|config| {
+						Ok((cmd.run::<Block, ShellRuntimeExecutor>(config), task_manager))
+					})
+				} else {
+					Err("Chain doesn't support try-runtime".into())
+				}
+			} else {
+				Err("Try-runtime must be enabled by `--features try-runtime`.".into())
+			}
+		},
 		Some(Subcommand::Key(cmd)) => Ok(cmd.run(&cli)?),
 		None => {
 			let runner = cli.create_runner(&cli.run.normalize())?;
 
 			runner.run_node_until_exit(|config| async move {
-				let para_id =
-					chain_spec::Extensions::try_get(&*config.chain_spec).map(|e| e.para_id);
+				let para_id = chain_spec::Extensions::try_get(&*config.chain_spec)
+					.map(|e| e.para_id)
+					.ok_or_else(|| "Could not find allychain extension in chain-spec.")?;
 
 				let axia_cli = RelayChainCli::new(
 					&config,
@@ -414,13 +506,17 @@ pub fn run() -> Result<()> {
 						.chain(cli.relaychain_args.iter()),
 				);
 
-				let id = ParaId::from(cli.run.allychain_id.or(para_id).unwrap_or(DEFAULT_PARA_ID));
+				let id = ParaId::from(para_id);
 
 				let allychain_account =
 					AccountIdConversion::<axia_primitives::v0::AccountId>::into_account(&id);
 
+				let state_version =
+					RelayChainCli::native_runtime_version(&config.chain_spec).state_version();
+
 				let block: crate::service::Block =
-					generate_genesis_block(&config.chain_spec).map_err(|e| format!("{:?}", e))?;
+					generate_genesis_block(&config.chain_spec, state_version)
+						.map_err(|e| format!("{:?}", e))?;
 				let genesis_state = format!("0x{:?}", HexDisplay::from(&block.header().encode()));
 
 				let tokio_handle = config.tokio_handle.clone();
@@ -437,6 +533,7 @@ pub fn run() -> Result<()> {
 					crate::service::start_statemint_node::<
 						statemint_runtime::RuntimeApi,
 						StatemintRuntimeExecutor,
+						StatemintAuraId,
 					>(config, axia_config, id)
 					.await
 					.map(|r| r.0)
@@ -445,6 +542,7 @@ pub fn run() -> Result<()> {
 					crate::service::start_statemint_node::<
 						statemine_runtime::RuntimeApi,
 						StatemineRuntimeExecutor,
+						AuraId,
 					>(config, axia_config, id)
 					.await
 					.map(|r| r.0)
@@ -453,12 +551,29 @@ pub fn run() -> Result<()> {
 					crate::service::start_statemint_node::<
 						westmint_runtime::RuntimeApi,
 						WestmintRuntimeExecutor,
+						AuraId,
 					>(config, axia_config, id)
 					.await
 					.map(|r| r.0)
 					.map_err(Into::into)
 				} else if config.chain_spec.is_shell() {
-					crate::service::start_shell_node(config, axia_config, id)
+					crate::service::start_shell_node::<
+						shell_runtime::RuntimeApi,
+						ShellRuntimeExecutor,
+					>(config, axia_config, id)
+					.await
+					.map(|r| r.0)
+					.map_err(Into::into)
+				} else if config.chain_spec.is_seedling() {
+					crate::service::start_shell_node::<
+						seedling_runtime::RuntimeApi,
+						SeedlingRuntimeExecutor,
+					>(config, axia_config, id)
+					.await
+					.map(|r| r.0)
+					.map_err(Into::into)
+				} else if config.chain_spec.is_canvas_axctest() {
+					crate::service::start_canvas_axctest_node(config, axia_config, id)
 						.await
 						.map(|r| r.0)
 						.map_err(Into::into)
@@ -527,12 +642,25 @@ impl CliConfiguration<Self> for RelayChainCli {
 		self.base.base.rpc_ws(default_listen_port)
 	}
 
-	fn prometheus_config(&self, default_listen_port: u16) -> Result<Option<PrometheusConfig>> {
-		self.base.base.prometheus_config(default_listen_port)
+	fn prometheus_config(
+		&self,
+		default_listen_port: u16,
+		chain_spec: &Box<dyn ChainSpec>,
+	) -> Result<Option<PrometheusConfig>> {
+		self.base.base.prometheus_config(default_listen_port, chain_spec)
 	}
 
-	fn init<C: SubstrateCli>(&self) -> Result<()> {
-		unreachable!("AXIACli is never initialized; qed");
+	fn init<F>(
+		&self,
+		_support_url: &String,
+		_impl_version: &String,
+		_logger_hook: F,
+		_config: &sc_service::Configuration,
+	) -> Result<()>
+	where
+		F: FnOnce(&mut sc_cli::LoggerBuilder, &sc_service::Configuration),
+	{
+		unreachable!("AxiaCli is never initialized; qed");
 	}
 
 	fn chain_id(&self, is_dev: bool) -> Result<String> {
@@ -590,5 +718,9 @@ impl CliConfiguration<Self> for RelayChainCli {
 		chain_spec: &Box<dyn ChainSpec>,
 	) -> Result<Option<sc_telemetry::TelemetryEndpoints>> {
 		self.base.base.telemetry_endpoints(chain_spec)
+	}
+
+	fn node_name(&self) -> Result<String> {
+		self.base.base.node_name()
 	}
 }

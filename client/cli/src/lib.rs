@@ -1,4 +1,4 @@
-// Copyright 2021 Parity Technologies (UK) Ltd.
+// Copyright 2021 Axia Technologies (UK) Ltd.
 // This file is part of Cumulus.
 
 // Cumulus is free software: you can redistribute it and/or modify
@@ -18,6 +18,7 @@
 
 #![warn(missing_docs)]
 
+use clap::Parser;
 use sc_cli;
 use sc_service::{
 	config::{PrometheusConfig, TelemetryEndpoints},
@@ -28,21 +29,20 @@ use std::{
 	io::{self, Write},
 	net::SocketAddr,
 };
-use structopt::StructOpt;
 
-/// The `purge-chain` command used to remove the whole chain: the allychain and the relaychain.
-#[derive(Debug, StructOpt)]
+/// The `purge-chain` command used to remove the whole chain: the allychain and the relay chain.
+#[derive(Debug, Parser)]
 pub struct PurgeChainCmd {
 	/// The base struct of the purge-chain command.
-	#[structopt(flatten)]
+	#[clap(flatten)]
 	pub base: sc_cli::PurgeChainCmd,
 
 	/// Only delete the para chain database
-	#[structopt(long, aliases = &["para"])]
+	#[clap(long, aliases = &["para"])]
 	pub allychain: bool,
 
 	/// Only delete the relay chain database
-	#[structopt(long, aliases = &["relay"])]
+	#[clap(long, aliases = &["relay"])]
 	pub relaychain: bool,
 }
 
@@ -54,8 +54,9 @@ impl PurgeChainCmd {
 		relay_config: sc_service::Configuration,
 	) -> sc_cli::Result<()> {
 		let databases = match (self.allychain, self.relaychain) {
-			(true, true) | (false, false) =>
-				vec![("allychain", para_config.database), ("relaychain", relay_config.database)],
+			(true, true) | (false, false) => {
+				vec![("allychain", para_config.database), ("relaychain", relay_config.database)]
+			},
 			(true, false) => vec![("allychain", para_config.database)],
 			(false, true) => vec![("relaychain", relay_config.database)],
 		};
@@ -119,31 +120,25 @@ impl sc_cli::CliConfiguration for PurgeChainCmd {
 }
 
 /// The `run` command used to run a node.
-#[derive(Debug, StructOpt)]
+#[derive(Debug, Parser)]
 pub struct RunCmd {
 	/// The cumulus RunCmd inherents from sc_cli's
-	#[structopt(flatten)]
+	#[clap(flatten)]
 	pub base: sc_cli::RunCmd,
-
-	/// Id of the allychain this collator collates for.
-	#[structopt(long)]
-	pub allychain_id: Option<u32>,
 
 	/// Run node as collator.
 	///
 	/// Note that this is the same as running with `--validator`.
-	#[structopt(long, conflicts_with = "validator")]
+	#[clap(long, conflicts_with = "validator")]
 	pub collator: bool,
 }
 
 /// A non-redundant version of the `RunCmd` that sets the `validator` field when the
-/// original `RunCmd` had the `colaltor` field.
+/// original `RunCmd` had the `collator` field.
 /// This is how we make `--collator` imply `--validator`.
 pub struct NormalizedRunCmd {
 	/// The cumulus RunCmd inherents from sc_cli's
 	pub base: sc_cli::RunCmd,
-	/// Id of the allychain this collator collates for.
-	pub allychain_id: Option<u32>,
 }
 
 impl RunCmd {
@@ -153,7 +148,7 @@ impl RunCmd {
 
 		new_base.validator = self.base.validator || self.collator;
 
-		NormalizedRunCmd { base: new_base, allychain_id: self.allychain_id }
+		NormalizedRunCmd { base: new_base }
 	}
 }
 
@@ -204,8 +199,9 @@ impl sc_cli::CliConfiguration for NormalizedRunCmd {
 	fn prometheus_config(
 		&self,
 		default_listen_port: u16,
+		chain_spec: &Box<dyn sc_cli::ChainSpec>,
 	) -> sc_cli::Result<Option<PrometheusConfig>> {
-		self.base.prometheus_config(default_listen_port)
+		self.base.prometheus_config(default_listen_port, chain_spec)
 	}
 
 	fn disable_grandpa(&self) -> sc_cli::Result<bool> {
@@ -236,12 +232,24 @@ impl sc_cli::CliConfiguration for NormalizedRunCmd {
 		self.base.rpc_methods()
 	}
 
+	fn rpc_max_payload(&self) -> sc_cli::Result<Option<usize>> {
+		self.base.rpc_max_payload()
+	}
+
+	fn ws_max_out_buffer_capacity(&self) -> sc_cli::Result<Option<usize>> {
+		self.base.ws_max_out_buffer_capacity()
+	}
+
 	fn transaction_pool(&self) -> sc_cli::Result<TransactionPoolOptions> {
 		self.base.transaction_pool()
 	}
 
 	fn max_runtime_instances(&self) -> sc_cli::Result<Option<usize>> {
 		self.base.max_runtime_instances()
+	}
+
+	fn runtime_cache_size(&self) -> sc_cli::Result<u8> {
+		self.base.runtime_cache_size()
 	}
 
 	fn base_path(&self) -> sc_cli::Result<Option<BasePath>> {

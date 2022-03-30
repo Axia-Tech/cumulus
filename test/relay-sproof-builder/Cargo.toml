@@ -1,20 +1,20 @@
 [package]
 name = "cumulus-test-relay-sproof-builder"
-version = '0.1.0'
-authors = ["Parity Technologies <admin@parity.io>"]
-edition = '2018'
+version = "0.1.0"
+authors = ["Axia Technologies <admin@axia.io>"]
+edition = "2021"
 
 [dependencies]
 # Other dependencies
 codec = { package = "parity-scale-codec", version = "2.3.0", default-features = false, features = [ "derive" ] }
 
 # Substrate dependencies
-sp-state-machine = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
-sp-runtime = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
-sp-std = { git = "https://github.com/axia-tech/axia-core", default-features = false, branch = "dev" }
+sp-state-machine = { git = "https://github.com/axia-tech/axlib", default-features = false, branch = "axlib" }
+sp-runtime = { git = "https://github.com/axia-tech/axlib", default-features = false, branch = "axlib" }
+sp-std = { git = "https://github.com/axia-tech/axlib", default-features = false, branch = "axlib" }
 
-# AXIA dependencies
-axia-primitives = { git = "https://github.com/axia-tech/axia", default-features = false, branch = "dev" }
+# Axia dependencies
+axia-primitives = { git = "https://github.com/axia-tech/axia", default-features = false, branch = "axia" }
 
 # Cumulus dependencies
 cumulus-primitives-core = { path = "../../primitives/core", default-features = false }
