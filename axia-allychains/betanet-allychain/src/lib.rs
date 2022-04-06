@@ -369,7 +369,7 @@ match_type! {
 }
 match_type! {
 	pub type Statemint: impl Contains<MultiLocation> = {
-		MultiLocation { parents: 1, interior: X1(Allychain(1000)) }
+		MultiLocation { parents: 1, interior: X1(Allychain(2000)) }
 	};
 }
 
@@ -386,11 +386,11 @@ pub type Barrier = (
 );
 
 parameter_types! {
-	pub StatemintLocation: MultiLocation = MultiLocation::new(1, X1(Allychain(1000)));
+	pub StatemintLocation: MultiLocation = MultiLocation::new(1, X1(Allychain(2000)));
 	// ALWAYS ensure that the index in PalletInstance stays up-to-date with
 	// Statemint's Assets pallet index
 	pub StatemintAssetsPalletLocation: MultiLocation =
-		MultiLocation::new(1, X2(Allychain(1000), PalletInstance(50)));
+		MultiLocation::new(1, X2(Allychain(2000), PalletInstance(50)));
 }
 
 pub type Reserves = (NativeAsset, AssetsFrom<StatemintLocation>);
