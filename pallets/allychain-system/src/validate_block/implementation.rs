@@ -132,7 +132,7 @@ where
 
 	run_with_externalities::<B, _, _>(&backend, || {
 		let relay_chain_proof = crate::RelayChainStateProof::new(
-			PSC::SelfParaId::get(),
+			PSC::SelfAllyId::get(),
 			inherent_data.validation_data.relay_parent_storage_root,
 			inherent_data.relay_chain_state.clone(),
 		)

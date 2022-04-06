@@ -15,7 +15,7 @@
 // along with Cumulus.  If not, see <http://www.gnu.org/licenses/>.
 
 use cumulus_primitives_core::{
-	relay_chain, AbridgedHostConfiguration, AbridgedHrmpChannel, ParaId,
+	relay_chain, AbridgedHostConfiguration, AbridgedHrmpChannel, AllyId,
 };
 use axia_primitives::v1::UpgradeGoAhead;
 use sp_runtime::traits::HashFor;
@@ -33,14 +33,14 @@ pub struct RelayStateSproofBuilder {
 	/// It's recommended to change this value once in the very beginning of usage.
 	///
 	/// The default value is 200.
-	pub para_id: ParaId,
+	pub para_id: AllyId,
 
 	pub host_config: AbridgedHostConfiguration,
 	pub dmq_mqc_head: Option<relay_chain::Hash>,
 	pub upgrade_go_ahead: Option<UpgradeGoAhead>,
 	pub relay_dispatch_queue_size: Option<(u32, u32)>,
-	pub hrmp_ingress_channel_index: Option<Vec<ParaId>>,
-	pub hrmp_egress_channel_index: Option<Vec<ParaId>>,
+	pub hrmp_ingress_channel_index: Option<Vec<AllyId>>,
+	pub hrmp_egress_channel_index: Option<Vec<AllyId>>,
 	pub hrmp_channels: BTreeMap<relay_chain::v1::HrmpChannelId, AbridgedHrmpChannel>,
 	pub current_slot: relay_chain::v1::Slot,
 }
@@ -48,7 +48,7 @@ pub struct RelayStateSproofBuilder {
 impl Default for RelayStateSproofBuilder {
 	fn default() -> Self {
 		RelayStateSproofBuilder {
-			para_id: ParaId::from(200),
+			para_id: AllyId::from(200),
 			host_config: cumulus_primitives_core::AbridgedHostConfiguration {
 				max_code_size: 2 * 1024 * 1024,
 				max_head_data_size: 1024 * 1024,
@@ -77,7 +77,7 @@ impl RelayStateSproofBuilder {
 	/// If there is no channel, a new default one is created.
 	///
 	/// It also updates the `hrmp_ingress_channel_index`, creating it if needed.
-	pub fn upsert_inbound_channel(&mut self, sender: ParaId) -> &mut AbridgedHrmpChannel {
+	pub fn upsert_inbound_channel(&mut self, sender: AllyId) -> &mut AbridgedHrmpChannel {
 		let in_index = self.hrmp_ingress_channel_index.get_or_insert_with(Vec::new);
 		if let Err(idx) = in_index.binary_search(&sender) {
 			in_index.insert(idx, sender);

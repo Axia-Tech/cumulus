@@ -24,7 +24,7 @@ use parking_lot::Mutex;
 use axia_node_primitives::{SignedFullStatement, Statement};
 use axia_primitives::v1::{
 	CandidateCommitments, CandidateDescriptor, CollatorPair, CommittedCandidateReceipt,
-	Hash as PHash, HeadData, Header as PHeader, Id as ParaId, InboundDownwardMessage,
+	Hash as PHash, HeadData, Header as PHeader, Id as AllyId, InboundDownwardMessage,
 	InboundHrmpMessage, OccupiedCoreAssumption, PersistedValidationData, SessionIndex,
 	SigningContext, ValidationCodeHash, ValidatorId,
 };
@@ -100,7 +100,7 @@ impl RelayChainInterface for DummyRelayChainInterface {
 
 	async fn retrieve_dmq_contents(
 		&self,
-		_: ParaId,
+		_: AllyId,
 		_: PHash,
 	) -> RelayChainResult<Vec<InboundDownwardMessage>> {
 		unimplemented!("Not needed for test")
@@ -108,16 +108,16 @@ impl RelayChainInterface for DummyRelayChainInterface {
 
 	async fn retrieve_all_inbound_hrmp_channel_contents(
 		&self,
-		_: ParaId,
+		_: AllyId,
 		_: PHash,
-	) -> RelayChainResult<BTreeMap<ParaId, Vec<InboundHrmpMessage>>> {
+	) -> RelayChainResult<BTreeMap<AllyId, Vec<InboundHrmpMessage>>> {
 		Ok(BTreeMap::new())
 	}
 
 	async fn persisted_validation_data(
 		&self,
 		_: &cumulus_primitives_core::relay_chain::BlockId,
-		_: ParaId,
+		_: AllyId,
 		_: OccupiedCoreAssumption,
 	) -> RelayChainResult<Option<PersistedValidationData>> {
 		Ok(Some(PersistedValidationData {
@@ -129,7 +129,7 @@ impl RelayChainInterface for DummyRelayChainInterface {
 	async fn candidate_pending_availability(
 		&self,
 		_: &cumulus_primitives_core::relay_chain::BlockId,
-		_: ParaId,
+		_: AllyId,
 	) -> RelayChainResult<Option<CommittedCandidateReceipt>> {
 		if self.data.lock().has_pending_availability {
 			Ok(Some(CommittedCandidateReceipt {
@@ -256,7 +256,7 @@ fn make_validator_and_api(
 ) -> (BlockAnnounceValidator<Block, Arc<DummyRelayChainInterface>>, Arc<DummyRelayChainInterface>) {
 	let relay_chain_interface = Arc::new(DummyRelayChainInterface::new());
 	(
-		BlockAnnounceValidator::new(relay_chain_interface.clone(), ParaId::from(56)),
+		BlockAnnounceValidator::new(relay_chain_interface.clone(), AllyId::from(56)),
 		relay_chain_interface,
 	)
 }

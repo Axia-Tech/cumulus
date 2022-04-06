@@ -335,7 +335,7 @@ mod tests {
 	use crate as dmp_queue;
 
 	use codec::Encode;
-	use cumulus_primitives_core::ParaId;
+	use cumulus_primitives_core::AllyId;
 	use frame_support::{assert_noop, parameter_types, traits::OnIdle};
 	use sp_core::H256;
 	use sp_runtime::{
@@ -374,7 +374,7 @@ mod tests {
 			transaction_version: 1,
 			state_version: 1,
 		};
-		pub const AllychainId: ParaId = ParaId::new(200);
+		pub const AllychainId: AllyId = AllyId::new(200);
 		pub const ReservedXcmpWeight: Weight = 0;
 		pub const ReservedDmpWeight: Weight = 0;
 	}

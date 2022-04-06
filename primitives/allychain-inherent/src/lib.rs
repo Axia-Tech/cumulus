@@ -29,7 +29,7 @@
 
 use cumulus_primitives_core::{
 	relay_chain::{BlakeTwo256, Hash as RelayHash, HashT as _},
-	InboundDownwardMessage, InboundHrmpMessage, ParaId, PersistedValidationData,
+	InboundDownwardMessage, InboundHrmpMessage, AllyId, PersistedValidationData,
 };
 
 use scale_info::TypeInfo;
@@ -67,7 +67,7 @@ pub struct AllychainInherentData {
 	/// HRMP messages grouped by channels. The messages in the inner vec must be in order they
 	/// were sent. In combination with the rule of no more than one message in a channel per block,
 	/// this means `sent_at` is **strictly** greater than the previous one (if any).
-	pub horizontal_messages: BTreeMap<ParaId, Vec<InboundHrmpMessage>>,
+	pub horizontal_messages: BTreeMap<AllyId, Vec<InboundHrmpMessage>>,
 }
 
 /// This struct provides ability to extend a message queue chain (MQC) and compute a new head.

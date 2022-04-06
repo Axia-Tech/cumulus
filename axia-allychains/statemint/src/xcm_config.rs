@@ -53,7 +53,7 @@ parameter_types! {
 pub type LocationToAccountId = (
 	// The parent (Relay-chain) origin converts to the parent `AccountId`.
 	ParentIsPreset<AccountId>,
-	// Sibling allychain origins convert to AccountId via the `ParaId::into`.
+	// Sibling allychain origins convert to AccountId via the `AllyId::into`.
 	SiblingAllychainConvertsVia<Sibling, AccountId>,
 	// Straight up local `AccountId32` origins just alias directly to `AccountId`.
 	AccountId32Aliases<RelayNetwork, AccountId>,

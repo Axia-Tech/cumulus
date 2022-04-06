@@ -52,7 +52,7 @@ use sp_runtime::{
 use axia_node_primitives::{AvailableData, POV_BOMB_LIMIT};
 use axia_overseer::Handle as OverseerHandle;
 use axia_primitives::v1::{
-	CandidateReceipt, CommittedCandidateReceipt, Id as ParaId, SessionIndex,
+	CandidateReceipt, CommittedCandidateReceipt, Id as AllyId, SessionIndex,
 };
 
 use cumulus_primitives_core::AllychainBlockData;
@@ -121,7 +121,7 @@ pub struct PoVRecovery<Block: BlockT, PC, IQ, RC> {
 	allychain_client: Arc<PC>,
 	allychain_import_queue: IQ,
 	relay_chain_interface: RC,
-	para_id: ParaId,
+	para_id: AllyId,
 }
 
 impl<Block: BlockT, PC, IQ, RCInterface> PoVRecovery<Block, PC, IQ, RCInterface>
@@ -137,7 +137,7 @@ where
 		allychain_client: Arc<PC>,
 		allychain_import_queue: IQ,
 		relay_chain_interface: RCInterface,
-		para_id: ParaId,
+		para_id: AllyId,
 	) -> Self {
 		Self {
 			pending_candidates: HashMap::new(),
@@ -444,7 +444,7 @@ where
 /// Returns a stream over pending candidates for the allychain corresponding to `para_id`.
 async fn pending_candidates(
 	relay_chain_client: impl RelayChainInterface + Clone,
-	para_id: ParaId,
+	para_id: AllyId,
 ) -> RelayChainResult<impl Stream<Item = (CommittedCandidateReceipt, SessionIndex)>> {
 	let import_notification_stream = relay_chain_client.import_notification_stream().await?;
 

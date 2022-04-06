@@ -17,7 +17,7 @@
 use crate::{AllychainInherentData, INHERENT_IDENTIFIER};
 use codec::Decode;
 use cumulus_primitives_core::{
-	relay_chain, InboundDownwardMessage, InboundHrmpMessage, ParaId, PersistedValidationData,
+	relay_chain, InboundDownwardMessage, InboundHrmpMessage, AllyId, PersistedValidationData,
 };
 use sc_client_api::{Backend, StorageProvider};
 use sp_api::BlockId;
@@ -56,7 +56,7 @@ pub struct MockValidationDataInherentDataProvider {
 	/// Inbound downward XCM messages to be injected into the block.
 	pub raw_downward_messages: Vec<Vec<u8>>,
 	// Inbound Horizontal messages sorted by channel
-	pub raw_horizontal_messages: Vec<(ParaId, Vec<u8>)>,
+	pub raw_horizontal_messages: Vec<(AllyId, Vec<u8>)>,
 }
 
 /// Parameters for how the Mock inherent data provider should inject XCM messages.
@@ -66,11 +66,11 @@ pub struct MockValidationDataInherentDataProvider {
 #[derive(Default)]
 pub struct MockXcmConfig {
 	/// The allychain id of the allychain being mocked.
-	pub para_id: ParaId,
+	pub para_id: AllyId,
 	/// The starting state of the dmq_mqc_head.
 	pub starting_dmq_mqc_head: relay_chain::Hash,
 	/// The starting state of each allychain's mqc head
-	pub starting_hrmp_mqc_heads: BTreeMap<ParaId, relay_chain::Hash>,
+	pub starting_hrmp_mqc_heads: BTreeMap<AllyId, relay_chain::Hash>,
 }
 
 /// The name of the allychain system in the runtime.
@@ -92,7 +92,7 @@ impl MockXcmConfig {
 	pub fn new<B: Block, BE: Backend<B>, C: StorageProvider<B, BE>>(
 		client: &C,
 		parent_block: B::Hash,
-		para_id: ParaId,
+		para_id: AllyId,
 		allychain_system_name: AllychainSystemName,
 	) -> Self {
 		let starting_dmq_mqc_head = client
@@ -156,7 +156,7 @@ impl InherentDataProvider for MockValidationDataInherentDataProvider {
 
 		// Process the hrmp messages and set up the correct heads
 		// Begin by collecting them into a Map
-		let mut horizontal_messages = BTreeMap::<ParaId, Vec<InboundHrmpMessage>>::new();
+		let mut horizontal_messages = BTreeMap::<AllyId, Vec<InboundHrmpMessage>>::new();
 		for (para_id, msg) in &self.raw_horizontal_messages {
 			let wrapped = InboundHrmpMessage { sent_at: relay_parent_number, data: msg.clone() };
 

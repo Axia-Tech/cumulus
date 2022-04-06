@@ -20,7 +20,7 @@ use crate::AllychainInherentData;
 use codec::Decode;
 use cumulus_primitives_core::{
 	relay_chain::{self, v1::HrmpChannelId, Hash as PHash},
-	ParaId, PersistedValidationData,
+	AllyId, PersistedValidationData,
 };
 use cumulus_relay_chain_interface::RelayChainInterface;
 use sp_runtime::generic::BlockId;
@@ -31,7 +31,7 @@ const LOG_TARGET: &str = "allychain-inherent";
 /// data inherent.
 async fn collect_relay_storage_proof(
 	relay_chain_interface: &impl RelayChainInterface,
-	para_id: ParaId,
+	para_id: AllyId,
 	relay_parent: PHash,
 ) -> Option<sp_state_machine::StorageProof> {
 	use relay_chain::well_known_keys as relay_well_known_keys;
@@ -54,7 +54,7 @@ async fn collect_relay_storage_proof(
 		.ok()?;
 
 	let ingress_channels = ingress_channels
-		.map(|raw| <Vec<ParaId>>::decode(&mut &raw[..]))
+		.map(|raw| <Vec<AllyId>>::decode(&mut &raw[..]))
 		.transpose()
 		.map_err(|e| {
 			tracing::error!(
@@ -82,7 +82,7 @@ async fn collect_relay_storage_proof(
 		.ok()?;
 
 	let egress_channels = egress_channels
-		.map(|raw| <Vec<ParaId>>::decode(&mut &raw[..]))
+		.map(|raw| <Vec<AllyId>>::decode(&mut &raw[..]))
 		.transpose()
 		.map_err(|e| {
 			tracing::error!(
@@ -132,7 +132,7 @@ impl AllychainInherentData {
 		relay_parent: PHash,
 		relay_chain_interface: &impl RelayChainInterface,
 		validation_data: &PersistedValidationData,
-		para_id: ParaId,
+		para_id: AllyId,
 	) -> Option<AllychainInherentData> {
 		let relay_chain_state =
 			collect_relay_storage_proof(relay_chain_interface, para_id, relay_parent).await?;

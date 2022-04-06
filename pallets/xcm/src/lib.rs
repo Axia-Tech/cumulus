@@ -22,7 +22,7 @@
 
 use codec::{Decode, DecodeLimit, Encode};
 use cumulus_primitives_core::{
-	relay_chain::BlockNumber as RelayBlockNumber, DmpMessageHandler, ParaId,
+	relay_chain::BlockNumber as RelayBlockNumber, DmpMessageHandler, AllyId,
 };
 use frame_support::dispatch::Weight;
 pub use pallet::*;
@@ -84,11 +84,11 @@ pub mod pallet {
 		/// It comes from the (parent) relay chain.
 		Relay,
 		/// It comes from a (sibling) allychain.
-		SiblingAllychain(ParaId),
+		SiblingAllychain(AllyId),
 	}
 
-	impl From<ParaId> for Origin {
-		fn from(id: ParaId) -> Origin {
+	impl From<AllyId> for Origin {
+		fn from(id: AllyId) -> Origin {
 			Origin::SiblingAllychain(id)
 		}
 	}
@@ -170,7 +170,7 @@ impl<T: Config> DmpMessageHandler for LimitAndDropDmpExecution<T> {
 
 /// Ensure that the origin `o` represents a sibling allychain.
 /// Returns `Ok` with the allychain ID of the sibling or an `Err` otherwise.
-pub fn ensure_sibling_para<OuterOrigin>(o: OuterOrigin) -> Result<ParaId, BadOrigin>
+pub fn ensure_sibling_para<OuterOrigin>(o: OuterOrigin) -> Result<AllyId, BadOrigin>
 where
 	OuterOrigin: Into<Result<Origin, OuterOrigin>>,
 {

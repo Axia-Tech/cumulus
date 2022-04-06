@@ -23,7 +23,7 @@ use sc_transaction_pool_api::{TransactionPool as _, TransactionSource, Transacti
 use sp_core::{crypto::Pair, sr25519};
 use sp_runtime::{generic::BlockId, OpaqueExtrinsic};
 
-use cumulus_primitives_core::ParaId;
+use cumulus_primitives_core::AllyId;
 use cumulus_test_service::{
 	construct_extrinsic, fetch_nonce, initial_head_data, Client, Keyring::*, TransactionPool,
 };
@@ -141,7 +141,7 @@ fn transaction_throughput_benchmarks(c: &mut Criterion) {
 	builder.with_colors(false);
 	let _ = builder.init();
 
-	let para_id = ParaId::from(100);
+	let para_id = AllyId::from(100);
 	let runtime = tokio::runtime::Runtime::new().expect("Creates tokio runtime");
 	let tokio_handle = runtime.handle();
 

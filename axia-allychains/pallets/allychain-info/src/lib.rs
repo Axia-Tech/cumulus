@@ -22,7 +22,7 @@ pub use pallet::*;
 
 #[frame_support::pallet]
 pub mod pallet {
-	use cumulus_primitives_core::ParaId;
+	use cumulus_primitives_core::AllyId;
 	use frame_support::pallet_prelude::*;
 	use frame_system::pallet_prelude::*;
 
@@ -41,7 +41,7 @@ pub mod pallet {
 
 	#[pallet::genesis_config]
 	pub struct GenesisConfig {
-		pub allychain_id: ParaId,
+		pub allychain_id: AllyId,
 	}
 
 	#[cfg(feature = "std")]
@@ -59,17 +59,17 @@ pub mod pallet {
 	}
 
 	#[pallet::type_value]
-	pub(super) fn DefaultForAllychainId() -> ParaId {
+	pub(super) fn DefaultForAllychainId() -> AllyId {
 		100.into()
 	}
 
 	#[pallet::storage]
 	#[pallet::getter(fn allychain_id)]
 	pub(super) type AllychainId<T: Config> =
-		StorageValue<_, ParaId, ValueQuery, DefaultForAllychainId>;
+		StorageValue<_, AllyId, ValueQuery, DefaultForAllychainId>;
 
-	impl<T: Config> Get<ParaId> for Pallet<T> {
-		fn get() -> ParaId {
+	impl<T: Config> Get<AllyId> for Pallet<T> {
+		fn get() -> AllyId {
 			Self::allychain_id()
 		}
 	}

@@ -257,7 +257,7 @@ impl pallet_sudo::Config for Runtime {
 }
 
 impl cumulus_pallet_allychain_system::Config for Runtime {
-	type SelfParaId = AllychainId;
+	type SelfAllyId = AllychainId;
 	type Event = Event;
 	type OnSystemEvent = ();
 	type OutboundXcmpMessageSource = ();
@@ -268,7 +268,7 @@ impl cumulus_pallet_allychain_system::Config for Runtime {
 }
 
 parameter_types! {
-	pub storage AllychainId: cumulus_primitives_core::ParaId = 100.into();
+	pub storage AllychainId: cumulus_primitives_core::AllyId = 100.into();
 }
 
 impl test_pallet::Config for Runtime {}

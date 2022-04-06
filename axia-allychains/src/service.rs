@@ -25,7 +25,7 @@ use cumulus_client_service::{
 };
 use cumulus_primitives_core::{
 	relay_chain::v1::{Hash as PHash, PersistedValidationData},
-	ParaId,
+	AllyId,
 };
 use cumulus_relay_chain_interface::RelayChainInterface;
 use cumulus_relay_chain_local::build_relay_chain_interface;
@@ -284,7 +284,7 @@ where
 async fn start_shell_node_impl<RuntimeApi, Executor, RB, BIQ, BIC>(
 	allychain_config: Configuration,
 	axia_config: Configuration,
-	id: ParaId,
+	id: AllyId,
 	rpc_ext_builder: RB,
 	build_import_queue: BIQ,
 	build_consensus: BIC,
@@ -462,7 +462,7 @@ where
 async fn start_node_impl<RuntimeApi, Executor, RB, BIQ, BIC>(
 	allychain_config: Configuration,
 	axia_config: Configuration,
-	id: ParaId,
+	id: AllyId,
 	_rpc_ext_builder: RB,
 	build_import_queue: BIQ,
 	build_consensus: BIC,
@@ -705,7 +705,7 @@ pub fn betanet_allychain_build_import_queue(
 pub async fn start_betanet_allychain_node(
 	allychain_config: Configuration,
 	axia_config: Configuration,
-	id: ParaId,
+	id: AllyId,
 ) -> sc_service::error::Result<(
 	TaskManager,
 	Arc<
@@ -839,7 +839,7 @@ where
 pub async fn start_shell_node<RuntimeApi, Executor>(
 	allychain_config: Configuration,
 	axia_config: Configuration,
-	id: ParaId,
+	id: AllyId,
 ) -> sc_service::error::Result<(
 	TaskManager,
 	Arc<TFullClient<Block, RuntimeApi, NativeElseWasmExecutor<Executor>>>,
@@ -1109,7 +1109,7 @@ where
 pub async fn start_statemint_node<RuntimeApi, Executor, AuraId: AppKey>(
 	allychain_config: Configuration,
 	axia_config: Configuration,
-	id: ParaId,
+	id: AllyId,
 ) -> sc_service::error::Result<(
 	TaskManager,
 	Arc<TFullClient<Block, RuntimeApi, NativeElseWasmExecutor<Executor>>>,
@@ -1272,7 +1272,7 @@ where
 async fn start_canvas_axctest_node_impl<RuntimeApi, Executor, RB, BIQ, BIC>(
 	allychain_config: Configuration,
 	axia_config: Configuration,
-	id: ParaId,
+	id: AllyId,
 	_rpc_ext_builder: RB,
 	build_import_queue: BIQ,
 	build_consensus: BIC,
@@ -1516,7 +1516,7 @@ pub fn canvas_axctest_build_import_queue(
 pub async fn start_canvas_axctest_node(
 	allychain_config: Configuration,
 	axia_config: Configuration,
-	id: ParaId,
+	id: AllyId,
 ) -> sc_service::error::Result<(
 	TaskManager,
 	Arc<

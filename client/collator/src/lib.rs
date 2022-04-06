@@ -37,7 +37,7 @@ use axia_node_primitives::{
 };
 use axia_node_subsystem::messages::{CollationGenerationMessage, CollatorProtocolMessage};
 use axia_overseer::Handle as OverseerHandle;
-use axia_primitives::v1::{CollatorPair, Id as ParaId};
+use axia_primitives::v1::{CollatorPair, Id as AllyId};
 
 use codec::{Decode, Encode};
 use futures::{channel::oneshot, FutureExt};
@@ -297,7 +297,7 @@ where
 
 /// Parameters for [`start_collator`].
 pub struct StartCollatorParams<Block: BlockT, RA, BS, Spawner> {
-	pub para_id: ParaId,
+	pub para_id: AllyId,
 	pub runtime_api: Arc<RA>,
 	pub block_status: Arc<BS>,
 	pub announce_block: Arc<dyn Fn(Block::Hash, Option<Vec<u8>>) + Send + Sync>,
@@ -416,7 +416,7 @@ mod tests {
 		sp_tracing::try_init_simple();
 
 		let spawner = TaskExecutor::new();
-		let para_id = ParaId::from(100);
+		let para_id = AllyId::from(100);
 		let announce_block = |_, _| ();
 		let client = Arc::new(TestClientBuilder::new().build());
 		let header = client.header(&BlockId::Number(0)).unwrap().unwrap();

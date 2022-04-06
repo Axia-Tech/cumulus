@@ -16,7 +16,7 @@
 
 use codec::{Decode, Encode};
 use cumulus_primitives_core::{
-	relay_chain, AbridgedHostConfiguration, AbridgedHrmpChannel, ParaId,
+	relay_chain, AbridgedHostConfiguration, AbridgedHrmpChannel, AllyId,
 };
 use scale_info::TypeInfo;
 use sp_runtime::traits::HashFor;
@@ -48,7 +48,7 @@ pub struct MessagingStateSnapshot {
 	/// of the channel. Obviously, the recipient is the current allychain.
 	///
 	/// The channels are sorted by the sender para id ascension.
-	pub ingress_channels: Vec<(ParaId, AbridgedHrmpChannel)>,
+	pub ingress_channels: Vec<(AllyId, AbridgedHrmpChannel)>,
 
 	/// Information about all the outbound HRMP channels.
 	///
@@ -56,7 +56,7 @@ pub struct MessagingStateSnapshot {
 	/// of the channel. Obviously, the sender is the current allychain.
 	///
 	/// The channels are sorted by the recipient para id ascension.
-	pub egress_channels: Vec<(ParaId, AbridgedHrmpChannel)>,
+	pub egress_channels: Vec<(AllyId, AbridgedHrmpChannel)>,
 }
 
 #[derive(Debug)]
@@ -80,7 +80,7 @@ pub enum Error {
 	/// The hrmp egress channel index cannot be extracted.
 	HrmpEgressChannelIndex(ReadEntryErr),
 	/// The channel identified by the sender and receiver cannot be extracted.
-	HrmpChannel(ParaId, ParaId, ReadEntryErr),
+	HrmpChannel(AllyId, AllyId, ReadEntryErr),
 }
 
 #[derive(Debug)]
@@ -134,7 +134,7 @@ where
 ///
 /// This state proof is extracted from the relay chain block we are building on top of.
 pub struct RelayChainStateProof {
-	para_id: ParaId,
+	para_id: AllyId,
 	trie_backend: TrieBackend<MemoryDB<HashFor<relay_chain::Block>>, HashFor<relay_chain::Block>>,
 }
 
@@ -144,7 +144,7 @@ impl RelayChainStateProof {
 	/// Returns an error if the given `relay_parent_storage_root` is not the root of the given
 	/// `proof`.
 	pub fn new(
-		para_id: ParaId,
+		para_id: AllyId,
 		relay_parent_storage_root: relay_chain::v1::Hash,
 		proof: StorageProof,
 	) -> Result<Self, Error> {
@@ -175,14 +175,14 @@ impl RelayChainStateProof {
 		)
 		.map_err(Error::RelayDispatchQueueSize)?;
 
-		let ingress_channel_index: Vec<ParaId> = read_entry(
+		let ingress_channel_index: Vec<AllyId> = read_entry(
 			&self.trie_backend,
 			&relay_chain::well_known_keys::hrmp_ingress_channel_index(self.para_id),
 			Some(Vec::new()),
 		)
 		.map_err(Error::HrmpIngressChannelIndex)?;
 
-		let egress_channel_index: Vec<ParaId> = read_entry(
+		let egress_channel_index: Vec<AllyId> = read_entry(
 			&self.trie_backend,
 			&relay_chain::well_known_keys::hrmp_egress_channel_index(self.para_id),
 			Some(Vec::new()),

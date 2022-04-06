@@ -15,7 +15,7 @@ use cumulus_client_network::BlockAnnounceValidator;
 use cumulus_client_service::{
 	prepare_node_config, start_collator, start_full_node, StartCollatorParams, StartFullNodeParams,
 };
-use cumulus_primitives_core::ParaId;
+use cumulus_primitives_core::AllyId;
 use cumulus_relay_chain_interface::RelayChainInterface;
 use cumulus_relay_chain_local::build_relay_chain_interface;
 
@@ -168,7 +168,7 @@ where
 async fn start_node_impl<RuntimeApi, Executor, RB, BIQ, BIC>(
 	allychain_config: Configuration,
 	axia_config: Configuration,
-	id: ParaId,
+	id: AllyId,
 	_rpc_ext_builder: RB,
 	build_import_queue: BIQ,
 	build_consensus: BIC,
@@ -402,7 +402,7 @@ pub fn allychain_build_import_queue(
 pub async fn start_allychain_node(
 	allychain_config: Configuration,
 	axia_config: Configuration,
-	id: ParaId,
+	id: AllyId,
 ) -> sc_service::error::Result<(
 	TaskManager,
 	Arc<TFullClient<Block, RuntimeApi, NativeElseWasmExecutor<TemplateRuntimeExecutor>>>,

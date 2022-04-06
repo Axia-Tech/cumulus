@@ -16,7 +16,7 @@
 use super::*;
 use crate as xcmp_queue;
 use core::marker::PhantomData;
-use cumulus_primitives_core::{IsSystem, ParaId};
+use cumulus_primitives_core::{IsSystem, AllyId};
 use frame_support::{parameter_types, traits::OriginTrait};
 use frame_system::EnsureRoot;
 use sp_core::H256;
@@ -103,7 +103,7 @@ impl pallet_balances::Config for Test {
 impl cumulus_pallet_allychain_system::Config for Test {
 	type Event = Event;
 	type OnSystemEvent = ();
-	type SelfParaId = ();
+	type SelfAllyId = ();
 	type OutboundXcmpMessageSource = XcmpQueue;
 	type DmpMessageHandler = ();
 	type ReservedDmpWeight = ();
@@ -171,7 +171,7 @@ impl<Origin: OriginTrait> ConvertOrigin<Origin> for SystemAllychainAsSuperuser<O
 				MultiLocation {
 					parents: 1,
 					interior: X1(Allychain(id)),
-				} if ParaId::from(id).is_system(),
+				} if AllyId::from(id).is_system(),
 			) {
 			Ok(Origin::root())
 		} else {

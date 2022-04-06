@@ -36,7 +36,7 @@
 use cumulus_client_consensus_common::{
 	AllychainBlockImport, AllychainCandidate, AllychainConsensus,
 };
-use cumulus_primitives_core::{relay_chain::v1::Hash as PHash, ParaId, PersistedValidationData};
+use cumulus_primitives_core::{relay_chain::v1::Hash as PHash, AllyId, PersistedValidationData};
 use cumulus_relay_chain_interface::RelayChainInterface;
 use parking_lot::Mutex;
 
@@ -55,7 +55,7 @@ const LOG_TARGET: &str = "cumulus-consensus-relay-chain";
 
 /// The implementation of the relay-chain provided consensus for allychains.
 pub struct RelayChainConsensus<B, PF, BI, RCInterface, CIDP> {
-	para_id: ParaId,
+	para_id: AllyId,
 	_phantom: PhantomData<B>,
 	proposer_factory: Arc<Mutex<PF>>,
 	create_inherent_data_providers: Arc<CIDP>,
@@ -87,7 +87,7 @@ where
 {
 	/// Create a new instance of relay-chain provided consensus.
 	pub fn new(
-		para_id: ParaId,
+		para_id: AllyId,
 		proposer_factory: PF,
 		create_inherent_data_providers: CIDP,
 		block_import: BI,
@@ -219,7 +219,7 @@ where
 
 /// Parameters of [`build_relay_chain_consensus`].
 pub struct BuildRelayChainConsensusParams<PF, BI, CIDP, RCInterface> {
-	pub para_id: ParaId,
+	pub para_id: AllyId,
 	pub proposer_factory: PF,
 	pub create_inherent_data_providers: CIDP,
 	pub block_import: BI,

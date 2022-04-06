@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Substrate.  If not, see <http://www.gnu.org/licenses/>.
 
-use cumulus_primitives_core::ParaId;
+use cumulus_primitives_core::AllyId;
 use cumulus_test_service::{initial_head_data, Keyring::*};
 use std::sync::Arc;
 
@@ -30,7 +30,7 @@ async fn pov_recovery() {
 	builder.with_colors(false);
 	let _ = builder.init();
 
-	let para_id = ParaId::from(100);
+	let para_id = AllyId::from(100);
 	let tokio_handle = tokio::runtime::Handle::current();
 
 	// Start alice

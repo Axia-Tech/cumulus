@@ -1,4 +1,4 @@
-use cumulus_primitives_core::ParaId;
+use cumulus_primitives_core::AllyId;
 use allychain_template_runtime::{AccountId, AuraId, Signature, EXISTENTIAL_DEPOSIT};
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::ChainType;
@@ -180,7 +180,7 @@ pub fn local_testnet_config() -> ChainSpec {
 fn testnet_genesis(
 	invulnerables: Vec<(AccountId, AuraId)>,
 	endowed_accounts: Vec<AccountId>,
-	id: ParaId,
+	id: AllyId,
 ) -> allychain_template_runtime::GenesisConfig {
 	allychain_template_runtime::GenesisConfig {
 		system: allychain_template_runtime::SystemConfig {

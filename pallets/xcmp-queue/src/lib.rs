@@ -36,7 +36,7 @@ mod tests;
 use codec::{Decode, DecodeLimit, Encode};
 use cumulus_primitives_core::{
 	relay_chain::BlockNumber as RelayBlockNumber, ChannelStatus, GetChannelInfo, MessageSendError,
-	ParaId, XcmpMessageFormat, XcmpMessageHandler, XcmpMessageSource,
+	AllyId, XcmpMessageFormat, XcmpMessageHandler, XcmpMessageSource,
 };
 use frame_support::{
 	traits::EnsureOrigin,
@@ -265,7 +265,7 @@ pub mod pallet {
 		/// An HRMP message was sent to a sibling allychain.
 		XcmpMessageSent(Option<T::Hash>),
 		/// An XCM exceeded the individual message weight budget.
-		OverweightEnqueued(ParaId, RelayBlockNumber, OverweightIndex, Weight),
+		OverweightEnqueued(AllyId, RelayBlockNumber, OverweightIndex, Weight),
 		/// An XCM from the overweight queue was executed with the given actual weight used.
 		OverweightServiced(OverweightIndex, Weight),
 	}
@@ -289,12 +289,12 @@ pub mod pallet {
 	pub(super) type InboundXcmpStatus<T: Config> =
 		StorageValue<_, Vec<InboundChannelDetails>, ValueQuery>;
 
-	/// Inbound aggregate XCMP messages. It can only be one per ParaId/block.
+	/// Inbound aggregate XCMP messages. It can only be one per AllyId/block.
 	#[pallet::storage]
 	pub(super) type InboundXcmpMessages<T: Config> = StorageDoubleMap<
 		_,
 		Blake2_128Concat,
-		ParaId,
+		AllyId,
 		Twox64Concat,
 		RelayBlockNumber,
 		Vec<u8>,
@@ -315,12 +315,12 @@ pub mod pallet {
 	/// The messages outbound in a given XCMP channel.
 	#[pallet::storage]
 	pub(super) type OutboundXcmpMessages<T: Config> =
-		StorageDoubleMap<_, Blake2_128Concat, ParaId, Twox64Concat, u16, Vec<u8>, ValueQuery>;
+		StorageDoubleMap<_, Blake2_128Concat, AllyId, Twox64Concat, u16, Vec<u8>, ValueQuery>;
 
 	/// Any signal messages waiting to be sent.
 	#[pallet::storage]
 	pub(super) type SignalMessages<T: Config> =
-		StorageMap<_, Blake2_128Concat, ParaId, Vec<u8>, ValueQuery>;
+		StorageMap<_, Blake2_128Concat, AllyId, Vec<u8>, ValueQuery>;
 
 	/// The configuration which controls the dynamics of the outbound queue.
 	#[pallet::storage]
@@ -332,7 +332,7 @@ pub mod pallet {
 	/// `service_overweight`.
 	#[pallet::storage]
 	pub(super) type Overweight<T: Config> =
-		StorageMap<_, Twox64Concat, OverweightIndex, (ParaId, RelayBlockNumber, Vec<u8>)>;
+		StorageMap<_, Twox64Concat, OverweightIndex, (AllyId, RelayBlockNumber, Vec<u8>)>;
 
 	/// The number of overweight messages ever recorded in `Overweight`. Also doubles as the next
 	/// available free overweight index.
@@ -359,8 +359,8 @@ pub enum OutboundState {
 /// Struct containing detailed information about the inbound channel.
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Encode, Decode, TypeInfo)]
 pub struct InboundChannelDetails {
-	/// The `ParaId` of the allychain that this channel is connected with.
-	sender: ParaId,
+	/// The `AllyId` of the allychain that this channel is connected with.
+	sender: AllyId,
 	/// The state of the channel.
 	state: InboundState,
 	/// The ordered metadata of each inbound message.
@@ -373,8 +373,8 @@ pub struct InboundChannelDetails {
 /// Struct containing detailed information about the outbound channel.
 #[derive(Clone, Eq, PartialEq, Encode, Decode, TypeInfo)]
 pub struct OutboundChannelDetails {
-	/// The `ParaId` of the allychain that this channel is connected with.
-	recipient: ParaId,
+	/// The `AllyId` of the allychain that this channel is connected with.
+	recipient: AllyId,
 	/// The state of the channel.
 	state: OutboundState,
 	/// Whether or not any signals exist in this channel.
@@ -386,7 +386,7 @@ pub struct OutboundChannelDetails {
 }
 
 impl OutboundChannelDetails {
-	pub fn new(recipient: ParaId) -> OutboundChannelDetails {
+	pub fn new(recipient: AllyId) -> OutboundChannelDetails {
 		OutboundChannelDetails {
 			recipient,
 			state: OutboundState::Ok,
@@ -469,7 +469,7 @@ impl<T: Config> Pallet<T> {
 	/// we can concatenate them into a single aggregate blob without needing to be concerned
 	/// about encoding fragment boundaries.
 	fn send_fragment<Fragment: Encode>(
-		recipient: ParaId,
+		recipient: AllyId,
 		format: XcmpMessageFormat,
 		fragment: Fragment,
 	) -> Result<u32, MessageSendError> {
@@ -522,7 +522,7 @@ impl<T: Config> Pallet<T> {
 
 	/// Sends a signal to the `dest` chain over XCMP. This is guaranteed to be dispatched on this
 	/// block.
-	fn send_signal(dest: ParaId, signal: ChannelSignal) -> Result<(), ()> {
+	fn send_signal(dest: AllyId, signal: ChannelSignal) -> Result<(), ()> {
 		let mut s = <OutboundXcmpStatus<T>>::get();
 		if let Some(index) = s.iter().position(|item| item.recipient == dest) {
 			s[index].signals_exist = true;
@@ -541,12 +541,12 @@ impl<T: Config> Pallet<T> {
 		Ok(())
 	}
 
-	pub fn send_blob_message(recipient: ParaId, blob: Vec<u8>) -> Result<u32, MessageSendError> {
+	pub fn send_blob_message(recipient: AllyId, blob: Vec<u8>) -> Result<u32, MessageSendError> {
 		Self::send_fragment(recipient, XcmpMessageFormat::ConcatenatedEncodedBlob, blob)
 	}
 
 	pub fn send_xcm_message(
-		recipient: ParaId,
+		recipient: AllyId,
 		xcm: VersionedXcm<()>,
 	) -> Result<u32, MessageSendError> {
 		Self::send_fragment(recipient, XcmpMessageFormat::ConcatenatedVersionedXcm, xcm)
@@ -571,7 +571,7 @@ impl<T: Config> Pallet<T> {
 	}
 
 	fn handle_blob_message(
-		_sender: ParaId,
+		_sender: AllyId,
 		_sent_at: RelayBlockNumber,
 		_blob: Vec<u8>,
 		_weight_limit: Weight,
@@ -581,7 +581,7 @@ impl<T: Config> Pallet<T> {
 	}
 
 	fn handle_xcm_message(
-		sender: ParaId,
+		sender: AllyId,
 		_sent_at: RelayBlockNumber,
 		xcm: VersionedXcm<T::Call>,
 		max_weight: Weight,
@@ -606,7 +606,7 @@ impl<T: Config> Pallet<T> {
 	}
 
 	fn process_xcmp_message(
-		sender: ParaId,
+		sender: AllyId,
 		(sent_at, format): (RelayBlockNumber, XcmpMessageFormat),
 		max_weight: Weight,
 		max_individual_weight: Weight,
@@ -697,7 +697,7 @@ impl<T: Config> Pallet<T> {
 
 	/// Puts a given XCM into the list of overweight messages, allowing it to be executed later.
 	fn stash_overweight(
-		sender: ParaId,
+		sender: AllyId,
 		sent_at: RelayBlockNumber,
 		xcm: Vec<u8>,
 	) -> OverweightIndex {
@@ -849,7 +849,7 @@ impl<T: Config> Pallet<T> {
 		weight_used
 	}
 
-	fn suspend_channel(target: ParaId) {
+	fn suspend_channel(target: AllyId) {
 		<OutboundXcmpStatus<T>>::mutate(|s| {
 			if let Some(index) = s.iter().position(|item| item.recipient == target) {
 				let ok = s[index].state == OutboundState::Ok;
@@ -861,7 +861,7 @@ impl<T: Config> Pallet<T> {
 		});
 	}
 
-	fn resume_channel(target: ParaId) {
+	fn resume_channel(target: AllyId) {
 		<OutboundXcmpStatus<T>>::mutate(|s| {
 			if let Some(index) = s.iter().position(|item| item.recipient == target) {
 				let suspended = s[index].state == OutboundState::Suspended;
@@ -882,7 +882,7 @@ impl<T: Config> Pallet<T> {
 }
 
 impl<T: Config> XcmpMessageHandler for Pallet<T> {
-	fn handle_xcmp_messages<'a, I: Iterator<Item = (ParaId, RelayBlockNumber, &'a [u8])>>(
+	fn handle_xcmp_messages<'a, I: Iterator<Item = (AllyId, RelayBlockNumber, &'a [u8])>>(
 		iter: I,
 		max_weight: Weight,
 	) -> Weight {
@@ -957,7 +957,7 @@ impl<T: Config> XcmpMessageHandler for Pallet<T> {
 }
 
 impl<T: Config> XcmpMessageSource for Pallet<T> {
-	fn take_outbound_messages(maximum_channels: usize) -> Vec<(ParaId, Vec<u8>)> {
+	fn take_outbound_messages(maximum_channels: usize) -> Vec<(AllyId, Vec<u8>)> {
 		let mut statuses = <OutboundXcmpStatus<T>>::get();
 		let old_statuses_len = statuses.len();
 		let max_message_count = statuses.len().min(maximum_channels);

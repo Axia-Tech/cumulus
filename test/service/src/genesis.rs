@@ -16,13 +16,13 @@
 
 use codec::Encode;
 use cumulus_client_service::genesis::generate_genesis_block;
-use cumulus_primitives_core::ParaId;
+use cumulus_primitives_core::AllyId;
 use cumulus_test_runtime::Block;
 use axia_primitives::v0::HeadData;
 use sp_runtime::traits::Block as BlockT;
 
 /// Returns the initial head data for a allychain ID.
-pub fn initial_head_data(para_id: ParaId) -> HeadData {
+pub fn initial_head_data(para_id: AllyId) -> HeadData {
 	let spec = Box::new(crate::chain_spec::get_chain_spec(para_id));
 	let block: Block =
 		generate_genesis_block(&(spec as Box<_>), sp_runtime::StateVersion::V1).unwrap();

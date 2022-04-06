@@ -155,7 +155,7 @@ impl cumulus_pallet_solo_to_para::Config for Runtime {
 impl cumulus_pallet_allychain_system::Config for Runtime {
 	type Event = Event;
 	type OnSystemEvent = cumulus_pallet_solo_to_para::Pallet<Runtime>;
-	type SelfParaId = allychain_info::Pallet<Runtime>;
+	type SelfAllyId = allychain_info::Pallet<Runtime>;
 	type OutboundXcmpMessageSource = ();
 	type DmpMessageHandler = ();
 	type ReservedDmpWeight = ();

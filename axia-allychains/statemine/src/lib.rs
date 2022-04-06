@@ -408,7 +408,7 @@ parameter_types! {
 impl cumulus_pallet_allychain_system::Config for Runtime {
 	type Event = Event;
 	type OnSystemEvent = ();
-	type SelfParaId = allychain_info::Pallet<Runtime>;
+	type SelfAllyId = allychain_info::Pallet<Runtime>;
 	type DmpMessageHandler = DmpQueue;
 	type ReservedDmpWeight = ReservedDmpWeight;
 	type OutboundXcmpMessageSource = XcmpQueue;

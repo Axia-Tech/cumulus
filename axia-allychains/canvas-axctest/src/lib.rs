@@ -242,7 +242,7 @@ impl pallet_utility::Config for Runtime {
 impl cumulus_pallet_allychain_system::Config for Runtime {
 	type Event = Event;
 	type OnSystemEvent = ();
-	type SelfParaId = allychain_info::Pallet<Runtime>;
+	type SelfAllyId = allychain_info::Pallet<Runtime>;
 	type DmpMessageHandler = DmpQueue;
 	type ReservedDmpWeight = ConstU64<{ MAXIMUM_BLOCK_WEIGHT / 4 }>;
 	type OutboundXcmpMessageSource = XcmpQueue;

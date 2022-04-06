@@ -21,7 +21,7 @@ use cumulus_primitives_core::{
 		v1::{CommittedCandidateReceipt, OccupiedCoreAssumption, SessionIndex, ValidatorId},
 		BlockId, Hash as PHash, Header as PHeader, InboundHrmpMessage,
 	},
-	InboundDownwardMessage, ParaId, PersistedValidationData,
+	InboundDownwardMessage, AllyId, PersistedValidationData,
 };
 use axia_overseer::Handle as OverseerHandle;
 use sc_client_api::{blockchain::BlockStatus, StorageProof};
@@ -77,7 +77,7 @@ pub trait RelayChainInterface: Send + Sync {
 	/// Returns `None` in case of an error.
 	async fn retrieve_dmq_contents(
 		&self,
-		para_id: ParaId,
+		para_id: AllyId,
 		relay_parent: PHash,
 	) -> RelayChainResult<Vec<InboundDownwardMessage>>;
 
@@ -87,11 +87,11 @@ pub trait RelayChainInterface: Send + Sync {
 	/// Empty channels are also included.
 	async fn retrieve_all_inbound_hrmp_channel_contents(
 		&self,
-		para_id: ParaId,
+		para_id: AllyId,
 		relay_parent: PHash,
-	) -> RelayChainResult<BTreeMap<ParaId, Vec<InboundHrmpMessage>>>;
+	) -> RelayChainResult<BTreeMap<AllyId, Vec<InboundHrmpMessage>>>;
 
-	/// Yields the persisted validation data for the given `ParaId` along with an assumption that
+	/// Yields the persisted validation data for the given `AllyId` along with an assumption that
 	/// should be used if the para currently occupies a core.
 	///
 	/// Returns `None` if either the para is not registered or the assumption is `Freed`
@@ -99,7 +99,7 @@ pub trait RelayChainInterface: Send + Sync {
 	async fn persisted_validation_data(
 		&self,
 		block_id: &BlockId,
-		para_id: ParaId,
+		para_id: AllyId,
 		_: OccupiedCoreAssumption,
 	) -> RelayChainResult<Option<PersistedValidationData>>;
 
@@ -108,7 +108,7 @@ pub trait RelayChainInterface: Send + Sync {
 	async fn candidate_pending_availability(
 		&self,
 		block_id: &BlockId,
-		para_id: ParaId,
+		para_id: AllyId,
 	) -> RelayChainResult<Option<CommittedCandidateReceipt>>;
 
 	/// Returns the session index expected at a child of the block.
@@ -157,7 +157,7 @@ where
 {
 	async fn retrieve_dmq_contents(
 		&self,
-		para_id: ParaId,
+		para_id: AllyId,
 		relay_parent: PHash,
 	) -> RelayChainResult<Vec<InboundDownwardMessage>> {
 		(**self).retrieve_dmq_contents(para_id, relay_parent).await
@@ -165,16 +165,16 @@ where
 
 	async fn retrieve_all_inbound_hrmp_channel_contents(
 		&self,
-		para_id: ParaId,
+		para_id: AllyId,
 		relay_parent: PHash,
-	) -> RelayChainResult<BTreeMap<ParaId, Vec<InboundHrmpMessage>>> {
+	) -> RelayChainResult<BTreeMap<AllyId, Vec<InboundHrmpMessage>>> {
 		(**self).retrieve_all_inbound_hrmp_channel_contents(para_id, relay_parent).await
 	}
 
 	async fn persisted_validation_data(
 		&self,
 		block_id: &BlockId,
-		para_id: ParaId,
+		para_id: AllyId,
 		occupied_core_assumption: OccupiedCoreAssumption,
 	) -> RelayChainResult<Option<PersistedValidationData>> {
 		(**self)
@@ -185,7 +185,7 @@ where
 	async fn candidate_pending_availability(
 		&self,
 		block_id: &BlockId,
-		para_id: ParaId,
+		para_id: AllyId,
 	) -> RelayChainResult<Option<CommittedCandidateReceipt>> {
 		(**self).candidate_pending_availability(block_id, para_id).await
 	}

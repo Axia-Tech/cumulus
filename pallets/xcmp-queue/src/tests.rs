@@ -40,7 +40,7 @@ fn bad_message_is_handled() {
 			0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 255, 0, 0, 0, 0, 0, 0, 0, 37, 0,
 			0, 0, 0, 0, 0, 0, 16, 0, 127, 147,
 		];
-		InboundXcmpMessages::<Test>::insert(ParaId::from(1000), 1, bad_data);
+		InboundXcmpMessages::<Test>::insert(AllyId::from(2000), 1, bad_data);
 		let format = XcmpMessageFormat::ConcatenatedEncodedBlob;
 		// This should exit with an error.
 		XcmpQueue::process_xcmp_message(1000.into(), (1, format), 10_000_000_000, 10_000_000_000);
@@ -59,7 +59,7 @@ fn handle_blob_message() {
 			139, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 255, 0, 0, 0, 0, 0, 0, 0,
 			37, 0, 0, 0, 0, 0, 0, 0, 16, 0, 127, 147,
 		];
-		InboundXcmpMessages::<Test>::insert(ParaId::from(1000), 1, bad_data);
+		InboundXcmpMessages::<Test>::insert(AllyId::from(2000), 1, bad_data);
 		let format = XcmpMessageFormat::ConcatenatedEncodedBlob;
 		XcmpQueue::process_xcmp_message(1000.into(), (1, format), 10_000_000_000, 10_000_000_000);
 	});
@@ -79,7 +79,7 @@ fn service_overweight_unknown() {
 fn service_overweight_bad_xcm_format() {
 	new_test_ext().execute_with(|| {
 		let bad_xcm = vec![255];
-		Overweight::<Test>::insert(0, (ParaId::from(1000), 0, bad_xcm));
+		Overweight::<Test>::insert(0, (AllyId::from(2000), 0, bad_xcm));
 
 		assert_noop!(XcmpQueue::service_overweight(Origin::root(), 0, 1000), Error::<Test>::BadXcm);
 	});
@@ -93,20 +93,20 @@ fn suspend_xcm_execution_works() {
 		let xcm = VersionedXcm::from(Xcm::<Call>(vec![Instruction::<Call>::ClearOrigin])).encode();
 		let mut message_format = XcmpMessageFormat::ConcatenatedVersionedXcm.encode();
 		message_format.extend(xcm.clone());
-		let messages = vec![(ParaId::from(999), 1u32.into(), message_format.as_slice())];
+		let messages = vec![(AllyId::from(999), 1u32.into(), message_format.as_slice())];
 
 		// This should have executed the incoming XCM, because it came from a system allychain
 		XcmpQueue::handle_xcmp_messages(messages.into_iter(), Weight::max_value());
 
-		let queued_xcm = InboundXcmpMessages::<Test>::get(ParaId::from(999), 1u32);
+		let queued_xcm = InboundXcmpMessages::<Test>::get(AllyId::from(999), 1u32);
 		assert!(queued_xcm.is_empty());
 
-		let messages = vec![(ParaId::from(2000), 1u32.into(), message_format.as_slice())];
+		let messages = vec![(AllyId::from(2000), 1u32.into(), message_format.as_slice())];
 
 		// This shouldn't have executed the incoming XCM
 		XcmpQueue::handle_xcmp_messages(messages.into_iter(), Weight::max_value());
 
-		let queued_xcm = InboundXcmpMessages::<Test>::get(ParaId::from(2000), 1u32);
+		let queued_xcm = InboundXcmpMessages::<Test>::get(AllyId::from(2000), 1u32);
 		assert_eq!(queued_xcm, xcm);
 	});
 }

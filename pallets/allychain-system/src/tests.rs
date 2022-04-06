@@ -68,7 +68,7 @@ parameter_types! {
 		transaction_version: 1,
 		state_version: 1,
 	};
-	pub const AllychainId: ParaId = ParaId::new(200);
+	pub const AllychainId: AllyId = AllyId::new(200);
 	pub const ReservedXcmpWeight: Weight = 0;
 	pub const ReservedDmpWeight: Weight = 0;
 }
@@ -101,7 +101,7 @@ impl frame_system::Config for Test {
 impl Config for Test {
 	type Event = Event;
 	type OnSystemEvent = ();
-	type SelfParaId = AllychainId;
+	type SelfAllyId = AllychainId;
 	type OutboundXcmpMessageSource = FromThreadLocal;
 	type DmpMessageHandler = SaveIntoThreadLocal;
 	type ReservedDmpWeight = ReservedDmpWeight;
@@ -114,17 +114,17 @@ pub struct SaveIntoThreadLocal;
 
 std::thread_local! {
 	static HANDLED_DMP_MESSAGES: RefCell<Vec<(relay_chain::BlockNumber, Vec<u8>)>> = RefCell::new(Vec::new());
-	static HANDLED_XCMP_MESSAGES: RefCell<Vec<(ParaId, relay_chain::BlockNumber, Vec<u8>)>> = RefCell::new(Vec::new());
-	static SENT_MESSAGES: RefCell<Vec<(ParaId, Vec<u8>)>> = RefCell::new(Vec::new());
+	static HANDLED_XCMP_MESSAGES: RefCell<Vec<(AllyId, relay_chain::BlockNumber, Vec<u8>)>> = RefCell::new(Vec::new());
+	static SENT_MESSAGES: RefCell<Vec<(AllyId, Vec<u8>)>> = RefCell::new(Vec::new());
 }
 
-fn send_message(dest: ParaId, message: Vec<u8>) {
+fn send_message(dest: AllyId, message: Vec<u8>) {
 	SENT_MESSAGES.with(|m| m.borrow_mut().push((dest, message)));
 }
 
 impl XcmpMessageSource for FromThreadLocal {
-	fn take_outbound_messages(maximum_channels: usize) -> Vec<(ParaId, Vec<u8>)> {
-		let mut ids = std::collections::BTreeSet::<ParaId>::new();
+	fn take_outbound_messages(maximum_channels: usize) -> Vec<(AllyId, Vec<u8>)> {
+		let mut ids = std::collections::BTreeSet::<AllyId>::new();
 		let mut taken = 0;
 		let mut result = Vec::new();
 		SENT_MESSAGES.with(|ms| {
@@ -160,7 +160,7 @@ impl DmpMessageHandler for SaveIntoThreadLocal {
 }
 
 impl XcmpMessageHandler for SaveIntoThreadLocal {
-	fn handle_xcmp_messages<'a, I: Iterator<Item = (ParaId, RelayBlockNumber, &'a [u8])>>(
+	fn handle_xcmp_messages<'a, I: Iterator<Item = (AllyId, RelayBlockNumber, &'a [u8])>>(
 		iter: I,
 		_max_weight: Weight,
 	) -> Weight {
@@ -577,10 +577,10 @@ fn send_hrmp_message_buffer_channel_close() {
 			//
 			// Base case setup
 			//
-			sproof.para_id = ParaId::from(200);
-			sproof.hrmp_egress_channel_index = Some(vec![ParaId::from(300), ParaId::from(400)]);
+			sproof.para_id = AllyId::from(200);
+			sproof.hrmp_egress_channel_index = Some(vec![AllyId::from(300), AllyId::from(400)]);
 			sproof.hrmp_channels.insert(
-				HrmpChannelId { sender: ParaId::from(200), recipient: ParaId::from(300) },
+				HrmpChannelId { sender: AllyId::from(200), recipient: AllyId::from(300) },
 				AbridgedHrmpChannel {
 					max_capacity: 1,
 					msg_count: 1, // <- 1/1 means the channel is full
@@ -591,7 +591,7 @@ fn send_hrmp_message_buffer_channel_close() {
 				},
 			);
 			sproof.hrmp_channels.insert(
-				HrmpChannelId { sender: ParaId::from(200), recipient: ParaId::from(400) },
+				HrmpChannelId { sender: AllyId::from(200), recipient: AllyId::from(400) },
 				AbridgedHrmpChannel {
 					max_capacity: 1,
 					msg_count: 1,
@@ -614,18 +614,18 @@ fn send_hrmp_message_buffer_channel_close() {
 						.hrmp_egress_channel_index
 						.as_mut()
 						.unwrap()
-						.retain(|n| n != &ParaId::from(400));
+						.retain(|n| n != &AllyId::from(400));
 					sproof.hrmp_channels.remove(&HrmpChannelId {
-						sender: ParaId::from(200),
-						recipient: ParaId::from(400),
+						sender: AllyId::from(200),
+						recipient: AllyId::from(400),
 					});
 
 					// We also free up space for a message in the 200->300 channel.
 					sproof
 						.hrmp_channels
 						.get_mut(&HrmpChannelId {
-							sender: ParaId::from(200),
-							recipient: ParaId::from(300),
+							sender: AllyId::from(200),
+							recipient: AllyId::from(300),
 						})
 						.unwrap()
 						.msg_count = 0;
@@ -636,8 +636,8 @@ fn send_hrmp_message_buffer_channel_close() {
 		.add_with_post_test(
 			1,
 			|| {
-				send_message(ParaId::from(300), b"1".to_vec());
-				send_message(ParaId::from(400), b"2".to_vec());
+				send_message(AllyId::from(300), b"1".to_vec());
+				send_message(AllyId::from(400), b"2".to_vec());
 			},
 			|| {},
 		)
@@ -657,7 +657,7 @@ fn send_hrmp_message_buffer_channel_close() {
 				let v = HrmpOutboundMessages::<Test>::get();
 				assert_eq!(
 					v,
-					vec![OutboundHrmpMessage { recipient: ParaId::from(300), data: b"1".to_vec() }]
+					vec![OutboundHrmpMessage { recipient: AllyId::from(300), data: b"1".to_vec() }]
 				);
 			},
 		);
@@ -812,15 +812,15 @@ fn receive_hrmp() {
 			1 => {
 				// 200 - doesn't exist yet
 				// 300 - one new message
-				sproof.upsert_inbound_channel(ParaId::from(300)).mqc_head =
+				sproof.upsert_inbound_channel(AllyId::from(300)).mqc_head =
 					Some(MessageQueueChain::default().extend_hrmp(&MSG_1).head());
 			},
 			2 => {
 				// 200 - now present with one message
 				// 300 - two new messages
-				sproof.upsert_inbound_channel(ParaId::from(200)).mqc_head =
+				sproof.upsert_inbound_channel(AllyId::from(200)).mqc_head =
 					Some(MessageQueueChain::default().extend_hrmp(&MSG_4).head());
-				sproof.upsert_inbound_channel(ParaId::from(300)).mqc_head = Some(
+				sproof.upsert_inbound_channel(AllyId::from(300)).mqc_head = Some(
 					MessageQueueChain::default()
 						.extend_hrmp(&MSG_1)
 						.extend_hrmp(&MSG_2)
@@ -831,18 +831,18 @@ fn receive_hrmp() {
 			3 => {
 				// 200 - no new messages
 				// 300 - is gone
-				sproof.upsert_inbound_channel(ParaId::from(200)).mqc_head =
+				sproof.upsert_inbound_channel(AllyId::from(200)).mqc_head =
 					Some(MessageQueueChain::default().extend_hrmp(&MSG_4).head());
 			},
 			_ => unreachable!(),
 		})
 		.with_inherent_data(|_, relay_block_num, data| match relay_block_num {
 			1 => {
-				data.horizontal_messages.insert(ParaId::from(300), vec![MSG_1.clone()]);
+				data.horizontal_messages.insert(AllyId::from(300), vec![MSG_1.clone()]);
 			},
 			2 => {
 				data.horizontal_messages.insert(
-					ParaId::from(300),
+					AllyId::from(300),
 					vec![
 						// can't be sent at the block 1 actually. However, we cheat here
 						// because we want to test the case where there are multiple messages
@@ -851,7 +851,7 @@ fn receive_hrmp() {
 						MSG_3.clone(),
 					],
 				);
-				data.horizontal_messages.insert(ParaId::from(200), vec![MSG_4.clone()]);
+				data.horizontal_messages.insert(AllyId::from(200), vec![MSG_4.clone()]);
 			},
 			3 => {},
 			_ => unreachable!(),
@@ -859,7 +859,7 @@ fn receive_hrmp() {
 		.add(1, || {
 			HANDLED_XCMP_MESSAGES.with(|m| {
 				let mut m = m.borrow_mut();
-				assert_eq!(&*m, &[(ParaId::from(300), 1, b"1".to_vec())]);
+				assert_eq!(&*m, &[(AllyId::from(300), 1, b"1".to_vec())]);
 				m.clear();
 			});
 		})
@@ -869,9 +869,9 @@ fn receive_hrmp() {
 				assert_eq!(
 					&*m,
 					&[
-						(ParaId::from(300), 1, b"2".to_vec()),
-						(ParaId::from(200), 2, b"4".to_vec()),
-						(ParaId::from(300), 2, b"3".to_vec()),
+						(AllyId::from(300), 1, b"2".to_vec()),
+						(AllyId::from(200), 2, b"4".to_vec()),
+						(AllyId::from(300), 2, b"3".to_vec()),
 					]
 				);
 				m.clear();
@@ -889,7 +889,7 @@ fn receive_hrmp_empty_channel() {
 			},
 			2 => {
 				// one new channel
-				sproof.upsert_inbound_channel(ParaId::from(300)).mqc_head =
+				sproof.upsert_inbound_channel(AllyId::from(300)).mqc_head =
 					Some(MessageQueueChain::default().head());
 			},
 			_ => unreachable!(),
@@ -912,7 +912,7 @@ fn receive_hrmp_after_pause() {
 		};
 	}
 
-	const ALICE: ParaId = ParaId::new(300);
+	const ALICE: AllyId = AllyId::new(300);
 
 	BlockTests::new()
 		.with_relay_sproof_builder(|_, relay_block_num, sproof| match relay_block_num {

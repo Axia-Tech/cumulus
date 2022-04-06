@@ -31,7 +31,7 @@ use codec::Encode;
 use cumulus_primitives_core::{
 	relay_chain, AbridgedHostConfiguration, ChannelStatus, CollationInfo, DmpMessageHandler,
 	GetChannelInfo, InboundDownwardMessage, InboundHrmpMessage, MessageSendError,
-	OutboundHrmpMessage, ParaId, PersistedValidationData, UpwardMessage, UpwardMessageSender,
+	OutboundHrmpMessage, AllyId, PersistedValidationData, UpwardMessage, UpwardMessageSender,
 	XcmpMessageHandler, XcmpMessageSource,
 };
 use cumulus_primitives_allychain_inherent::{MessageQueueChain, AllychainInherentData};
@@ -108,7 +108,7 @@ pub mod pallet {
 		type OnSystemEvent: OnSystemEvent;
 
 		/// Returns the allychain ID we are running with.
-		type SelfParaId: Get<ParaId>;
+		type SelfAllyId: Get<AllyId>;
 
 		/// The place where outbound XCMP messages come from. This is queried in `finalize_block`.
 		type OutboundXcmpMessageSource: XcmpMessageSource;
@@ -308,7 +308,7 @@ pub mod pallet {
 			Self::validate_validation_data(&vfp);
 
 			let relay_state_proof = RelayChainStateProof::new(
-				T::SelfParaId::get(),
+				T::SelfAllyId::get(),
 				vfp.relay_parent_storage_root,
 				relay_chain_state,
 			)
@@ -518,7 +518,7 @@ pub mod pallet {
 	/// by the system inherent.
 	#[pallet::storage]
 	pub(super) type LastHrmpMqcHeads<T: Config> =
-		StorageValue<_, BTreeMap<ParaId, MessageQueueChain>, ValueQuery>;
+		StorageValue<_, BTreeMap<AllyId, MessageQueueChain>, ValueQuery>;
 
 	/// Number of downward messages processed in a block.
 	///
@@ -643,7 +643,7 @@ impl<T: Config> Pallet<T> {
 }
 
 impl<T: Config> GetChannelInfo for Pallet<T> {
-	fn get_channel_status(id: ParaId) -> ChannelStatus {
+	fn get_channel_status(id: AllyId) -> ChannelStatus {
 		// Note, that we are using `relevant_messaging_state` which may be from the previous
 		// block, in case this is called from `on_initialize`, i.e. before the inherent with
 		// fresh data is submitted.
@@ -685,7 +685,7 @@ impl<T: Config> GetChannelInfo for Pallet<T> {
 		ChannelStatus::Ready(max_size_now as usize, max_size_ever as usize)
 	}
 
-	fn get_channel_max(id: ParaId) -> Option<usize> {
+	fn get_channel_max(id: AllyId) -> Option<usize> {
 		let channels = Self::relevant_messaging_state()?.egress_channels;
 		let index = channels.binary_search_by_key(&id, |item| item.0).ok()?;
 		Some(channels[index].1.max_message_size as usize)
@@ -777,8 +777,8 @@ impl<T: Config> Pallet<T> {
 	///            messages across all inbound channels MQCs were obtained which do not
 	///            correspond to the ones found on the relay-chain.
 	fn process_inbound_horizontal_messages(
-		ingress_channels: &[(ParaId, cumulus_primitives_core::AbridgedHrmpChannel)],
-		horizontal_messages: BTreeMap<ParaId, Vec<InboundHrmpMessage>>,
+		ingress_channels: &[(AllyId, cumulus_primitives_core::AbridgedHrmpChannel)],
+		horizontal_messages: BTreeMap<AllyId, Vec<InboundHrmpMessage>>,
 		relay_parent_number: relay_chain::v1::BlockNumber,
 	) -> Weight {
 		// First, check that all submitted messages are sent from channels that exist. The

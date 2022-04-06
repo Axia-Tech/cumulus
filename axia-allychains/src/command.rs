@@ -25,7 +25,7 @@ use crate::{
 };
 use codec::Encode;
 use cumulus_client_service::genesis::generate_genesis_block;
-use cumulus_primitives_core::ParaId;
+use cumulus_primitives_core::AllyId;
 use log::info;
 use allychains_common::{AuraId, StatemintAuraId};
 use axia_allychain::primitives::AccountIdConversion;
@@ -506,7 +506,7 @@ pub fn run() -> Result<()> {
 						.chain(cli.relaychain_args.iter()),
 				);
 
-				let id = ParaId::from(para_id);
+				let id = AllyId::from(para_id);
 
 				let allychain_account =
 					AccountIdConversion::<axia_primitives::v0::AccountId>::into_account(&id);

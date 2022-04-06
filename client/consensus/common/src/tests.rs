@@ -25,7 +25,7 @@ use cumulus_test_client::{
 };
 use futures::{channel::mpsc, executor::block_on, select, FutureExt, Stream, StreamExt};
 use futures_timer::Delay;
-use axia_primitives::v1::{Block as PBlock, Id as ParaId};
+use axia_primitives::v1::{Block as PBlock, Id as AllyId};
 use sc_client_api::UsageProvider;
 use sc_consensus::{BlockImport, BlockImportParams, ForkChoiceStrategy};
 use sp_blockchain::Error as ClientError;
@@ -74,7 +74,7 @@ impl crate::allychain_consensus::RelaychainClient for Relaychain {
 
 	type HeadStream = Box<dyn Stream<Item = Vec<u8>> + Send + Unpin>;
 
-	async fn new_best_heads(&self, _: ParaId) -> RelayChainResult<Self::HeadStream> {
+	async fn new_best_heads(&self, _: AllyId) -> RelayChainResult<Self::HeadStream> {
 		let stream = self
 			.inner
 			.lock()
@@ -86,7 +86,7 @@ impl crate::allychain_consensus::RelaychainClient for Relaychain {
 		Ok(Box::new(stream.map(|v| v.encode())))
 	}
 
-	async fn finalized_heads(&self, _: ParaId) -> RelayChainResult<Self::HeadStream> {
+	async fn finalized_heads(&self, _: AllyId) -> RelayChainResult<Self::HeadStream> {
 		let stream = self
 			.inner
 			.lock()
@@ -101,7 +101,7 @@ impl crate::allychain_consensus::RelaychainClient for Relaychain {
 	async fn allychain_head_at(
 		&self,
 		_: &BlockId<PBlock>,
-		_: ParaId,
+		_: AllyId,
 	) -> RelayChainResult<Option<Vec<u8>>> {
 		unimplemented!("Not required for tests")
 	}

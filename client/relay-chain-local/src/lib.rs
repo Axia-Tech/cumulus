@@ -23,7 +23,7 @@ use cumulus_primitives_core::{
 		v2::AllychainHost,
 		Block as PBlock, BlockId, Hash as PHash, Header as PHeader, InboundHrmpMessage,
 	},
-	InboundDownwardMessage, ParaId, PersistedValidationData,
+	InboundDownwardMessage, AllyId, PersistedValidationData,
 };
 use cumulus_relay_chain_interface::{RelayChainError, RelayChainInterface, RelayChainResult};
 use futures::{FutureExt, Stream, StreamExt};
@@ -89,7 +89,7 @@ where
 {
 	async fn retrieve_dmq_contents(
 		&self,
-		para_id: ParaId,
+		para_id: AllyId,
 		relay_parent: PHash,
 	) -> RelayChainResult<Vec<InboundDownwardMessage>> {
 		Ok(self.full_client.runtime_api().dmq_contents_with_context(
@@ -101,9 +101,9 @@ where
 
 	async fn retrieve_all_inbound_hrmp_channel_contents(
 		&self,
-		para_id: ParaId,
+		para_id: AllyId,
 		relay_parent: PHash,
-	) -> RelayChainResult<BTreeMap<ParaId, Vec<InboundHrmpMessage>>> {
+	) -> RelayChainResult<BTreeMap<AllyId, Vec<InboundHrmpMessage>>> {
 		Ok(self.full_client.runtime_api().inbound_hrmp_channels_contents_with_context(
 			&BlockId::hash(relay_parent),
 			sp_core::ExecutionContext::Importing,
@@ -114,7 +114,7 @@ where
 	async fn persisted_validation_data(
 		&self,
 		block_id: &BlockId,
-		para_id: ParaId,
+		para_id: AllyId,
 		occupied_core_assumption: OccupiedCoreAssumption,
 	) -> RelayChainResult<Option<PersistedValidationData>> {
 		Ok(self.full_client.runtime_api().persisted_validation_data(
@@ -127,7 +127,7 @@ where
 	async fn candidate_pending_availability(
 		&self,
 		block_id: &BlockId,
-		para_id: ParaId,
+		para_id: AllyId,
 	) -> RelayChainResult<Option<CommittedCandidateReceipt>> {
 		Ok(self
 			.full_client

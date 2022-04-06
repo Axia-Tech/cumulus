@@ -33,7 +33,7 @@ use cumulus_relay_chain_interface::RelayChainInterface;
 use axia_node_primitives::{CollationSecondedSignal, Statement};
 use axia_allychain::primitives::HeadData;
 use axia_primitives::v1::{
-	Block as PBlock, CandidateReceipt, CompactStatement, Hash as PHash, Id as ParaId,
+	Block as PBlock, CandidateReceipt, CompactStatement, Hash as PHash, Id as AllyId,
 	OccupiedCoreAssumption, SigningContext, UncheckedSigned,
 };
 
@@ -222,7 +222,7 @@ impl TryFrom<&'_ CollationSecondedSignal> for BlockAnnounceData {
 pub struct BlockAnnounceValidator<Block, RCInterface> {
 	phantom: PhantomData<Block>,
 	relay_chain_interface: RCInterface,
-	para_id: ParaId,
+	para_id: AllyId,
 }
 
 impl<Block, RCInterface> BlockAnnounceValidator<Block, RCInterface>
@@ -230,7 +230,7 @@ where
 	RCInterface: Clone,
 {
 	/// Create a new [`BlockAnnounceValidator`].
-	pub fn new(relay_chain_interface: RCInterface, para_id: ParaId) -> Self {
+	pub fn new(relay_chain_interface: RCInterface, para_id: AllyId) -> Self {
 		Self {
 			phantom: Default::default(),
 			relay_chain_interface: relay_chain_interface.clone(),
@@ -247,7 +247,7 @@ where
 	async fn included_block(
 		relay_chain_interface: &RCInterface,
 		block_id: &BlockId<PBlock>,
-		para_id: ParaId,
+		para_id: AllyId,
 	) -> Result<Block::Header, BoxedError> {
 		let validation_data = relay_chain_interface
 			.persisted_validation_data(block_id, para_id, OccupiedCoreAssumption::TimedOut)
@@ -270,7 +270,7 @@ where
 	async fn backed_block_hash(
 		relay_chain_interface: &RCInterface,
 		block_id: &BlockId<PBlock>,
-		para_id: ParaId,
+		para_id: AllyId,
 	) -> Result<Option<PHash>, BoxedError> {
 		let candidate_receipt = relay_chain_interface
 			.candidate_pending_availability(block_id, para_id)

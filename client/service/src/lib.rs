@@ -19,7 +19,7 @@
 //! Provides functions for starting a collator node or a normal full node.
 
 use cumulus_client_consensus_common::AllychainConsensus;
-use cumulus_primitives_core::{CollectCollationInfo, ParaId};
+use cumulus_primitives_core::{CollectCollationInfo, AllyId};
 use cumulus_relay_chain_interface::RelayChainInterface;
 use axia_primitives::v1::CollatorPair;
 use sc_client_api::{
@@ -48,7 +48,7 @@ pub struct StartCollatorParams<'a, Block: BlockT, BS, Client, RCInterface, Spawn
 	pub client: Arc<Client>,
 	pub announce_block: Arc<dyn Fn(Block::Hash, Option<Vec<u8>>) + Send + Sync>,
 	pub spawner: Spawner,
-	pub para_id: ParaId,
+	pub para_id: AllyId,
 	pub relay_chain_interface: RCInterface,
 	pub task_manager: &'a mut TaskManager,
 	pub allychain_consensus: Box<dyn AllychainConsensus<Block>>,
@@ -144,7 +144,7 @@ where
 
 /// Parameters given to [`start_full_node`].
 pub struct StartFullNodeParams<'a, Block: BlockT, Client, RCInterface, IQ> {
-	pub para_id: ParaId,
+	pub para_id: AllyId,
 	pub client: Arc<Client>,
 	pub relay_chain_interface: RCInterface,
 	pub task_manager: &'a mut TaskManager,

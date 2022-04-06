@@ -25,7 +25,7 @@ use sp_std::prelude::*;
 
 pub use axia_core_primitives::InboundDownwardMessage;
 pub use axia_allychain::primitives::{
-	DmpMessageHandler, Id as ParaId, IsSystem, UpwardMessage, ValidationParams, XcmpMessageFormat,
+	DmpMessageHandler, Id as AllyId, IsSystem, UpwardMessage, ValidationParams, XcmpMessageFormat,
 	XcmpMessageHandler,
 };
 pub use axia_primitives::v1::{
@@ -42,7 +42,7 @@ pub mod relay_chain {
 pub type InboundHrmpMessage = axia_primitives::v1::InboundHrmpMessage<relay_chain::BlockNumber>;
 
 /// And outbound HRMP message
-pub type OutboundHrmpMessage = axia_primitives::v1::OutboundHrmpMessage<ParaId>;
+pub type OutboundHrmpMessage = axia_primitives::v1::OutboundHrmpMessage<AllyId>;
 
 /// Error description of a message send failure.
 #[derive(Eq, PartialEq, Copy, Clone, RuntimeDebug, Encode, Decode)]
@@ -86,8 +86,8 @@ pub struct ChannelInfo {
 }
 
 pub trait GetChannelInfo {
-	fn get_channel_status(id: ParaId) -> ChannelStatus;
-	fn get_channel_max(id: ParaId) -> Option<usize>;
+	fn get_channel_status(id: AllyId) -> ChannelStatus;
+	fn get_channel_max(id: AllyId) -> Option<usize>;
 }
 
 /// Something that should be called when sending an upward message.
@@ -118,11 +118,11 @@ pub enum ChannelStatus {
 /// A means of figuring out what outbound XCMP messages should be being sent.
 pub trait XcmpMessageSource {
 	/// Take a single XCMP message from the queue for the given `dest`, if one exists.
-	fn take_outbound_messages(maximum_channels: usize) -> Vec<(ParaId, Vec<u8>)>;
+	fn take_outbound_messages(maximum_channels: usize) -> Vec<(AllyId, Vec<u8>)>;
 }
 
 impl XcmpMessageSource for () {
-	fn take_outbound_messages(_maximum_channels: usize) -> Vec<(ParaId, Vec<u8>)> {
+	fn take_outbound_messages(_maximum_channels: usize) -> Vec<(AllyId, Vec<u8>)> {
 		Vec::new()
 	}
 }

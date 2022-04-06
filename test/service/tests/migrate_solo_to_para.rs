@@ -25,7 +25,7 @@
 //! (Be aware, that this is just a highlevel description and some parts are omitted.)
 
 use codec::Encode;
-use cumulus_primitives_core::ParaId;
+use cumulus_primitives_core::AllyId;
 use cumulus_test_service::{initial_head_data, run_relay_chain_validator_node, Keyring::*};
 use sc_client_api::{BlockBackend, UsageProvider};
 use sp_runtime::generic::BlockId;
@@ -37,7 +37,7 @@ async fn test_migrate_solo_to_para() {
 	builder.with_colors(false);
 	let _ = builder.init();
 
-	let para_id = ParaId::from(100);
+	let para_id = AllyId::from(100);
 
 	let tokio_handle = tokio::runtime::Handle::current();
 

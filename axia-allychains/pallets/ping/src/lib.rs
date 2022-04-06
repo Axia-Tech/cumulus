@@ -19,7 +19,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use cumulus_pallet_xcm::{ensure_sibling_para, Origin as CumulusOrigin};
-use cumulus_primitives_core::ParaId;
+use cumulus_primitives_core::AllyId;
 use frame_system::Config as SystemConfig;
 use sp_runtime::traits::Saturating;
 use sp_std::prelude::*;
@@ -55,7 +55,7 @@ pub mod pallet {
 
 	/// The target allychains to ping.
 	#[pallet::storage]
-	pub(super) type Targets<T: Config> = StorageValue<_, Vec<(ParaId, Vec<u8>)>, ValueQuery>;
+	pub(super) type Targets<T: Config> = StorageValue<_, Vec<(AllyId, Vec<u8>)>, ValueQuery>;
 
 	/// The total number of pings sent.
 	#[pallet::storage]
@@ -69,13 +69,13 @@ pub mod pallet {
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event<T: Config> {
-		PingSent(ParaId, u32, Vec<u8>),
-		Pinged(ParaId, u32, Vec<u8>),
-		PongSent(ParaId, u32, Vec<u8>),
-		Ponged(ParaId, u32, Vec<u8>, T::BlockNumber),
-		ErrorSendingPing(SendError, ParaId, u32, Vec<u8>),
-		ErrorSendingPong(SendError, ParaId, u32, Vec<u8>),
-		UnknownPong(ParaId, u32, Vec<u8>),
+		PingSent(AllyId, u32, Vec<u8>),
+		Pinged(AllyId, u32, Vec<u8>),
+		PongSent(AllyId, u32, Vec<u8>),
+		Ponged(AllyId, u32, Vec<u8>, T::BlockNumber),
+		ErrorSendingPing(SendError, AllyId, u32, Vec<u8>),
+		ErrorSendingPong(SendError, AllyId, u32, Vec<u8>),
+		UnknownPong(AllyId, u32, Vec<u8>),
 	}
 
 	#[pallet::error]
@@ -117,7 +117,7 @@ pub mod pallet {
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
 		#[pallet::weight(0)]
-		pub fn start(origin: OriginFor<T>, para: ParaId, payload: Vec<u8>) -> DispatchResult {
+		pub fn start(origin: OriginFor<T>, para: AllyId, payload: Vec<u8>) -> DispatchResult {
 			ensure_root(origin)?;
 			Targets::<T>::mutate(|t| t.push((para, payload)));
 			Ok(())
@@ -126,7 +126,7 @@ pub mod pallet {
 		#[pallet::weight(0)]
 		pub fn start_many(
 			origin: OriginFor<T>,
-			para: ParaId,
+			para: AllyId,
 			count: u32,
 			payload: Vec<u8>,
 		) -> DispatchResult {
@@ -138,7 +138,7 @@ pub mod pallet {
 		}
 
 		#[pallet::weight(0)]
-		pub fn stop(origin: OriginFor<T>, para: ParaId) -> DispatchResult {
+		pub fn stop(origin: OriginFor<T>, para: AllyId) -> DispatchResult {
 			ensure_root(origin)?;
 			Targets::<T>::mutate(|t| {
 				if let Some(p) = t.iter().position(|(p, _)| p == &para) {
@@ -149,7 +149,7 @@ pub mod pallet {
 		}
 
 		#[pallet::weight(0)]
-		pub fn stop_all(origin: OriginFor<T>, maybe_para: Option<ParaId>) -> DispatchResult {
+		pub fn stop_all(origin: OriginFor<T>, maybe_para: Option<AllyId>) -> DispatchResult {
 			ensure_root(origin)?;
 			if let Some(para) = maybe_para {
 				Targets::<T>::mutate(|t| t.retain(|&(x, _)| x != para));

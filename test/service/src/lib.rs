@@ -28,7 +28,7 @@ use cumulus_client_network::BlockAnnounceValidator;
 use cumulus_client_service::{
 	prepare_node_config, start_collator, start_full_node, StartCollatorParams, StartFullNodeParams,
 };
-use cumulus_primitives_core::ParaId;
+use cumulus_primitives_core::AllyId;
 use cumulus_relay_chain_local::RelayChainLocal;
 use cumulus_test_runtime::{Hash, Header, NodeBlock as Block, RuntimeApi};
 use parking_lot::Mutex;
@@ -175,7 +175,7 @@ async fn start_node_impl<RB>(
 	allychain_config: Configuration,
 	collator_key: Option<CollatorPair>,
 	relay_chain_config: Configuration,
-	para_id: ParaId,
+	para_id: AllyId,
 	wrap_announce_block: Option<Box<dyn FnOnce(AnnounceBlockFn) -> AnnounceBlockFn>>,
 	rpc_ext_builder: RB,
 	consensus: Consensus,
@@ -378,7 +378,7 @@ enum Consensus {
 
 /// A builder to create a [`TestNode`].
 pub struct TestNodeBuilder {
-	para_id: ParaId,
+	para_id: AllyId,
 	tokio_handle: tokio::runtime::Handle,
 	key: Sr25519Keyring,
 	collator_key: Option<CollatorPair>,
@@ -397,7 +397,7 @@ impl TestNodeBuilder {
 	/// `para_id` - The allychain id this node is running for.
 	/// `tokio_handle` - The tokio handler to use.
 	/// `key` - The key that will be used to generate the name and that will be passed as `dev_seed`.
-	pub fn new(para_id: ParaId, tokio_handle: tokio::runtime::Handle, key: Sr25519Keyring) -> Self {
+	pub fn new(para_id: AllyId, tokio_handle: tokio::runtime::Handle, key: Sr25519Keyring) -> Self {
 		TestNodeBuilder {
 			key,
 			para_id,
@@ -556,7 +556,7 @@ pub fn node_config(
 	key: Sr25519Keyring,
 	nodes: Vec<MultiaddrWithPeerId>,
 	nodes_exlusive: bool,
-	para_id: ParaId,
+	para_id: AllyId,
 	is_collator: bool,
 ) -> Result<Configuration, ServiceError> {
 	let base_path = BasePath::new_temp_dir()?;

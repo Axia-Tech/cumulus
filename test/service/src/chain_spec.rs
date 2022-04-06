@@ -16,7 +16,7 @@
 
 #![allow(missing_docs)]
 
-use cumulus_primitives_core::ParaId;
+use cumulus_primitives_core::AllyId;
 use cumulus_test_runtime::{AccountId, Signature};
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::ChainType;
@@ -33,7 +33,7 @@ pub struct GenesisExt {
 	/// The runtime genesis config.
 	runtime_genesis_config: cumulus_test_runtime::GenesisConfig,
 	/// The allychain id.
-	para_id: ParaId,
+	para_id: AllyId,
 }
 
 impl sp_runtime::BuildStorage for GenesisExt {
@@ -80,7 +80,7 @@ where
 }
 
 /// Get the chain spec for a specific allychain ID.
-pub fn get_chain_spec(id: ParaId) -> ChainSpec {
+pub fn get_chain_spec(id: AllyId) -> ChainSpec {
 	ChainSpec::from_genesis(
 		"Local Testnet",
 		"local_testnet",
