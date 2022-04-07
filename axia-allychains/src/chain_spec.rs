@@ -94,7 +94,7 @@ pub fn get_chain_spec() -> ChainSpec {
 					get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
 					get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
 				],
-				2000.into(),
+				1000.into(),
 			)
 		},
 		Vec::new(),
@@ -102,7 +102,7 @@ pub fn get_chain_spec() -> ChainSpec {
 		None,
 		None,
 		None,
-		Extensions { relay_chain: "alphanet".into(), ally_id: 2000 },
+		Extensions { relay_chain: "alphanet".into(), ally_id: 1000 },
 	)
 }
 
@@ -111,13 +111,13 @@ pub fn get_shell_chain_spec() -> ShellChainSpec {
 		"Shell Local Testnet",
 		"shell_local_testnet",
 		ChainType::Local,
-		move || shell_testnet_genesis(2000.into()),
+		move || shell_testnet_genesis(1000.into()),
 		Vec::new(),
 		None,
 		None,
 		None,
 		None,
-		Extensions { relay_chain: "alphanet".into(), ally_id: 2000 },
+		Extensions { relay_chain: "alphanet".into(), ally_id: 1000 },
 	)
 }
 
@@ -160,7 +160,7 @@ pub fn staging_test_net() -> ChainSpec {
 				vec![
 					hex!["9ed7705e3c7da027ba0583a22a3212042f7e715d3c168ba14f1424e2bc111d00"].into()
 				],
-				2000.into(),
+				1000.into(),
 			)
 		},
 		Vec::new(),
@@ -168,25 +168,16 @@ pub fn staging_test_net() -> ChainSpec {
 		None,
 		None,
 		None,
-		Extensions { relay_chain: "alphanet".into(), ally_id: 2000 },
+		Extensions { relay_chain: "alphanet".into(), ally_id: 1000 },
 	)
 }
 
 fn testnet_genesis(
-	_root_key: AccountId,
-	_initial_authorities: Vec<AuraId>,
-	_endowed_accounts: Vec<AccountId>,
+	root_key: AccountId,
+	initial_authorities: Vec<AuraId>,
+	endowed_accounts: Vec<AccountId>,
 	id: AllyId,
 ) -> betanet_allychain_runtime::GenesisConfig {
-
-	use hex_literal::hex;
-	use sp_core::crypto::UncheckedInto;
-	let initial_authorities: Vec<AuraId> = aura_ids();
-	let endowed_accounts: Vec<AccountId> = account_ids();
-
-	let root_key = endowed_accounts[0].clone();
-	const ENDOWMENT: u128 = 1_000_000_000_000_000_000;
-
 	betanet_allychain_runtime::GenesisConfig {
 		system: betanet_allychain_runtime::SystemConfig {
 			code: betanet_allychain_runtime::WASM_BINARY
@@ -194,8 +185,7 @@ fn testnet_genesis(
 				.to_vec(),
 		},
 		balances: betanet_allychain_runtime::BalancesConfig {
-			balances: endowed_accounts.iter().cloned().map(|k| (k, ENDOWMENT))
-			.collect(),
+			balances: endowed_accounts.iter().cloned().map(|k| (k, 1 << 60)).collect(),
 		},
 		sudo: betanet_allychain_runtime::SudoConfig { key: Some(root_key) },
 		allychain_info: betanet_allychain_runtime::AllychainInfoConfig { allychain_id: id },
@@ -310,7 +300,7 @@ pub fn statemint_development_config() -> StatemintChainSpec {
 					get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
 					get_account_id_from_seed::<sr25519::Public>("Bob//stash"),
 				],
-				2000.into(),
+				1000.into(),
 			)
 		},
 		Vec::new(),
@@ -318,7 +308,7 @@ pub fn statemint_development_config() -> StatemintChainSpec {
 		None,
 		None,
 		Some(properties),
-		Extensions { relay_chain: "axia-dev".into(), ally_id: 2000 },
+		Extensions { relay_chain: "axia-dev".into(), ally_id: 1000 },
 	)
 }
 
@@ -361,7 +351,7 @@ pub fn statemint_local_config() -> StatemintChainSpec {
 					get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
 					get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
 				],
-				2000.into(),
+				1000.into(),
 			)
 		},
 		Vec::new(),
@@ -369,7 +359,7 @@ pub fn statemint_local_config() -> StatemintChainSpec {
 		None,
 		None,
 		Some(properties),
-		Extensions { relay_chain: "axia-local".into(), ally_id: 2000 },
+		Extensions { relay_chain: "axia-local".into(), ally_id: 1000 },
 	)
 }
 
@@ -416,7 +406,7 @@ pub fn statemint_config() -> StatemintChainSpec {
 					),
 				],
 				vec![],
-				2000u32.into(),
+				1000u32.into(),
 			)
 		},
 		vec![
@@ -429,7 +419,7 @@ pub fn statemint_config() -> StatemintChainSpec {
 		None,
 		None,
 		Some(properties),
-		Extensions { relay_chain: "axia".into(), ally_id: 2000 },
+		Extensions { relay_chain: "axia".into(), ally_id: 1000 },
 	)
 }
 
@@ -501,7 +491,7 @@ pub fn statemine_development_config() -> StatemineChainSpec {
 					get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
 					get_account_id_from_seed::<sr25519::Public>("Bob//stash"),
 				],
-				2000.into(),
+				1000.into(),
 			)
 		},
 		Vec::new(),
@@ -509,7 +499,7 @@ pub fn statemine_development_config() -> StatemineChainSpec {
 		None,
 		None,
 		Some(properties),
-		Extensions { relay_chain: "axctest-dev".into(), ally_id: 2000 },
+		Extensions { relay_chain: "axctest-dev".into(), ally_id: 1000 },
 	)
 }
 
@@ -552,7 +542,7 @@ pub fn statemine_local_config() -> StatemineChainSpec {
 					get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
 					get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
 				],
-				2000.into(),
+				1000.into(),
 			)
 		},
 		Vec::new(),
@@ -560,7 +550,7 @@ pub fn statemine_local_config() -> StatemineChainSpec {
 		None,
 		None,
 		Some(properties),
-		Extensions { relay_chain: "axctest-local".into(), ally_id: 2000 },
+		Extensions { relay_chain: "axctest-local".into(), ally_id: 1000 },
 	)
 }
 
@@ -606,7 +596,7 @@ pub fn statemine_config() -> StatemineChainSpec {
 					),
 				],
 				Vec::new(),
-				2000.into(),
+				1000.into(),
 			)
 		},
 		Vec::new(),
@@ -614,7 +604,7 @@ pub fn statemine_config() -> StatemineChainSpec {
 		None,
 		None,
 		Some(properties),
-		Extensions { relay_chain: "axctest".into(), ally_id: 2000 },
+		Extensions { relay_chain: "axctest".into(), ally_id: 1000 },
 	)
 }
 
@@ -687,7 +677,7 @@ pub fn westmint_development_config() -> WestmintChainSpec {
 					get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
 					get_account_id_from_seed::<sr25519::Public>("Bob//stash"),
 				],
-				2000.into(),
+				1000.into(),
 			)
 		},
 		Vec::new(),
@@ -695,7 +685,7 @@ pub fn westmint_development_config() -> WestmintChainSpec {
 		None,
 		None,
 		Some(properties),
-		Extensions { relay_chain: "alphanet".into(), ally_id: 2000 },
+		Extensions { relay_chain: "alphanet".into(), ally_id: 1000 },
 	)
 }
 
@@ -737,7 +727,7 @@ pub fn westmint_local_config() -> WestmintChainSpec {
 					get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
 					get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
 				],
-				2000.into(),
+				1000.into(),
 			)
 		},
 		Vec::new(),
@@ -745,7 +735,7 @@ pub fn westmint_local_config() -> WestmintChainSpec {
 		None,
 		None,
 		Some(properties),
-		Extensions { relay_chain: "alphanet-local".into(), ally_id: 2000 },
+		Extensions { relay_chain: "alphanet-local".into(), ally_id: 1000 },
 	)
 }
 
@@ -790,7 +780,7 @@ pub fn westmint_config() -> WestmintChainSpec {
 					),
 				],
 				Vec::new(),
-				2000.into(),
+				1000.into(),
 			)
 		},
 		Vec::new(),
@@ -798,7 +788,7 @@ pub fn westmint_config() -> WestmintChainSpec {
 		None,
 		None,
 		Some(properties),
-		Extensions { relay_chain: "alphanet".into(), ally_id: 2000 },
+		Extensions { relay_chain: "alphanet".into(), ally_id: 1000 },
 	)
 }
 
@@ -1099,21 +1089,4 @@ fn canvas_axctest_genesis(
 			),
 		},
 	}
-}
-
-
-fn aura_ids() -> Vec<AuraId> {
-	vec![
-		hex!["4e743e3efea9390a89894383c8567907db13edb3fb2c1e0f8c428a745e05be77"].unchecked_into(),
-		hex!["b21c79d2588ddeaf6005a28222110c62f7dd31b89c03efd46ba6b555b327eb08"].unchecked_into()
-	]
-}
-
-fn account_ids() -> Vec<AccountId> {
-	vec![
-		AccountId::from(hex!["3233f745d0860ed64ae9c7f4ea5c0773316fc9265199f312d3f6e8ce08255c10"]),		
-		AccountId::from(hex!["445f574d57f768ea7e1a2f551bef4298ace99d8895d316352cfc02aececcf26c"]),
-		AccountId::from(hex!["c2312f7f9a8190bf76db9dc40e5ef351c4c23e3ae6540932bf2c2d485289c37b"]),
-		AccountId::from(hex!["688d6fa54d9ace0fa07492f3d8dfef78594130719e61c213d700c62421177c38"])		
-	]
 }
