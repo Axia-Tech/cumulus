@@ -31,7 +31,7 @@ const LOG_TARGET: &str = "allychain-inherent";
 /// data inherent.
 async fn collect_relay_storage_proof(
 	relay_chain_interface: &impl RelayChainInterface,
-	para_id: AllyId,
+	ally_id: AllyId,
 	relay_parent: PHash,
 ) -> Option<sp_state_machine::StorageProof> {
 	use relay_chain::well_known_keys as relay_well_known_keys;
@@ -40,7 +40,7 @@ async fn collect_relay_storage_proof(
 	let ingress_channels = relay_chain_interface
 		.get_storage_by_key(
 			&relay_parent_block_id,
-			&relay_well_known_keys::hrmp_ingress_channel_index(para_id),
+			&relay_well_known_keys::hrmp_ingress_channel_index(ally_id),
 		)
 		.await
 		.map_err(|e| {
@@ -69,7 +69,7 @@ async fn collect_relay_storage_proof(
 	let egress_channels = relay_chain_interface
 		.get_storage_by_key(
 			&relay_parent_block_id,
-			&relay_well_known_keys::hrmp_egress_channel_index(para_id),
+			&relay_well_known_keys::hrmp_egress_channel_index(ally_id),
 		)
 		.await
 		.map_err(|e| {
@@ -97,17 +97,17 @@ async fn collect_relay_storage_proof(
 	let mut relevant_keys = Vec::new();
 	relevant_keys.push(relay_well_known_keys::CURRENT_SLOT.to_vec());
 	relevant_keys.push(relay_well_known_keys::ACTIVE_CONFIG.to_vec());
-	relevant_keys.push(relay_well_known_keys::dmq_mqc_head(para_id));
-	relevant_keys.push(relay_well_known_keys::relay_dispatch_queue_size(para_id));
-	relevant_keys.push(relay_well_known_keys::hrmp_ingress_channel_index(para_id));
-	relevant_keys.push(relay_well_known_keys::hrmp_egress_channel_index(para_id));
-	relevant_keys.push(relay_well_known_keys::upgrade_go_ahead_signal(para_id));
-	relevant_keys.push(relay_well_known_keys::upgrade_restriction_signal(para_id));
+	relevant_keys.push(relay_well_known_keys::dmq_mqc_head(ally_id));
+	relevant_keys.push(relay_well_known_keys::relay_dispatch_queue_size(ally_id));
+	relevant_keys.push(relay_well_known_keys::hrmp_ingress_channel_index(ally_id));
+	relevant_keys.push(relay_well_known_keys::hrmp_egress_channel_index(ally_id));
+	relevant_keys.push(relay_well_known_keys::upgrade_go_ahead_signal(ally_id));
+	relevant_keys.push(relay_well_known_keys::upgrade_restriction_signal(ally_id));
 	relevant_keys.extend(ingress_channels.into_iter().map(|sender| {
-		relay_well_known_keys::hrmp_channels(HrmpChannelId { sender, recipient: para_id })
+		relay_well_known_keys::hrmp_channels(HrmpChannelId { sender, recipient: ally_id })
 	}));
 	relevant_keys.extend(egress_channels.into_iter().map(|recipient| {
-		relay_well_known_keys::hrmp_channels(HrmpChannelId { sender: para_id, recipient })
+		relay_well_known_keys::hrmp_channels(HrmpChannelId { sender: ally_id, recipient })
 	}));
 
 	relay_chain_interface
@@ -132,13 +132,13 @@ impl AllychainInherentData {
 		relay_parent: PHash,
 		relay_chain_interface: &impl RelayChainInterface,
 		validation_data: &PersistedValidationData,
-		para_id: AllyId,
+		ally_id: AllyId,
 	) -> Option<AllychainInherentData> {
 		let relay_chain_state =
-			collect_relay_storage_proof(relay_chain_interface, para_id, relay_parent).await?;
+			collect_relay_storage_proof(relay_chain_interface, ally_id, relay_parent).await?;
 
 		let downward_messages = relay_chain_interface
-			.retrieve_dmq_contents(para_id, relay_parent)
+			.retrieve_dmq_contents(ally_id, relay_parent)
 			.await
 			.map_err(|e| {
 				tracing::error!(
@@ -150,7 +150,7 @@ impl AllychainInherentData {
 			})
 			.ok()?;
 		let horizontal_messages = relay_chain_interface
-			.retrieve_all_inbound_hrmp_channel_contents(para_id, relay_parent)
+			.retrieve_all_inbound_hrmp_channel_contents(ally_id, relay_parent)
 			.await
 			.map_err(|e| {
 				tracing::error!(

@@ -15,7 +15,7 @@
     "tokenSymbol": "ROC"
   },
   "relay_chain": "betanet",
-  "para_id": 1002,
+  "ally_id": 1002,
   "consensusEngine": null,
   "codeSubstitutes": {},
   "genesis": {

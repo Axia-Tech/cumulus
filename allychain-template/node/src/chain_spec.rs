@@ -27,7 +27,7 @@ pub struct Extensions {
 	/// The relay chain of the Allychain.
 	pub relay_chain: String,
 	/// The id of the Allychain.
-	pub para_id: u32,
+	pub ally_id: u32,
 }
 
 impl Extensions {
@@ -111,7 +111,7 @@ pub fn development_config() -> ChainSpec {
 		None,
 		Extensions {
 			relay_chain: "betanet-local".into(), // You MUST set this to the correct network!
-			para_id: 2000,
+			ally_id: 2000,
 		},
 	)
 }
@@ -172,7 +172,7 @@ pub fn local_testnet_config() -> ChainSpec {
 		// Extensions
 		Extensions {
 			relay_chain: "betanet-local".into(), // You MUST set this to the correct network!
-			para_id: 2000,
+			ally_id: 2000,
 		},
 	)
 }

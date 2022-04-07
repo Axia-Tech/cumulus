@@ -32,12 +32,7 @@ members = [
 	"axia-allychains/statemint",
 	"axia-allychains/statemine",
 	"axia-allychains/westmint",
-	"axia-allychains/canvas-axctest",
-	"test/client",
-	"test/relay-sproof-builder",
-	"test/relay-validation-worker-provider",
-	"test/runtime",
-	"test/service",
+	"axia-allychains/canvas-axctest"
 ]
 
 [profile.release]

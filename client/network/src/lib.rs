@@ -42,9 +42,6 @@ use futures::{channel::oneshot, future::FutureExt, Future};
 
 use std::{convert::TryFrom, fmt, marker::PhantomData, pin::Pin, sync::Arc};
 
-#[cfg(test)]
-mod tests;
-
 const LOG_TARGET: &str = "sync::cumulus";
 
 type BoxedError = Box<dyn std::error::Error + Send>;
@@ -222,7 +219,7 @@ impl TryFrom<&'_ CollationSecondedSignal> for BlockAnnounceData {
 pub struct BlockAnnounceValidator<Block, RCInterface> {
 	phantom: PhantomData<Block>,
 	relay_chain_interface: RCInterface,
-	para_id: AllyId,
+	ally_id: AllyId,
 }
 
 impl<Block, RCInterface> BlockAnnounceValidator<Block, RCInterface>
@@ -230,11 +227,11 @@ where
 	RCInterface: Clone,
 {
 	/// Create a new [`BlockAnnounceValidator`].
-	pub fn new(relay_chain_interface: RCInterface, para_id: AllyId) -> Self {
+	pub fn new(relay_chain_interface: RCInterface, ally_id: AllyId) -> Self {
 		Self {
 			phantom: Default::default(),
 			relay_chain_interface: relay_chain_interface.clone(),
-			para_id,
+			ally_id,
 		}
 	}
 }
@@ -247,10 +244,10 @@ where
 	async fn included_block(
 		relay_chain_interface: &RCInterface,
 		block_id: &BlockId<PBlock>,
-		para_id: AllyId,
+		ally_id: AllyId,
 	) -> Result<Block::Header, BoxedError> {
 		let validation_data = relay_chain_interface
-			.persisted_validation_data(block_id, para_id, OccupiedCoreAssumption::TimedOut)
+			.persisted_validation_data(block_id, ally_id, OccupiedCoreAssumption::TimedOut)
 			.await
 			.map_err(|e| Box::new(BlockAnnounceError(format!("{:?}", e))) as Box<_>)?
 			.ok_or_else(|| {
@@ -270,10 +267,10 @@ where
 	async fn backed_block_hash(
 		relay_chain_interface: &RCInterface,
 		block_id: &BlockId<PBlock>,
-		para_id: AllyId,
+		ally_id: AllyId,
 	) -> Result<Option<PHash>, BoxedError> {
 		let candidate_receipt = relay_chain_interface
-			.candidate_pending_availability(block_id, para_id)
+			.candidate_pending_availability(block_id, ally_id)
 			.await
 			.map_err(|e| Box::new(BlockAnnounceError(format!("{:?}", e))) as Box<_>)?;
 
@@ -286,7 +283,7 @@ where
 		header: Block::Header,
 	) -> Result<Validation, BoxedError> {
 		let relay_chain_interface = self.relay_chain_interface.clone();
-		let para_id = self.para_id;
+		let ally_id = self.ally_id;
 
 		// Check if block is equal or higher than best (this requires a justification)
 		let relay_chain_best_hash = relay_chain_interface
@@ -297,10 +294,10 @@ where
 		let block_number = header.number();
 
 		let best_head =
-			Self::included_block(&relay_chain_interface, &runtime_api_block_id, para_id).await?;
+			Self::included_block(&relay_chain_interface, &runtime_api_block_id, ally_id).await?;
 		let known_best_number = best_head.number();
 		let backed_block = || async {
-			Self::backed_block_hash(&relay_chain_interface, &runtime_api_block_id, para_id).await
+			Self::backed_block_hash(&relay_chain_interface, &runtime_api_block_id, ally_id).await
 		};
 
 		if best_head == header {

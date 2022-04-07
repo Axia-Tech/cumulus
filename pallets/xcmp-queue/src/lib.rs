@@ -965,7 +965,7 @@ impl<T: Config> XcmpMessageSource for Pallet<T> {
 
 		for status in statuses.iter_mut() {
 			let OutboundChannelDetails {
-				recipient: para_id,
+				recipient: ally_id,
 				state: outbound_state,
 				mut signals_exist,
 				mut first_index,
@@ -980,17 +980,17 @@ impl<T: Config> XcmpMessageSource for Pallet<T> {
 			if outbound_state == OutboundState::Suspended {
 				continue
 			}
-			let (max_size_now, max_size_ever) = match T::ChannelInfo::get_channel_status(para_id) {
+			let (max_size_now, max_size_ever) = match T::ChannelInfo::get_channel_status(ally_id) {
 				ChannelStatus::Closed => {
 					// This means that there is no such channel anymore. Nothing to be done but
 					// swallow the messages and discard the status.
 					for i in first_index..last_index {
-						<OutboundXcmpMessages<T>>::remove(para_id, i);
+						<OutboundXcmpMessages<T>>::remove(ally_id, i);
 					}
 					if signals_exist {
-						<SignalMessages<T>>::remove(para_id);
+						<SignalMessages<T>>::remove(ally_id);
 					}
-					*status = OutboundChannelDetails::new(para_id);
+					*status = OutboundChannelDetails::new(ally_id);
 					continue
 				},
 				ChannelStatus::Full => continue,
@@ -998,18 +998,18 @@ impl<T: Config> XcmpMessageSource for Pallet<T> {
 			};
 
 			let page = if signals_exist {
-				let page = <SignalMessages<T>>::get(para_id);
+				let page = <SignalMessages<T>>::get(ally_id);
 				if page.len() < max_size_now {
-					<SignalMessages<T>>::remove(para_id);
+					<SignalMessages<T>>::remove(ally_id);
 					signals_exist = false;
 					page
 				} else {
 					continue
 				}
 			} else if last_index > first_index {
-				let page = <OutboundXcmpMessages<T>>::get(para_id, first_index);
+				let page = <OutboundXcmpMessages<T>>::get(ally_id, first_index);
 				if page.len() < max_size_now {
-					<OutboundXcmpMessages<T>>::remove(para_id, first_index);
+					<OutboundXcmpMessages<T>>::remove(ally_id, first_index);
 					first_index += 1;
 					page
 				} else {
@@ -1029,11 +1029,11 @@ impl<T: Config> XcmpMessageSource for Pallet<T> {
 				//   since it's so unlikely then for now we just drop it.
 				log::warn!("WARNING: oversize message in queue. silently dropping.");
 			} else {
-				result.push((para_id, page));
+				result.push((ally_id, page));
 			}
 
 			*status = OutboundChannelDetails {
-				recipient: para_id,
+				recipient: ally_id,
 				state: outbound_state,
 				signals_exist,
 				first_index,

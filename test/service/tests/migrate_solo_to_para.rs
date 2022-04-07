@@ -37,7 +37,7 @@ async fn test_migrate_solo_to_para() {
 	builder.with_colors(false);
 	let _ = builder.init();
 
-	let para_id = AllyId::from(100);
+	let ally_id = AllyId::from(100);
 
 	let tokio_handle = tokio::runtime::Handle::current();
 
@@ -51,25 +51,25 @@ async fn test_migrate_solo_to_para() {
 	// register allychain
 	alice
 		.register_allychain(
-			para_id,
+			ally_id,
 			cumulus_test_runtime::WASM_BINARY
 				.expect("You need to build the WASM binary to run this test!")
 				.to_vec(),
-			initial_head_data(para_id),
+			initial_head_data(ally_id),
 		)
 		.await
 		.unwrap();
 
 	// run the allychain that will be used to return the header of the solo chain.
 	let allychain =
-		cumulus_test_service::TestNodeBuilder::new(para_id, tokio_handle.clone(), Charlie)
+		cumulus_test_service::TestNodeBuilder::new(ally_id, tokio_handle.clone(), Charlie)
 			.enable_collator()
 			.connect_to_relay_chain_nodes(vec![&alice, &bob])
 			.build()
 			.await;
 
 	// run the solo chain (in our case this is also already a allychain, but as it has a different genesis it will not produce any blocks.)
-	let solo = cumulus_test_service::TestNodeBuilder::new(para_id, tokio_handle, Dave)
+	let solo = cumulus_test_service::TestNodeBuilder::new(ally_id, tokio_handle, Dave)
 		.enable_collator()
 		.connect_to_relay_chain_nodes(vec![&alice, &bob])
 		// Set some random value in the genesis state to create a different genesis hash.

@@ -22,8 +22,8 @@ use axia_primitives::v0::HeadData;
 use sp_runtime::traits::Block as BlockT;
 
 /// Returns the initial head data for a allychain ID.
-pub fn initial_head_data(para_id: AllyId) -> HeadData {
-	let spec = Box::new(crate::chain_spec::get_chain_spec(para_id));
+pub fn initial_head_data(ally_id: AllyId) -> HeadData {
+	let spec = Box::new(crate::chain_spec::get_chain_spec(ally_id));
 	let block: Block =
 		generate_genesis_block(&(spec as Box<_>), sp_runtime::StateVersion::V1).unwrap();
 	let genesis_state = block.header().encode();

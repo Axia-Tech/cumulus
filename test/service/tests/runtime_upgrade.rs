@@ -27,7 +27,7 @@ async fn test_runtime_upgrade() {
 	builder.with_colors(false);
 	let _ = builder.init();
 
-	let para_id = AllyId::from(100);
+	let ally_id = AllyId::from(100);
 	let tokio_handle = tokio::runtime::Handle::current();
 
 	// start alice
@@ -40,25 +40,25 @@ async fn test_runtime_upgrade() {
 	// register allychain
 	alice
 		.register_allychain(
-			para_id,
+			ally_id,
 			cumulus_test_runtime::WASM_BINARY
 				.expect("You need to build the WASM binary to run this test!")
 				.to_vec(),
-			initial_head_data(para_id),
+			initial_head_data(ally_id),
 		)
 		.await
 		.unwrap();
 
 	// run cumulus charlie (a allychain collator)
 	let charlie =
-		cumulus_test_service::TestNodeBuilder::new(para_id, tokio_handle.clone(), Charlie)
+		cumulus_test_service::TestNodeBuilder::new(ally_id, tokio_handle.clone(), Charlie)
 			.enable_collator()
 			.connect_to_relay_chain_nodes(vec![&alice, &bob])
 			.build()
 			.await;
 
 	// run cumulus dave (a allychain full node)
-	let dave = cumulus_test_service::TestNodeBuilder::new(para_id, tokio_handle, Dave)
+	let dave = cumulus_test_service::TestNodeBuilder::new(ally_id, tokio_handle, Dave)
 		.connect_to_allychain_node(&charlie)
 		.connect_to_relay_chain_nodes(vec![&alice, &bob])
 		.build()

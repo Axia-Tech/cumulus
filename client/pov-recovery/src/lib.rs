@@ -121,7 +121,7 @@ pub struct PoVRecovery<Block: BlockT, PC, IQ, RC> {
 	allychain_client: Arc<PC>,
 	allychain_import_queue: IQ,
 	relay_chain_interface: RC,
-	para_id: AllyId,
+	ally_id: AllyId,
 }
 
 impl<Block: BlockT, PC, IQ, RCInterface> PoVRecovery<Block, PC, IQ, RCInterface>
@@ -137,7 +137,7 @@ where
 		allychain_client: Arc<PC>,
 		allychain_import_queue: IQ,
 		relay_chain_interface: RCInterface,
-		para_id: AllyId,
+		ally_id: AllyId,
 	) -> Self {
 		Self {
 			pending_candidates: HashMap::new(),
@@ -148,7 +148,7 @@ where
 			allychain_client,
 			allychain_import_queue,
 			relay_chain_interface,
-			para_id,
+			ally_id,
 		}
 	}
 
@@ -381,7 +381,7 @@ where
 		let mut imported_blocks = self.allychain_client.import_notification_stream().fuse();
 		let mut finalized_blocks = self.allychain_client.finality_notification_stream().fuse();
 		let pending_candidates =
-			match pending_candidates(self.relay_chain_interface.clone(), self.para_id).await {
+			match pending_candidates(self.relay_chain_interface.clone(), self.ally_id).await {
 				Ok(pending_candidate_stream) => pending_candidate_stream.fuse(),
 				Err(err) => {
 					tracing::error!(target: LOG_TARGET, error = ?err, "Unable to retrieve pending candidate stream.");
@@ -441,10 +441,10 @@ where
 	}
 }
 
-/// Returns a stream over pending candidates for the allychain corresponding to `para_id`.
+/// Returns a stream over pending candidates for the allychain corresponding to `ally_id`.
 async fn pending_candidates(
 	relay_chain_client: impl RelayChainInterface + Clone,
-	para_id: AllyId,
+	ally_id: AllyId,
 ) -> RelayChainResult<impl Stream<Item = (CommittedCandidateReceipt, SessionIndex)>> {
 	let import_notification_stream = relay_chain_client.import_notification_stream().await?;
 
@@ -453,7 +453,7 @@ async fn pending_candidates(
 		async move {
 			let block_id = BlockId::hash(n.hash());
 			let pending_availability_result = client_for_closure
-				.candidate_pending_availability(&block_id, para_id)
+				.candidate_pending_availability(&block_id, ally_id)
 				.await
 				.map_err(|e| {
 					tracing::error!(

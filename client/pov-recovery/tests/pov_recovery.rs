@@ -30,7 +30,7 @@ async fn pov_recovery() {
 	builder.with_colors(false);
 	let _ = builder.init();
 
-	let para_id = AllyId::from(100);
+	let ally_id = AllyId::from(100);
 	let tokio_handle = tokio::runtime::Handle::current();
 
 	// Start alice
@@ -52,18 +52,18 @@ async fn pov_recovery() {
 	// Register allychain
 	alice
 		.register_allychain(
-			para_id,
+			ally_id,
 			cumulus_test_service::runtime::WASM_BINARY
 				.expect("You need to build the WASM binary to run this test!")
 				.to_vec(),
-			initial_head_data(para_id),
+			initial_head_data(ally_id),
 		)
 		.await
 		.unwrap();
 
 	// Run charlie as allychain collator
 	let charlie =
-		cumulus_test_service::TestNodeBuilder::new(para_id, tokio_handle.clone(), Charlie)
+		cumulus_test_service::TestNodeBuilder::new(ally_id, tokio_handle.clone(), Charlie)
 			.enable_collator()
 			.connect_to_relay_chain_nodes(vec![&alice, &bob])
 			.wrap_announce_block(|_| {
@@ -76,7 +76,7 @@ async fn pov_recovery() {
 	// Run dave as allychain collator and eve as allychain full node
 	//
 	// They will need to recover the pov blocks through availability recovery.
-	let dave = cumulus_test_service::TestNodeBuilder::new(para_id, tokio_handle.clone(), Dave)
+	let dave = cumulus_test_service::TestNodeBuilder::new(ally_id, tokio_handle.clone(), Dave)
 		.enable_collator()
 		.use_null_consensus()
 		.connect_to_allychain_node(&charlie)
@@ -88,7 +88,7 @@ async fn pov_recovery() {
 		.build()
 		.await;
 
-	let eve = cumulus_test_service::TestNodeBuilder::new(para_id, tokio_handle, Eve)
+	let eve = cumulus_test_service::TestNodeBuilder::new(ally_id, tokio_handle, Eve)
 		.use_null_consensus()
 		.connect_to_allychain_node(&charlie)
 		.connect_to_relay_chain_nodes(vec![&alice, &bob])

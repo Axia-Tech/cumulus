@@ -33,7 +33,7 @@ pub struct RelayStateSproofBuilder {
 	/// It's recommended to change this value once in the very beginning of usage.
 	///
 	/// The default value is 200.
-	pub para_id: AllyId,
+	pub ally_id: AllyId,
 
 	pub host_config: AbridgedHostConfiguration,
 	pub dmq_mqc_head: Option<relay_chain::Hash>,
@@ -48,7 +48,7 @@ pub struct RelayStateSproofBuilder {
 impl Default for RelayStateSproofBuilder {
 	fn default() -> Self {
 		RelayStateSproofBuilder {
-			para_id: AllyId::from(200),
+			ally_id: AllyId::from(200),
 			host_config: cumulus_primitives_core::AbridgedHostConfiguration {
 				max_code_size: 2 * 1024 * 1024,
 				max_head_data_size: 1024 * 1024,
@@ -72,7 +72,7 @@ impl Default for RelayStateSproofBuilder {
 }
 
 impl RelayStateSproofBuilder {
-	/// Returns a mutable reference to HRMP channel metadata for a channel (`sender`, `self.para_id`).
+	/// Returns a mutable reference to HRMP channel metadata for a channel (`sender`, `self.ally_id`).
 	///
 	/// If there is no channel, a new default one is created.
 	///
@@ -84,7 +84,7 @@ impl RelayStateSproofBuilder {
 		}
 
 		self.hrmp_channels
-			.entry(relay_chain::v1::HrmpChannelId { sender, recipient: self.para_id })
+			.entry(relay_chain::v1::HrmpChannelId { sender, recipient: self.ally_id })
 			.or_insert_with(|| AbridgedHrmpChannel {
 				max_capacity: 0,
 				max_total_size: 0,
@@ -114,19 +114,19 @@ impl RelayStateSproofBuilder {
 			insert(relay_chain::well_known_keys::ACTIVE_CONFIG.to_vec(), self.host_config.encode());
 			if let Some(dmq_mqc_head) = self.dmq_mqc_head {
 				insert(
-					relay_chain::well_known_keys::dmq_mqc_head(self.para_id),
+					relay_chain::well_known_keys::dmq_mqc_head(self.ally_id),
 					dmq_mqc_head.encode(),
 				);
 			}
 			if let Some(relay_dispatch_queue_size) = self.relay_dispatch_queue_size {
 				insert(
-					relay_chain::well_known_keys::relay_dispatch_queue_size(self.para_id),
+					relay_chain::well_known_keys::relay_dispatch_queue_size(self.ally_id),
 					relay_dispatch_queue_size.encode(),
 				);
 			}
 			if let Some(upgrade_go_ahead) = self.upgrade_go_ahead {
 				insert(
-					relay_chain::well_known_keys::upgrade_go_ahead_signal(self.para_id),
+					relay_chain::well_known_keys::upgrade_go_ahead_signal(self.ally_id),
 					upgrade_go_ahead.encode(),
 				);
 			}
@@ -136,7 +136,7 @@ impl RelayStateSproofBuilder {
 				assert_eq!(sorted, hrmp_ingress_channel_index);
 
 				insert(
-					relay_chain::well_known_keys::hrmp_ingress_channel_index(self.para_id),
+					relay_chain::well_known_keys::hrmp_ingress_channel_index(self.ally_id),
 					hrmp_ingress_channel_index.encode(),
 				);
 			}
@@ -146,7 +146,7 @@ impl RelayStateSproofBuilder {
 				assert_eq!(sorted, hrmp_egress_channel_index);
 
 				insert(
-					relay_chain::well_known_keys::hrmp_egress_channel_index(self.para_id),
+					relay_chain::well_known_keys::hrmp_egress_channel_index(self.ally_id),
 					hrmp_egress_channel_index.encode(),
 				);
 			}

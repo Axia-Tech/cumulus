@@ -66,7 +66,7 @@ pub struct MockValidationDataInherentDataProvider {
 #[derive(Default)]
 pub struct MockXcmConfig {
 	/// The allychain id of the allychain being mocked.
-	pub para_id: AllyId,
+	pub ally_id: AllyId,
 	/// The starting state of the dmq_mqc_head.
 	pub starting_dmq_mqc_head: relay_chain::Hash,
 	/// The starting state of each allychain's mqc head
@@ -92,7 +92,7 @@ impl MockXcmConfig {
 	pub fn new<B: Block, BE: Backend<B>, C: StorageProvider<B, BE>>(
 		client: &C,
 		parent_block: B::Hash,
-		para_id: AllyId,
+		ally_id: AllyId,
 		allychain_system_name: AllychainSystemName,
 	) -> Self {
 		let starting_dmq_mqc_head = client
@@ -125,7 +125,7 @@ impl MockXcmConfig {
 			})
 			.unwrap_or_default();
 
-		Self { para_id, starting_dmq_mqc_head, starting_hrmp_mqc_heads }
+		Self { ally_id, starting_dmq_mqc_head, starting_hrmp_mqc_heads }
 	}
 }
 
@@ -141,7 +141,7 @@ impl InherentDataProvider for MockValidationDataInherentDataProvider {
 
 		// Use the "sproof" (spoof proof) builder to build valid mock state root and proof.
 		let mut sproof_builder = RelayStateSproofBuilder::default();
-		sproof_builder.para_id = self.xcm_config.para_id;
+		sproof_builder.ally_id = self.xcm_config.ally_id;
 
 		// Process the downward messages and set up the correct head
 		let mut downward_messages = Vec::new();
@@ -157,25 +157,25 @@ impl InherentDataProvider for MockValidationDataInherentDataProvider {
 		// Process the hrmp messages and set up the correct heads
 		// Begin by collecting them into a Map
 		let mut horizontal_messages = BTreeMap::<AllyId, Vec<InboundHrmpMessage>>::new();
-		for (para_id, msg) in &self.raw_horizontal_messages {
+		for (ally_id, msg) in &self.raw_horizontal_messages {
 			let wrapped = InboundHrmpMessage { sent_at: relay_parent_number, data: msg.clone() };
 
-			horizontal_messages.entry(*para_id).or_default().push(wrapped);
+			horizontal_messages.entry(*ally_id).or_default().push(wrapped);
 		}
 
 		// Now iterate again, updating the heads as we go
-		for (para_id, messages) in &horizontal_messages {
+		for (ally_id, messages) in &horizontal_messages {
 			let mut channel_mqc = crate::MessageQueueChain(
 				*self
 					.xcm_config
 					.starting_hrmp_mqc_heads
-					.get(para_id)
+					.get(ally_id)
 					.unwrap_or(&relay_chain::Hash::default()),
 			);
 			for message in messages {
 				channel_mqc.extend_hrmp(message);
 			}
-			sproof_builder.upsert_inbound_channel(*para_id).mqc_head = Some(channel_mqc.head());
+			sproof_builder.upsert_inbound_channel(*ally_id).mqc_head = Some(channel_mqc.head());
 		}
 
 		let (relay_parent_storage_root, proof) = sproof_builder.into_state_root_and_proof();

@@ -319,7 +319,7 @@ where
 		let spawner = task_manager.spawn_handle();
 
 		let params = StartCollatorParams {
-			para_id: id,
+			ally_id: id,
 			block_status: client.clone(),
 			announce_block,
 			client: client.clone(),
@@ -338,7 +338,7 @@ where
 			client: client.clone(),
 			announce_block,
 			task_manager: &mut task_manager,
-			para_id: id,
+			ally_id: id,
 			relay_chain_interface,
 			relay_chain_slot_duration,
 			import_queue,

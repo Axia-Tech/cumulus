@@ -55,7 +55,7 @@ const LOG_TARGET: &str = "cumulus-consensus-relay-chain";
 
 /// The implementation of the relay-chain provided consensus for allychains.
 pub struct RelayChainConsensus<B, PF, BI, RCInterface, CIDP> {
-	para_id: AllyId,
+	ally_id: AllyId,
 	_phantom: PhantomData<B>,
 	proposer_factory: Arc<Mutex<PF>>,
 	create_inherent_data_providers: Arc<CIDP>,
@@ -69,7 +69,7 @@ where
 {
 	fn clone(&self) -> Self {
 		Self {
-			para_id: self.para_id,
+			ally_id: self.ally_id,
 			_phantom: PhantomData,
 			proposer_factory: self.proposer_factory.clone(),
 			create_inherent_data_providers: self.create_inherent_data_providers.clone(),
@@ -87,14 +87,14 @@ where
 {
 	/// Create a new instance of relay-chain provided consensus.
 	pub fn new(
-		para_id: AllyId,
+		ally_id: AllyId,
 		proposer_factory: PF,
 		create_inherent_data_providers: CIDP,
 		block_import: BI,
 		relay_chain_interface: RCInterface,
 	) -> Self {
 		Self {
-			para_id,
+			ally_id,
 			proposer_factory: Arc::new(Mutex::new(proposer_factory)),
 			create_inherent_data_providers: Arc::new(create_inherent_data_providers),
 			block_import: Arc::new(futures::lock::Mutex::new(AllychainBlockImport::new(
@@ -219,7 +219,7 @@ where
 
 /// Parameters of [`build_relay_chain_consensus`].
 pub struct BuildRelayChainConsensusParams<PF, BI, CIDP, RCInterface> {
-	pub para_id: AllyId,
+	pub ally_id: AllyId,
 	pub proposer_factory: PF,
 	pub create_inherent_data_providers: CIDP,
 	pub block_import: BI,
@@ -231,7 +231,7 @@ pub struct BuildRelayChainConsensusParams<PF, BI, CIDP, RCInterface> {
 /// Returns a boxed [`AllychainConsensus`].
 pub fn build_relay_chain_consensus<Block, PF, BI, CIDP, RCInterface>(
 	BuildRelayChainConsensusParams {
-		para_id,
+		ally_id,
 		proposer_factory,
 		create_inherent_data_providers,
 		block_import,
@@ -252,7 +252,7 @@ where
 	RCInterface: RelayChainInterface + Clone + 'static,
 {
 	Box::new(RelayChainConsensus::new(
-		para_id,
+		ally_id,
 		proposer_factory,
 		create_inherent_data_providers,
 		block_import,

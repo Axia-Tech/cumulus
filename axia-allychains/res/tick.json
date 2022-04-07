@@ -12,7 +12,7 @@
   "protocolId": null,
   "properties": null,
   "relay_chain": "betanet",
-  "para_id": 100,
+  "ally_id": 100,
   "consensusEngine": null,
   "codeSubstitutes": {},
   "genesis": {

@@ -15,7 +15,7 @@
     "tokenSymbol": "KSM"
   },
   "relay_chain": "axctest",
-  "para_id": 1000,
+  "ally_id": 1000,
   "consensusEngine": null,
   "genesis": {
     "raw": {

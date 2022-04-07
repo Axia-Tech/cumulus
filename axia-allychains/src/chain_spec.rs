@@ -51,7 +51,7 @@ pub struct Extensions {
 	/// The relay chain of the Allychain.
 	pub relay_chain: String,
 	/// The id of the Allychain.
-	pub para_id: u32,
+	pub ally_id: u32,
 }
 
 impl Extensions {
@@ -102,7 +102,7 @@ pub fn get_chain_spec() -> ChainSpec {
 		None,
 		None,
 		None,
-		Extensions { relay_chain: "alphanet".into(), para_id: 2000 },
+		Extensions { relay_chain: "alphanet".into(), ally_id: 2000 },
 	)
 }
 
@@ -117,7 +117,7 @@ pub fn get_shell_chain_spec() -> ShellChainSpec {
 		None,
 		None,
 		None,
-		Extensions { relay_chain: "alphanet".into(), para_id: 2000 },
+		Extensions { relay_chain: "alphanet".into(), ally_id: 2000 },
 	)
 }
 
@@ -137,7 +137,7 @@ pub fn get_seedling_chain_spec() -> SeedlingChainSpec {
 		None,
 		None,
 		None,
-		Extensions { relay_chain: "alphanet".into(), para_id: 2000 },
+		Extensions { relay_chain: "alphanet".into(), ally_id: 2000 },
 	)
 }
 
@@ -168,7 +168,7 @@ pub fn staging_test_net() -> ChainSpec {
 		None,
 		None,
 		None,
-		Extensions { relay_chain: "alphanet".into(), para_id: 2000 },
+		Extensions { relay_chain: "alphanet".into(), ally_id: 2000 },
 	)
 }
 
@@ -181,11 +181,11 @@ fn testnet_genesis(
 
 	use hex_literal::hex;
 	use sp_core::crypto::UncheckedInto;
-	let initial_authorities: Vec<AuraId> = auraIds();
-	let endowed_accounts: Vec<AccountId> = accountIds();
+	let initial_authorities: Vec<AuraId> = aura_ids();
+	let endowed_accounts: Vec<AccountId> = account_ids();
 
 	let root_key = endowed_accounts[0].clone();
-	const ENDOWMENT: u128 = 1_000_000_000_000;
+	const ENDOWMENT: u128 = 1_000_000_000_000_000_000;
 
 	betanet_allychain_runtime::GenesisConfig {
 		system: betanet_allychain_runtime::SystemConfig {
@@ -318,7 +318,7 @@ pub fn statemint_development_config() -> StatemintChainSpec {
 		None,
 		None,
 		Some(properties),
-		Extensions { relay_chain: "axia-dev".into(), para_id: 2000 },
+		Extensions { relay_chain: "axia-dev".into(), ally_id: 2000 },
 	)
 }
 
@@ -369,7 +369,7 @@ pub fn statemint_local_config() -> StatemintChainSpec {
 		None,
 		None,
 		Some(properties),
-		Extensions { relay_chain: "axia-local".into(), para_id: 2000 },
+		Extensions { relay_chain: "axia-local".into(), ally_id: 2000 },
 	)
 }
 
@@ -429,7 +429,7 @@ pub fn statemint_config() -> StatemintChainSpec {
 		None,
 		None,
 		Some(properties),
-		Extensions { relay_chain: "axia".into(), para_id: 2000 },
+		Extensions { relay_chain: "axia".into(), ally_id: 2000 },
 	)
 }
 
@@ -509,7 +509,7 @@ pub fn statemine_development_config() -> StatemineChainSpec {
 		None,
 		None,
 		Some(properties),
-		Extensions { relay_chain: "axctest-dev".into(), para_id: 2000 },
+		Extensions { relay_chain: "axctest-dev".into(), ally_id: 2000 },
 	)
 }
 
@@ -560,7 +560,7 @@ pub fn statemine_local_config() -> StatemineChainSpec {
 		None,
 		None,
 		Some(properties),
-		Extensions { relay_chain: "axctest-local".into(), para_id: 2000 },
+		Extensions { relay_chain: "axctest-local".into(), ally_id: 2000 },
 	)
 }
 
@@ -614,7 +614,7 @@ pub fn statemine_config() -> StatemineChainSpec {
 		None,
 		None,
 		Some(properties),
-		Extensions { relay_chain: "axctest".into(), para_id: 2000 },
+		Extensions { relay_chain: "axctest".into(), ally_id: 2000 },
 	)
 }
 
@@ -695,7 +695,7 @@ pub fn westmint_development_config() -> WestmintChainSpec {
 		None,
 		None,
 		Some(properties),
-		Extensions { relay_chain: "alphanet".into(), para_id: 2000 },
+		Extensions { relay_chain: "alphanet".into(), ally_id: 2000 },
 	)
 }
 
@@ -745,7 +745,7 @@ pub fn westmint_local_config() -> WestmintChainSpec {
 		None,
 		None,
 		Some(properties),
-		Extensions { relay_chain: "alphanet-local".into(), para_id: 2000 },
+		Extensions { relay_chain: "alphanet-local".into(), ally_id: 2000 },
 	)
 }
 
@@ -798,7 +798,7 @@ pub fn westmint_config() -> WestmintChainSpec {
 		None,
 		None,
 		Some(properties),
-		Extensions { relay_chain: "alphanet".into(), para_id: 2000 },
+		Extensions { relay_chain: "alphanet".into(), ally_id: 2000 },
 	)
 }
 
@@ -904,7 +904,7 @@ pub fn canvas_betanet_development_config() -> CanvasAxiaTestChainSpec {
 		None,
 		Extensions {
 			relay_chain: "betanet-local".into(), // You MUST set this to the correct network!
-			para_id: CANVAS_ALLYCHAIN_ID,
+			ally_id: CANVAS_ALLYCHAIN_ID,
 		},
 	)
 }
@@ -963,7 +963,7 @@ pub fn canvas_betanet_local_config() -> CanvasAxiaTestChainSpec {
 		// Extensions
 		Extensions {
 			relay_chain: "betanet-local".into(), // You MUST set this to the correct network!
-			para_id: CANVAS_ALLYCHAIN_ID,
+			ally_id: CANVAS_ALLYCHAIN_ID,
 		},
 	)
 }
@@ -1049,7 +1049,7 @@ pub fn canvas_betanet_config() -> CanvasAxiaTestChainSpec {
 		// Properties
 		Some(properties),
 		// Extensions
-		Extensions { relay_chain: "betanet".into(), para_id: CANVAS_ALLYCHAIN_ID },
+		Extensions { relay_chain: "betanet".into(), ally_id: CANVAS_ALLYCHAIN_ID },
 	)
 }
 
@@ -1102,14 +1102,14 @@ fn canvas_axctest_genesis(
 }
 
 
-fn auraIds() -> Vec<AuraId> {
+fn aura_ids() -> Vec<AuraId> {
 	vec![
 		hex!["4e743e3efea9390a89894383c8567907db13edb3fb2c1e0f8c428a745e05be77"].unchecked_into(),
 		hex!["b21c79d2588ddeaf6005a28222110c62f7dd31b89c03efd46ba6b555b327eb08"].unchecked_into()
 	]
 }
 
-fn accountIds() -> Vec<AccountId> {
+fn account_ids() -> Vec<AccountId> {
 	vec![
 		AccountId::from(hex!["3233f745d0860ed64ae9c7f4ea5c0773316fc9265199f312d3f6e8ce08255c10"]),		
 		AccountId::from(hex!["445f574d57f768ea7e1a2f551bef4298ace99d8895d316352cfc02aececcf26c"]),

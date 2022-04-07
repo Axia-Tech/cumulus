@@ -16,7 +16,7 @@
     "tokenSymbol": "AXC"
   },
   "relay_chain": "axia",
-  "para_id": 1000,
+  "ally_id": 1000,
   "consensusEngine": null,
   "codeSubstitutes": {},
   "genesis": {

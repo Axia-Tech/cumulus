@@ -297,7 +297,7 @@ where
 
 /// Parameters for [`start_collator`].
 pub struct StartCollatorParams<Block: BlockT, RA, BS, Spawner> {
-	pub para_id: AllyId,
+	pub ally_id: AllyId,
 	pub runtime_api: Arc<RA>,
 	pub block_status: Arc<BS>,
 	pub announce_block: Arc<dyn Fn(Block::Hash, Option<Vec<u8>>) + Send + Sync>,
@@ -310,7 +310,7 @@ pub struct StartCollatorParams<Block: BlockT, RA, BS, Spawner> {
 /// Start the collator.
 pub async fn start_collator<Block, RA, BS, Spawner>(
 	StartCollatorParams {
-		para_id,
+		ally_id,
 		block_status,
 		announce_block,
 		mut overseer_handle,
@@ -337,7 +337,7 @@ pub async fn start_collator<Block, RA, BS, Spawner>(
 	let span = tracing::Span::current();
 	let config = CollationGenerationConfig {
 		key,
-		para_id,
+		ally_id,
 		collator: Box::new(move |relay_parent, validation_data| {
 			let collator = collator.clone();
 			collator
@@ -352,7 +352,7 @@ pub async fn start_collator<Block, RA, BS, Spawner>(
 		.await;
 
 	overseer_handle
-		.send_msg(CollatorProtocolMessage::CollateOn(para_id), "StartCollator")
+		.send_msg(CollatorProtocolMessage::CollateOn(ally_id), "StartCollator")
 		.await;
 }
 
@@ -416,7 +416,7 @@ mod tests {
 		sp_tracing::try_init_simple();
 
 		let spawner = TaskExecutor::new();
-		let para_id = AllyId::from(100);
+		let ally_id = AllyId::from(100);
 		let announce_block = |_, _| ();
 		let client = Arc::new(TestClientBuilder::new().build());
 		let header = client.header(&BlockId::Number(0)).unwrap().unwrap();
@@ -438,7 +438,7 @@ mod tests {
 			announce_block: Arc::new(announce_block),
 			overseer_handle: OverseerHandle::new(handle),
 			spawner,
-			para_id,
+			ally_id,
 			key: CollatorPair::generate().0,
 			allychain_consensus: Box::new(DummyAllychainConsensus { client: client.clone() }),
 		});

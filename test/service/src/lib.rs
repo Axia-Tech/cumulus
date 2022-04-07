@@ -175,7 +175,7 @@ async fn start_node_impl<RB>(
 	allychain_config: Configuration,
 	collator_key: Option<CollatorPair>,
 	relay_chain_config: Configuration,
-	para_id: AllyId,
+	ally_id: AllyId,
 	wrap_announce_block: Option<Box<dyn FnOnce(AnnounceBlockFn) -> AnnounceBlockFn>>,
 	rpc_ext_builder: RB,
 	consensus: Consensus,
@@ -228,7 +228,7 @@ where
 	task_manager.add_child(relay_chain_full_node.task_manager);
 
 	let block_announce_validator =
-		BlockAnnounceValidator::new(relay_chain_interface.clone(), para_id);
+		BlockAnnounceValidator::new(relay_chain_interface.clone(), ally_id);
 	let block_announce_validator_builder = move |_| Box::new(block_announce_validator) as Box<_>;
 
 	let prometheus_registry = allychain_config.prometheus_registry().cloned();
@@ -285,7 +285,7 @@ where
 				);
 				let relay_chain_interface2 = relay_chain_interface_for_closure.clone();
 				Box::new(cumulus_client_consensus_relay_chain::RelayChainConsensus::new(
-					para_id,
+					ally_id,
 					proposer_factory,
 					move |_, (relay_parent, validation_data)| {
 						let relay_chain_interface = relay_chain_interface_for_closure.clone();
@@ -295,7 +295,7 @@ where
 								relay_parent,
 								&relay_chain_interface,
 								&validation_data,
-								para_id,
+								ally_id,
 							).await;
 
 							let time = sp_timestamp::InherentDataProvider::from_system_time();
@@ -321,7 +321,7 @@ where
 			client: client.clone(),
 			spawner: task_manager.spawn_handle(),
 			task_manager: &mut task_manager,
-			para_id,
+			ally_id,
 			allychain_consensus,
 			relay_chain_interface,
 			collator_key,
@@ -335,7 +335,7 @@ where
 			client: client.clone(),
 			announce_block,
 			task_manager: &mut task_manager,
-			para_id,
+			ally_id,
 			relay_chain_interface,
 			import_queue,
 			// The slot duration is currently used internally only to configure
@@ -378,7 +378,7 @@ enum Consensus {
 
 /// A builder to create a [`TestNode`].
 pub struct TestNodeBuilder {
-	para_id: AllyId,
+	ally_id: AllyId,
 	tokio_handle: tokio::runtime::Handle,
 	key: Sr25519Keyring,
 	collator_key: Option<CollatorPair>,
@@ -394,13 +394,13 @@ pub struct TestNodeBuilder {
 impl TestNodeBuilder {
 	/// Create a new instance of `Self`.
 	///
-	/// `para_id` - The allychain id this node is running for.
+	/// `ally_id` - The allychain id this node is running for.
 	/// `tokio_handle` - The tokio handler to use.
 	/// `key` - The key that will be used to generate the name and that will be passed as `dev_seed`.
-	pub fn new(para_id: AllyId, tokio_handle: tokio::runtime::Handle, key: Sr25519Keyring) -> Self {
+	pub fn new(ally_id: AllyId, tokio_handle: tokio::runtime::Handle, key: Sr25519Keyring) -> Self {
 		TestNodeBuilder {
 			key,
-			para_id,
+			ally_id,
 			tokio_handle,
 			collator_key: None,
 			allychain_nodes: Vec::new(),
@@ -509,7 +509,7 @@ impl TestNodeBuilder {
 			self.key.clone(),
 			self.allychain_nodes,
 			self.allychain_nodes_exclusive,
-			self.para_id,
+			self.ally_id,
 			self.collator_key.is_some(),
 		)
 		.expect("could not generate Configuration");
@@ -529,7 +529,7 @@ impl TestNodeBuilder {
 			allychain_config,
 			self.collator_key,
 			relay_chain_config,
-			self.para_id,
+			self.ally_id,
 			self.wrap_announce_block,
 			|_| Ok(Default::default()),
 			self.consensus,
@@ -556,14 +556,14 @@ pub fn node_config(
 	key: Sr25519Keyring,
 	nodes: Vec<MultiaddrWithPeerId>,
 	nodes_exlusive: bool,
-	para_id: AllyId,
+	ally_id: AllyId,
 	is_collator: bool,
 ) -> Result<Configuration, ServiceError> {
 	let base_path = BasePath::new_temp_dir()?;
 	let root = base_path.path().to_path_buf();
 	let role = if is_collator { Role::Authority } else { Role::Full };
 	let key_seed = key.to_seed();
-	let mut spec = Box::new(chain_spec::get_chain_spec(para_id));
+	let mut spec = Box::new(chain_spec::get_chain_spec(ally_id));
 
 	let mut storage = spec.as_storage_builder().build_storage().expect("could not build storage");
 

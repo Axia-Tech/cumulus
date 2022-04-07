@@ -134,7 +134,7 @@ where
 ///
 /// This state proof is extracted from the relay chain block we are building on top of.
 pub struct RelayChainStateProof {
-	para_id: AllyId,
+	ally_id: AllyId,
 	trie_backend: TrieBackend<MemoryDB<HashFor<relay_chain::Block>>, HashFor<relay_chain::Block>>,
 }
 
@@ -144,7 +144,7 @@ impl RelayChainStateProof {
 	/// Returns an error if the given `relay_parent_storage_root` is not the root of the given
 	/// `proof`.
 	pub fn new(
-		para_id: AllyId,
+		ally_id: AllyId,
 		relay_parent_storage_root: relay_chain::v1::Hash,
 		proof: StorageProof,
 	) -> Result<Self, Error> {
@@ -154,7 +154,7 @@ impl RelayChainStateProof {
 		}
 		let trie_backend = TrieBackend::new(db, relay_parent_storage_root);
 
-		Ok(Self { para_id, trie_backend })
+		Ok(Self { ally_id, trie_backend })
 	}
 
 	/// Read the [`MessagingStateSnapshot`] from the relay chain state proof.
@@ -163,53 +163,53 @@ impl RelayChainStateProof {
 	pub fn read_messaging_state_snapshot(&self) -> Result<MessagingStateSnapshot, Error> {
 		let dmq_mqc_head: relay_chain::Hash = read_entry(
 			&self.trie_backend,
-			&relay_chain::well_known_keys::dmq_mqc_head(self.para_id),
+			&relay_chain::well_known_keys::dmq_mqc_head(self.ally_id),
 			Some(Default::default()),
 		)
 		.map_err(Error::DmqMqcHead)?;
 
 		let relay_dispatch_queue_size: (u32, u32) = read_entry(
 			&self.trie_backend,
-			&relay_chain::well_known_keys::relay_dispatch_queue_size(self.para_id),
+			&relay_chain::well_known_keys::relay_dispatch_queue_size(self.ally_id),
 			Some((0, 0)),
 		)
 		.map_err(Error::RelayDispatchQueueSize)?;
 
 		let ingress_channel_index: Vec<AllyId> = read_entry(
 			&self.trie_backend,
-			&relay_chain::well_known_keys::hrmp_ingress_channel_index(self.para_id),
+			&relay_chain::well_known_keys::hrmp_ingress_channel_index(self.ally_id),
 			Some(Vec::new()),
 		)
 		.map_err(Error::HrmpIngressChannelIndex)?;
 
 		let egress_channel_index: Vec<AllyId> = read_entry(
 			&self.trie_backend,
-			&relay_chain::well_known_keys::hrmp_egress_channel_index(self.para_id),
+			&relay_chain::well_known_keys::hrmp_egress_channel_index(self.ally_id),
 			Some(Vec::new()),
 		)
 		.map_err(Error::HrmpEgressChannelIndex)?;
 
 		let mut ingress_channels = Vec::with_capacity(ingress_channel_index.len());
 		for sender in ingress_channel_index {
-			let channel_id = relay_chain::v1::HrmpChannelId { sender, recipient: self.para_id };
+			let channel_id = relay_chain::v1::HrmpChannelId { sender, recipient: self.ally_id };
 			let hrmp_channel: AbridgedHrmpChannel = read_entry(
 				&self.trie_backend,
 				&relay_chain::well_known_keys::hrmp_channels(channel_id),
 				None,
 			)
-			.map_err(|read_err| Error::HrmpChannel(sender, self.para_id, read_err))?;
+			.map_err(|read_err| Error::HrmpChannel(sender, self.ally_id, read_err))?;
 			ingress_channels.push((sender, hrmp_channel));
 		}
 
 		let mut egress_channels = Vec::with_capacity(egress_channel_index.len());
 		for recipient in egress_channel_index {
-			let channel_id = relay_chain::v1::HrmpChannelId { sender: self.para_id, recipient };
+			let channel_id = relay_chain::v1::HrmpChannelId { sender: self.ally_id, recipient };
 			let hrmp_channel: AbridgedHrmpChannel = read_entry(
 				&self.trie_backend,
 				&relay_chain::well_known_keys::hrmp_channels(channel_id),
 				None,
 			)
-			.map_err(|read_err| Error::HrmpChannel(self.para_id, recipient, read_err))?;
+			.map_err(|read_err| Error::HrmpChannel(self.ally_id, recipient, read_err))?;
 			egress_channels.push((recipient, hrmp_channel));
 		}
 
@@ -253,7 +253,7 @@ impl RelayChainStateProof {
 	) -> Result<Option<relay_chain::v1::UpgradeGoAhead>, Error> {
 		read_optional_entry(
 			&self.trie_backend,
-			&relay_chain::well_known_keys::upgrade_go_ahead_signal(self.para_id),
+			&relay_chain::well_known_keys::upgrade_go_ahead_signal(self.ally_id),
 		)
 		.map_err(Error::UpgradeGoAhead)
 	}
@@ -269,7 +269,7 @@ impl RelayChainStateProof {
 	) -> Result<Option<relay_chain::v1::UpgradeRestriction>, Error> {
 		read_optional_entry(
 			&self.trie_backend,
-			&relay_chain::well_known_keys::upgrade_restriction_signal(self.para_id),
+			&relay_chain::well_known_keys::upgrade_restriction_signal(self.ally_id),
 		)
 		.map_err(Error::UpgradeRestriction)
 	}

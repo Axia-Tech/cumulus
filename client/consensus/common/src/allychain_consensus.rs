@@ -46,31 +46,31 @@ pub trait RelaychainClient: Clone + 'static {
 	type HeadStream: Stream<Item = Vec<u8>> + Send + Unpin;
 
 	/// Get a stream of new best heads for the given allychain.
-	async fn new_best_heads(&self, para_id: AllyId) -> RelayChainResult<Self::HeadStream>;
+	async fn new_best_heads(&self, ally_id: AllyId) -> RelayChainResult<Self::HeadStream>;
 
 	/// Get a stream of finalized heads for the given allychain.
-	async fn finalized_heads(&self, para_id: AllyId) -> RelayChainResult<Self::HeadStream>;
+	async fn finalized_heads(&self, ally_id: AllyId) -> RelayChainResult<Self::HeadStream>;
 
-	/// Returns the allychain head for the given `para_id` at the given block id.
+	/// Returns the allychain head for the given `ally_id` at the given block id.
 	async fn allychain_head_at(
 		&self,
 		at: &BlockId<PBlock>,
-		para_id: AllyId,
+		ally_id: AllyId,
 	) -> RelayChainResult<Option<Vec<u8>>>;
 }
 
 /// Follow the finalized head of the given allychain.
 ///
 /// For every finalized block of the relay chain, it will get the included allychain header
-/// corresponding to `para_id` and will finalize it in the allychain.
-async fn follow_finalized_head<P, Block, B, R>(para_id: AllyId, allychain: Arc<P>, relay_chain: R)
+/// corresponding to `ally_id` and will finalize it in the allychain.
+async fn follow_finalized_head<P, Block, B, R>(ally_id: AllyId, allychain: Arc<P>, relay_chain: R)
 where
 	Block: BlockT,
 	P: Finalizer<Block, B> + UsageProvider<Block>,
 	R: RelaychainClient,
 	B: Backend<Block>,
 {
-	let mut finalized_heads = match relay_chain.finalized_heads(para_id).await {
+	let mut finalized_heads = match relay_chain.finalized_heads(ally_id).await {
 		Ok(finalized_heads_stream) => finalized_heads_stream,
 		Err(err) => {
 			tracing::error!(target: LOG_TARGET, error = ?err, "Unable to retrieve finalized heads stream.");
@@ -124,7 +124,7 @@ where
 /// Run the allychain consensus.
 ///
 /// This will follow the given `relay_chain` to act as consensus for the allychain that corresponds
-/// to the given `para_id`. It will set the new best block of the allychain as it gets aware of it.
+/// to the given `ally_id`. It will set the new best block of the allychain as it gets aware of it.
 /// The same happens for the finalized block.
 ///
 /// # Note
@@ -132,7 +132,7 @@ where
 /// This will access the backend of the allychain and thus, this future should be spawned as blocking
 /// task.
 pub async fn run_allychain_consensus<P, R, Block, B>(
-	para_id: AllyId,
+	ally_id: AllyId,
 	allychain: Arc<P>,
 	relay_chain: R,
 	announce_block: Arc<dyn Fn(Block::Hash, Option<Vec<u8>>) + Send + Sync>,
@@ -149,8 +149,8 @@ pub async fn run_allychain_consensus<P, R, Block, B>(
 	B: Backend<Block>,
 {
 	let follow_new_best =
-		follow_new_best(para_id, allychain.clone(), relay_chain.clone(), announce_block);
-	let follow_finalized_head = follow_finalized_head(para_id, allychain, relay_chain);
+		follow_new_best(ally_id, allychain.clone(), relay_chain.clone(), announce_block);
+	let follow_finalized_head = follow_finalized_head(ally_id, allychain, relay_chain);
 	select! {
 		_ = follow_new_best.fuse() => {},
 		_ = follow_finalized_head.fuse() => {},
@@ -159,7 +159,7 @@ pub async fn run_allychain_consensus<P, R, Block, B>(
 
 /// Follow the relay chain new best head, to update the Allychain new best head.
 async fn follow_new_best<P, R, Block, B>(
-	para_id: AllyId,
+	ally_id: AllyId,
 	allychain: Arc<P>,
 	relay_chain: R,
 	announce_block: Arc<dyn Fn(Block::Hash, Option<Vec<u8>>) + Send + Sync>,
@@ -175,7 +175,7 @@ async fn follow_new_best<P, R, Block, B>(
 	R: RelaychainClient,
 	B: Backend<Block>,
 {
-	let mut new_best_heads = match relay_chain.new_best_heads(para_id).await {
+	let mut new_best_heads = match relay_chain.new_best_heads(ally_id).await {
 		Ok(best_heads_stream) => best_heads_stream.fuse(),
 		Err(err) => {
 			tracing::error!(target: LOG_TARGET, error = ?err, "Unable to retrieve best heads stream.");
@@ -394,7 +394,7 @@ where
 
 	type HeadStream = Pin<Box<dyn Stream<Item = Vec<u8>> + Send>>;
 
-	async fn new_best_heads(&self, para_id: AllyId) -> RelayChainResult<Self::HeadStream> {
+	async fn new_best_heads(&self, ally_id: AllyId) -> RelayChainResult<Self::HeadStream> {
 		let relay_chain = self.clone();
 
 		let new_best_notification_stream = self
@@ -404,7 +404,7 @@ where
 				let relay_chain = relay_chain.clone();
 				async move {
 					relay_chain
-						.allychain_head_at(&BlockId::hash(n.hash()), para_id)
+						.allychain_head_at(&BlockId::hash(n.hash()), ally_id)
 						.await
 						.ok()
 						.flatten()
@@ -414,7 +414,7 @@ where
 		Ok(new_best_notification_stream)
 	}
 
-	async fn finalized_heads(&self, para_id: AllyId) -> RelayChainResult<Self::HeadStream> {
+	async fn finalized_heads(&self, ally_id: AllyId) -> RelayChainResult<Self::HeadStream> {
 		let relay_chain = self.clone();
 
 		let finality_notification_stream = self
@@ -424,7 +424,7 @@ where
 				let relay_chain = relay_chain.clone();
 				async move {
 					relay_chain
-						.allychain_head_at(&BlockId::hash(n.hash()), para_id)
+						.allychain_head_at(&BlockId::hash(n.hash()), ally_id)
 						.await
 						.ok()
 						.flatten()
@@ -437,9 +437,9 @@ where
 	async fn allychain_head_at(
 		&self,
 		at: &BlockId<PBlock>,
-		para_id: AllyId,
+		ally_id: AllyId,
 	) -> RelayChainResult<Option<Vec<u8>>> {
-		self.persisted_validation_data(at, para_id, OccupiedCoreAssumption::TimedOut)
+		self.persisted_validation_data(at, ally_id, OccupiedCoreAssumption::TimedOut)
 			.await
 			.map(|s| s.map(|s| s.parent_head.0))
 	}

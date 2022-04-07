@@ -17,7 +17,7 @@ chain_spec_summary() {
         echo -e " - decimals    :" $(jq  -r .properties.tokenDecimals $chain_spec)
         echo -e " - symbol      :" $(jq  -r .properties.tokenSymbol $chain_spec)
         echo -e " - relay_chain :" $(jq  -r .relay_chain $chain_spec)
-        echo -e " - para_id     :" $(jq  -r .para_id $chain_spec)
+        echo -e " - ally_id     :" $(jq  -r .ally_id $chain_spec)
         echo -e " - bootNodes   :" $(jq  '.bootNodes | length' $chain_spec)
         echo
     else

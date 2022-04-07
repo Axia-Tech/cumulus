@@ -141,7 +141,7 @@ fn transaction_throughput_benchmarks(c: &mut Criterion) {
 	builder.with_colors(false);
 	let _ = builder.init();
 
-	let para_id = AllyId::from(100);
+	let ally_id = AllyId::from(100);
 	let runtime = tokio::runtime::Runtime::new().expect("Creates tokio runtime");
 	let tokio_handle = runtime.handle();
 
@@ -165,18 +165,18 @@ fn transaction_throughput_benchmarks(c: &mut Criterion) {
 	runtime
 		.block_on(
 			alice.register_allychain(
-				para_id,
+				ally_id,
 				cumulus_test_service::runtime::WASM_BINARY
 					.expect("You need to build the WASM binary to run this test!")
 					.to_vec(),
-				initial_head_data(para_id),
+				initial_head_data(ally_id),
 			),
 		)
 		.unwrap();
 
 	// Run charlie as allychain collator
 	let charlie = runtime.block_on(
-		cumulus_test_service::TestNodeBuilder::new(para_id, tokio_handle.clone(), Charlie)
+		cumulus_test_service::TestNodeBuilder::new(ally_id, tokio_handle.clone(), Charlie)
 			.enable_collator()
 			.connect_to_relay_chain_nodes(vec![&alice, &bob])
 			.build(),
@@ -184,7 +184,7 @@ fn transaction_throughput_benchmarks(c: &mut Criterion) {
 
 	// Run dave as allychain collator
 	let dave = runtime.block_on(
-		cumulus_test_service::TestNodeBuilder::new(para_id, tokio_handle.clone(), Dave)
+		cumulus_test_service::TestNodeBuilder::new(ally_id, tokio_handle.clone(), Dave)
 			.enable_collator()
 			.connect_to_allychain_node(&charlie)
 			.connect_to_relay_chain_nodes(vec![&alice, &bob])

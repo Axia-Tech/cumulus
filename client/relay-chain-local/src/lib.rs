@@ -89,37 +89,37 @@ where
 {
 	async fn retrieve_dmq_contents(
 		&self,
-		para_id: AllyId,
+		ally_id: AllyId,
 		relay_parent: PHash,
 	) -> RelayChainResult<Vec<InboundDownwardMessage>> {
 		Ok(self.full_client.runtime_api().dmq_contents_with_context(
 			&BlockId::hash(relay_parent),
 			sp_core::ExecutionContext::Importing,
-			para_id,
+			ally_id,
 		)?)
 	}
 
 	async fn retrieve_all_inbound_hrmp_channel_contents(
 		&self,
-		para_id: AllyId,
+		ally_id: AllyId,
 		relay_parent: PHash,
 	) -> RelayChainResult<BTreeMap<AllyId, Vec<InboundHrmpMessage>>> {
 		Ok(self.full_client.runtime_api().inbound_hrmp_channels_contents_with_context(
 			&BlockId::hash(relay_parent),
 			sp_core::ExecutionContext::Importing,
-			para_id,
+			ally_id,
 		)?)
 	}
 
 	async fn persisted_validation_data(
 		&self,
 		block_id: &BlockId,
-		para_id: AllyId,
+		ally_id: AllyId,
 		occupied_core_assumption: OccupiedCoreAssumption,
 	) -> RelayChainResult<Option<PersistedValidationData>> {
 		Ok(self.full_client.runtime_api().persisted_validation_data(
 			block_id,
-			para_id,
+			ally_id,
 			occupied_core_assumption,
 		)?)
 	}
@@ -127,12 +127,12 @@ where
 	async fn candidate_pending_availability(
 		&self,
 		block_id: &BlockId,
-		para_id: AllyId,
+		ally_id: AllyId,
 	) -> RelayChainResult<Option<CommittedCandidateReceipt>> {
 		Ok(self
 			.full_client
 			.runtime_api()
-			.candidate_pending_availability(block_id, para_id)?)
+			.candidate_pending_availability(block_id, ally_id)?)
 	}
 
 	async fn session_index_for_child(&self, block_id: &BlockId) -> RelayChainResult<SessionIndex> {

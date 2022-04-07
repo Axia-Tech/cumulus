@@ -14,7 +14,7 @@ id="seedling-$3"
 chain_type=$4
 bootnodes=$5
 relay_chain=$6
-para_id=$7
+ally_id=$7
 sudo=$8
 
 [ -z "$runtime_path" ] && usage
@@ -41,16 +41,16 @@ cat seedling-spec-plain.json | jq --rawfile code seedling-hex.txt '.genesis.runt
     | jq --arg chain_type $chain_type '.chainType = $chain_type' \
     | jq --argjson bootnodes $bootnodes '.bootNodes = $bootnodes' \
     | jq --arg relay_chain $relay_chain '.relay_chain = $relay_chain' \
-    | jq --argjson para_id $para_id '.para_id = $para_id' \
+    | jq --argjson ally_id $ally_id '.ally_id = $ally_id' \
     | jq --arg sudo $sudo '.genesis.runtime.sudo.key = $sudo' \
-    | jq --argjson para_id $para_id '.genesis.runtime.allychainInfo.allychainId = $para_id' \
+    | jq --argjson ally_id $ally_id '.genesis.runtime.allychainInfo.allychainId = $ally_id' \
     > edited-seedling-plain.json
 
 # build a raw spec
 $binary build-spec --disable-default-bootnode --chain edited-seedling-plain.json --raw > seedling-spec-raw.json
 
 # build genesis data
-$binary export-genesis-state --allychain-id=$para_id --chain seedling-spec-raw.json > seedling-head-data
+$binary export-genesis-state --allychain-id=$ally_id --chain seedling-spec-raw.json > seedling-head-data
 
 # build genesis wasm
 $binary export-genesis-wasm --chain seedling-spec-raw.json > seedling-wasm

@@ -77,7 +77,7 @@ pub trait RelayChainInterface: Send + Sync {
 	/// Returns `None` in case of an error.
 	async fn retrieve_dmq_contents(
 		&self,
-		para_id: AllyId,
+		ally_id: AllyId,
 		relay_parent: PHash,
 	) -> RelayChainResult<Vec<InboundDownwardMessage>>;
 
@@ -87,7 +87,7 @@ pub trait RelayChainInterface: Send + Sync {
 	/// Empty channels are also included.
 	async fn retrieve_all_inbound_hrmp_channel_contents(
 		&self,
-		para_id: AllyId,
+		ally_id: AllyId,
 		relay_parent: PHash,
 	) -> RelayChainResult<BTreeMap<AllyId, Vec<InboundHrmpMessage>>>;
 
@@ -99,7 +99,7 @@ pub trait RelayChainInterface: Send + Sync {
 	async fn persisted_validation_data(
 		&self,
 		block_id: &BlockId,
-		para_id: AllyId,
+		ally_id: AllyId,
 		_: OccupiedCoreAssumption,
 	) -> RelayChainResult<Option<PersistedValidationData>>;
 
@@ -108,7 +108,7 @@ pub trait RelayChainInterface: Send + Sync {
 	async fn candidate_pending_availability(
 		&self,
 		block_id: &BlockId,
-		para_id: AllyId,
+		ally_id: AllyId,
 	) -> RelayChainResult<Option<CommittedCandidateReceipt>>;
 
 	/// Returns the session index expected at a child of the block.
@@ -157,37 +157,37 @@ where
 {
 	async fn retrieve_dmq_contents(
 		&self,
-		para_id: AllyId,
+		ally_id: AllyId,
 		relay_parent: PHash,
 	) -> RelayChainResult<Vec<InboundDownwardMessage>> {
-		(**self).retrieve_dmq_contents(para_id, relay_parent).await
+		(**self).retrieve_dmq_contents(ally_id, relay_parent).await
 	}
 
 	async fn retrieve_all_inbound_hrmp_channel_contents(
 		&self,
-		para_id: AllyId,
+		ally_id: AllyId,
 		relay_parent: PHash,
 	) -> RelayChainResult<BTreeMap<AllyId, Vec<InboundHrmpMessage>>> {
-		(**self).retrieve_all_inbound_hrmp_channel_contents(para_id, relay_parent).await
+		(**self).retrieve_all_inbound_hrmp_channel_contents(ally_id, relay_parent).await
 	}
 
 	async fn persisted_validation_data(
 		&self,
 		block_id: &BlockId,
-		para_id: AllyId,
+		ally_id: AllyId,
 		occupied_core_assumption: OccupiedCoreAssumption,
 	) -> RelayChainResult<Option<PersistedValidationData>> {
 		(**self)
-			.persisted_validation_data(block_id, para_id, occupied_core_assumption)
+			.persisted_validation_data(block_id, ally_id, occupied_core_assumption)
 			.await
 	}
 
 	async fn candidate_pending_availability(
 		&self,
 		block_id: &BlockId,
-		para_id: AllyId,
+		ally_id: AllyId,
 	) -> RelayChainResult<Option<CommittedCandidateReceipt>> {
-		(**self).candidate_pending_availability(block_id, para_id).await
+		(**self).candidate_pending_availability(block_id, ally_id).await
 	}
 
 	async fn session_index_for_child(&self, block_id: &BlockId) -> RelayChainResult<SessionIndex> {

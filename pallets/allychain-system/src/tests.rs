@@ -577,7 +577,7 @@ fn send_hrmp_message_buffer_channel_close() {
 			//
 			// Base case setup
 			//
-			sproof.para_id = AllyId::from(200);
+			sproof.ally_id = AllyId::from(200);
 			sproof.hrmp_egress_channel_index = Some(vec![AllyId::from(300), AllyId::from(400)]);
 			sproof.hrmp_channels.insert(
 				HrmpChannelId { sender: AllyId::from(200), recipient: AllyId::from(300) },

@@ -48,7 +48,7 @@ pub struct StartCollatorParams<'a, Block: BlockT, BS, Client, RCInterface, Spawn
 	pub client: Arc<Client>,
 	pub announce_block: Arc<dyn Fn(Block::Hash, Option<Vec<u8>>) + Send + Sync>,
 	pub spawner: Spawner,
-	pub para_id: AllyId,
+	pub ally_id: AllyId,
 	pub relay_chain_interface: RCInterface,
 	pub task_manager: &'a mut TaskManager,
 	pub allychain_consensus: Box<dyn AllychainConsensus<Block>>,
@@ -68,7 +68,7 @@ pub async fn start_collator<'a, Block, BS, Client, Backend, RCInterface, Spawner
 		client,
 		announce_block,
 		spawner,
-		para_id,
+		ally_id,
 		task_manager,
 		relay_chain_interface,
 		allychain_consensus,
@@ -97,7 +97,7 @@ where
 	IQ: ImportQueue<Block> + 'static,
 {
 	let consensus = cumulus_client_consensus_common::run_allychain_consensus(
-		para_id,
+		ally_id,
 		client.clone(),
 		relay_chain_interface.clone(),
 		announce_block.clone(),
@@ -120,7 +120,7 @@ where
 		client.clone(),
 		import_queue,
 		relay_chain_interface.clone(),
-		para_id,
+		ally_id,
 	);
 
 	task_manager
@@ -133,7 +133,7 @@ where
 		announce_block,
 		overseer_handle,
 		spawner,
-		para_id,
+		ally_id,
 		key: collator_key,
 		allychain_consensus,
 	})
@@ -144,7 +144,7 @@ where
 
 /// Parameters given to [`start_full_node`].
 pub struct StartFullNodeParams<'a, Block: BlockT, Client, RCInterface, IQ> {
-	pub para_id: AllyId,
+	pub ally_id: AllyId,
 	pub client: Arc<Client>,
 	pub relay_chain_interface: RCInterface,
 	pub task_manager: &'a mut TaskManager,
@@ -163,7 +163,7 @@ pub fn start_full_node<Block, Client, Backend, RCInterface, IQ>(
 		announce_block,
 		task_manager,
 		relay_chain_interface,
-		para_id,
+		ally_id,
 		relay_chain_slot_duration,
 		import_queue,
 	}: StartFullNodeParams<Block, Client, RCInterface, IQ>,
@@ -183,7 +183,7 @@ where
 	IQ: ImportQueue<Block> + 'static,
 {
 	let consensus = cumulus_client_consensus_common::run_allychain_consensus(
-		para_id,
+		ally_id,
 		client.clone(),
 		relay_chain_interface.clone(),
 		announce_block,
@@ -212,7 +212,7 @@ where
 		client.clone(),
 		import_queue,
 		relay_chain_interface.clone(),
-		para_id,
+		ally_id,
 	);
 
 	task_manager

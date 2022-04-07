@@ -495,8 +495,8 @@ pub fn run() -> Result<()> {
 			let runner = cli.create_runner(&cli.run.normalize())?;
 
 			runner.run_node_until_exit(|config| async move {
-				let para_id = chain_spec::Extensions::try_get(&*config.chain_spec)
-					.map(|e| e.para_id)
+				let ally_id = chain_spec::Extensions::try_get(&*config.chain_spec)
+					.map(|e| e.ally_id)
 					.ok_or_else(|| "Could not find allychain extension in chain-spec.")?;
 
 				let axia_cli = RelayChainCli::new(
@@ -506,7 +506,7 @@ pub fn run() -> Result<()> {
 						.chain(cli.relaychain_args.iter()),
 				);
 
-				let id = AllyId::from(para_id);
+				let id = AllyId::from(ally_id);
 
 				let allychain_account =
 					AccountIdConversion::<axia_primitives::v0::AccountId>::into_account(&id);

@@ -33,14 +33,14 @@ pub struct GenesisExt {
 	/// The runtime genesis config.
 	runtime_genesis_config: cumulus_test_runtime::GenesisConfig,
 	/// The allychain id.
-	para_id: AllyId,
+	ally_id: AllyId,
 }
 
 impl sp_runtime::BuildStorage for GenesisExt {
 	fn assimilate_storage(&self, storage: &mut sp_core::storage::Storage) -> Result<(), String> {
 		sp_state_machine::BasicExternalities::execute_with_storage(storage, || {
 			sp_io::storage::set(cumulus_test_runtime::TEST_RUNTIME_UPGRADE_KEY, &vec![1, 2, 3, 4]);
-			cumulus_test_runtime::AllychainId::set(&self.para_id);
+			cumulus_test_runtime::AllychainId::set(&self.ally_id);
 		});
 
 		self.runtime_genesis_config.assimilate_storage(storage)
@@ -59,7 +59,7 @@ pub fn get_from_seed<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Pu
 #[serde(deny_unknown_fields)]
 pub struct Extensions {
 	/// The id of the Allychain.
-	pub para_id: u32,
+	pub ally_id: u32,
 }
 
 impl Extensions {
@@ -85,13 +85,13 @@ pub fn get_chain_spec(id: AllyId) -> ChainSpec {
 		"Local Testnet",
 		"local_testnet",
 		ChainType::Local,
-		move || GenesisExt { runtime_genesis_config: local_testnet_genesis(), para_id: id },
+		move || GenesisExt { runtime_genesis_config: local_testnet_genesis(), ally_id: id },
 		Vec::new(),
 		None,
 		None,
 		None,
 		None,
-		Extensions { para_id: id.into() },
+		Extensions { ally_id: id.into() },
 	)
 }
 
