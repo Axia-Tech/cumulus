@@ -1090,3 +1090,66 @@ fn canvas_axctest_genesis(
 		},
 	}
 }
+
+
+pub fn sankar_config() -> ChainSpec {
+	ChainSpec::from_genesis(
+		"Sankar",
+		"betanet_sankar",
+		ChainType::Local,
+		move || {
+			sankar_genesis(
+				get_account_id_from_seed::<sr25519::Public>("Alice"),
+				vec![get_from_seed::<AuraId>("Alice"), get_from_seed::<AuraId>("Bob")],
+				vec![
+					get_account_id_from_seed::<sr25519::Public>("Alice"),
+					get_account_id_from_seed::<sr25519::Public>("Bob"),
+					get_account_id_from_seed::<sr25519::Public>("Charlie"),
+					get_account_id_from_seed::<sr25519::Public>("Dave"),
+					get_account_id_from_seed::<sr25519::Public>("Eve"),
+					get_account_id_from_seed::<sr25519::Public>("Ferdie"),
+					get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
+					get_account_id_from_seed::<sr25519::Public>("Bob//stash"),
+					get_account_id_from_seed::<sr25519::Public>("Charlie//stash"),
+					get_account_id_from_seed::<sr25519::Public>("Dave//stash"),
+					get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
+					get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
+				],
+				1000.into(),
+			)
+		},
+		Vec::new(),
+		None,
+		None,
+		None,
+		None,
+		Extensions { relay_chain: "betanet_sankar".into(), ally_id: 2000 },
+	)
+}
+
+
+fn sankar_genesis(
+	root_key: AccountId,
+	initial_authorities: Vec<AuraId>,
+	endowed_accounts: Vec<AccountId>,
+	id: AllyId,
+) -> betanet_allychain_runtime::GenesisConfig {
+	betanet_allychain_runtime::GenesisConfig {
+		system: betanet_allychain_runtime::SystemConfig {
+			code: betanet_allychain_runtime::WASM_BINARY
+				.expect("WASM binary was not build, please build it!")
+				.to_vec(),
+		},
+		balances: betanet_allychain_runtime::BalancesConfig {
+			balances: endowed_accounts.iter().cloned().map(|k| (k, 1 << 60)).collect(),
+		},
+		sudo: betanet_allychain_runtime::SudoConfig { key: Some(root_key) },
+		allychain_info: betanet_allychain_runtime::AllychainInfoConfig { allychain_id: id },
+		aura: betanet_allychain_runtime::AuraConfig { authorities: initial_authorities },
+		aura_ext: Default::default(),
+		allychain_system: Default::default(),
+		axia_xcm: betanet_allychain_runtime::AxiaXcmConfig {
+			safe_xcm_version: Some(SAFE_XCM_VERSION),
+		},
+	}
+}

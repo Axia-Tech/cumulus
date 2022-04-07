@@ -143,6 +143,7 @@ fn load_spec(id: &str) -> std::result::Result<Box<dyn sc_service::ChainSpec>, St
 		)?),
 		// -- Fallback (generic chainspec)
 		"" => Box::new(chain_spec::get_chain_spec()),
+		"sankar" => Box::new(chain_spec::sankar_config()),
 		// -- Loading a specific spec from disk
 		path => {
 			let chain_spec = chain_spec::ChainSpec::from_json_file(path.into())?;
