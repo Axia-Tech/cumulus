@@ -7,6 +7,7 @@ use sp_core::{sr25519, Pair, Public};
 use sp_runtime::traits::{IdentifyAccount, Verify};
 use hex_literal::hex;
 use sp_core::crypto::UncheckedInto;
+use crate::keys;
 
 /// Specialized `ChainSpec` for the normal allychain runtime.
 pub type ChainSpec =
@@ -45,7 +46,9 @@ type AccountPublic = <Signature as Verify>::Signer;
 ///
 /// This function's return type must always match the session keys of the chain in tuple format.
 pub fn get_collator_keys_from_seed(seed: &str) -> AuraId {
-	get_public_from_seed::<AuraId>(seed)
+	let a = get_public_from_seed::<AuraId>(seed);
+	eprintln!("Collator \n{:?}", a);
+	a
 }
 
 /// Helper function to generate an account ID from seed
@@ -53,7 +56,9 @@ pub fn get_account_id_from_seed<TPublic: Public>(seed: &str) -> AccountId
 where
 	AccountPublic: From<<TPublic::Pair as Pair>::Public>,
 {
-	AccountPublic::from(get_public_from_seed::<TPublic>(seed)).into_account()
+	let a = AccountPublic::from(get_public_from_seed::<TPublic>(seed)).into_account();
+	eprintln!("AccountId \n{:?}", a);
+	a
 }
 
 /// Generate the session keys from individual elements.
@@ -184,9 +189,9 @@ fn testnet_genesis(
 	endowed_accounts: Vec<AccountId>,
 	id: AllyId,
 ) -> allychain_template_runtime::GenesisConfig {
-	// let invulnerables: Vec<(AccountId, AuraId)> = invulnerables_accounts();
-	// let endowed_accounts: Vec<AccountId> = endowed_accounts();
-	
+	eprintln!("other-testnets__________________");
+	eprintln!("Testnet genesis:invulnerables\n{:?}", invulnerables);
+	eprintln!("Testnet genesis:endowed_accounts\n{:?}", endowed_accounts);
 	allychain_template_runtime::GenesisConfig {
 		system: allychain_template_runtime::SystemConfig {
 			code: allychain_template_runtime::WASM_BINARY
@@ -225,32 +230,86 @@ fn testnet_genesis(
 	}
 }
 
-// fn endowed_accounts() -> Vec<AccountId> {
-// 	vec![
-// 		// Sankar//stash
-// 		hex!["3233f745d0860ed64ae9c7f4ea5c0773316fc9265199f312d3f6e8ce08255c10"].into(),
-// 		// Arun//stash
-// 		hex!["445f574d57f768ea7e1a2f551bef4298ace99d8895d316352cfc02aececcf26c"].into(),
-// 		// Rakhi//stash
-// 		hex!["c2312f7f9a8190bf76db9dc40e5ef351c4c23e3ae6540932bf2c2d485289c37b"].into(),
-// 		// Priya//stash
-// 		hex!["688d6fa54d9ace0fa07492f3d8dfef78594130719e61c213d700c62421177c38"].into()
-// 	]
-// }
 
-// fn invulnerables_accounts() -> Vec<(AccountId, AuraId)> {
-// 	vec![
-// 		(
-// 			// Sankar//stash
-// 			hex!["3233f745d0860ed64ae9c7f4ea5c0773316fc9265199f312d3f6e8ce08255c10"].into(),
-// 			// Sankar//aura
-// 			hex!["4e743e3efea9390a89894383c8567907db13edb3fb2c1e0f8c428a745e05be77"].unchecked_into()
-// 		),
-// 		(
-// 			// Arun//stash
-// 			hex!["445f574d57f768ea7e1a2f551bef4298ace99d8895d316352cfc02aececcf26c"].into(),
-// 			// Arun//aura
-// 			hex!["b21c79d2588ddeaf6005a28222110c62f7dd31b89c03efd46ba6b555b327eb08"].unchecked_into()
-// 		)
-// 	]
-// }
+pub fn sankar_config() -> ChainSpec {
+	eprintln!("allychain-template________allychain-template");
+	eprintln!("SANKAR_____BORO______");
+	// Give your base currency a unit name and decimal places
+	let mut properties = sc_chain_spec::Properties::new();
+	properties.insert("tokenSymbol".into(), "UNIT".into());
+	properties.insert("tokenDecimals".into(), 12.into());
+	properties.insert("ss58Format".into(), 42.into());
+
+	ChainSpec::from_genesis(
+		// Name
+		"Sankar Testnet",
+		// ID
+		"local_testnet",
+		ChainType::Local,
+		move || {
+			sankar_genesis()
+		},
+		// Bootnodes
+		Vec::new(),
+		// Telemetry
+		None,
+		// Protocol ID
+		Some("template-local"),
+		// Fork ID
+		None,
+		// Properties
+		Some(properties),
+		// Extensions
+		Extensions {
+			relay_chain: "betanet-local".into(), // You MUST set this to the correct network!
+			ally_id: 2000,
+		},
+	)
+}
+
+
+fn sankar_genesis() -> allychain_template_runtime::GenesisConfig {
+	let invulnerables: Vec<(AccountId, AuraId)> = keys::initial_authorities();
+	let endowed_accounts: Vec<AccountId> = keys::endowed_accounts();
+	eprintln!("Sankar genesis:invulnerables\n{:?}", invulnerables);
+	eprintln!("Sankar genesis:endowed_accounts\n{:?}", endowed_accounts);
+
+	let id: AllyId = 2000.into();
+	
+	allychain_template_runtime::GenesisConfig {
+		system: allychain_template_runtime::SystemConfig {
+			code: allychain_template_runtime::WASM_BINARY
+				.expect("WASM binary was not build, please build it!")
+				.to_vec(),
+		},
+		balances: allychain_template_runtime::BalancesConfig {
+			balances: endowed_accounts.iter().cloned().map(|k| (k, 1 << 60)).collect(),
+		},
+		allychain_info: allychain_template_runtime::AllychainInfoConfig { allychain_id: id },
+		collator_selection: allychain_template_runtime::CollatorSelectionConfig {
+			invulnerables: invulnerables.iter().cloned().map(|(acc, _)| acc).collect(),
+			candidacy_bond: EXISTENTIAL_DEPOSIT * 16,
+			..Default::default()
+		},
+		session: allychain_template_runtime::SessionConfig {
+			keys: invulnerables
+				.into_iter()
+				.map(|(acc, aura)| {
+					(
+						acc.clone(),                 // account id
+						acc,                         // validator id
+						template_session_keys(aura), // session keys
+					)
+				})
+				.collect(),
+		},
+		// no need to pass anything to aura, in fact it will panic if we do. Session will take care
+		// of this.
+		aura: Default::default(),
+		aura_ext: Default::default(),
+		allychain_system: Default::default(),
+		axia_xcm: allychain_template_runtime::AxiaXcmConfig {
+			safe_xcm_version: Some(SAFE_XCM_VERSION),
+		},
+	}
+}

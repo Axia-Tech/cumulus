@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Cumulus.  If not, see <http://www.gnu.org/licenses/>.
 
+use crate::keys;
 use cumulus_primitives_core::AllyId;
 use hex_literal::hex;
 use betanet_allychain_runtime::{AccountId, AuraId, Signature};
@@ -68,7 +69,9 @@ pub fn get_account_id_from_seed<TPublic: Public>(seed: &str) -> AccountId
 where
 	AccountPublic: From<<TPublic::Pair as Pair>::Public>,
 {
-	AccountPublic::from(get_from_seed::<TPublic>(seed)).into_account()
+	let a = AccountPublic::from(get_from_seed::<TPublic>(seed)).into_account();
+	eprintln!("AccountId \n{:?}", a);
+	a
 }
 
 pub fn get_chain_spec() -> ChainSpec {
@@ -178,6 +181,7 @@ fn testnet_genesis(
 	endowed_accounts: Vec<AccountId>,
 	id: AllyId,
 ) -> betanet_allychain_runtime::GenesisConfig {
+	eprintln!("other-testnet________");
 	betanet_allychain_runtime::GenesisConfig {
 		system: betanet_allychain_runtime::SystemConfig {
 			code: betanet_allychain_runtime::WASM_BINARY
@@ -1093,30 +1097,13 @@ fn canvas_axctest_genesis(
 
 
 pub fn sankar_config() -> ChainSpec {
+	eprintln!("axia-allychains______axia-allychains");
 	ChainSpec::from_genesis(
 		"Sankar",
 		"betanet_sankar",
 		ChainType::Local,
 		move || {
-			sankar_genesis(
-				get_account_id_from_seed::<sr25519::Public>("Alice"),
-				vec![get_from_seed::<AuraId>("Alice"), get_from_seed::<AuraId>("Bob")],
-				vec![
-					get_account_id_from_seed::<sr25519::Public>("Alice"),
-					get_account_id_from_seed::<sr25519::Public>("Bob"),
-					get_account_id_from_seed::<sr25519::Public>("Charlie"),
-					get_account_id_from_seed::<sr25519::Public>("Dave"),
-					get_account_id_from_seed::<sr25519::Public>("Eve"),
-					get_account_id_from_seed::<sr25519::Public>("Ferdie"),
-					get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Bob//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Charlie//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Dave//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
-				],
-				1000.into(),
-			)
+			sankar_genesis()
 		},
 		Vec::new(),
 		None,
@@ -1128,12 +1115,16 @@ pub fn sankar_config() -> ChainSpec {
 }
 
 
-fn sankar_genesis(
-	root_key: AccountId,
-	initial_authorities: Vec<AuraId>,
-	endowed_accounts: Vec<AccountId>,
-	id: AllyId,
-) -> betanet_allychain_runtime::GenesisConfig {
+fn sankar_genesis() -> betanet_allychain_runtime::GenesisConfig {
+	// Sankar/Arun | AuraId
+	let initial_authorities: Vec<AuraId> = keys::initial_authorities();
+
+	// Rakhi/Priya | AccountId
+	let endowed_accounts: Vec<AccountId> = keys::endowed_accounts();
+	let root_key: AccountId = endowed_accounts[0].clone();
+	
+	let id: AllyId = 2000.into();
+	
 	betanet_allychain_runtime::GenesisConfig {
 		system: betanet_allychain_runtime::SystemConfig {
 			code: betanet_allychain_runtime::WASM_BINARY
