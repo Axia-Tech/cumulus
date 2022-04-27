@@ -142,6 +142,7 @@ fn load_spec(id: &str) -> std::result::Result<Box<dyn sc_service::ChainSpec>, St
 			&include_bytes!("../res/canvas-betanet.json")[..],
 		)?),
 		// -- Fallback (generic chainspec)
+		"canary" => Box::new(chain_spec::canary_chain_spec()),
 		"" => Box::new(chain_spec::get_chain_spec()),
 		// -- Loading a specific spec from disk
 		path => {

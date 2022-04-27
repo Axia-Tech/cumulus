@@ -5,8 +5,6 @@ use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
 use sp_core::{sr25519, Pair, Public};
 use sp_runtime::traits::{IdentifyAccount, Verify};
-use hex_literal::hex;
-use sp_core::crypto::UncheckedInto;
 
 /// Specialized `ChainSpec` for the normal allychain runtime.
 pub type ChainSpec =
@@ -224,33 +222,3 @@ fn testnet_genesis(
 		},
 	}
 }
-
-// fn endowed_accounts() -> Vec<AccountId> {
-// 	vec![
-// 		// Sankar//stash
-// 		hex!["3233f745d0860ed64ae9c7f4ea5c0773316fc9265199f312d3f6e8ce08255c10"].into(),
-// 		// Arun//stash
-// 		hex!["445f574d57f768ea7e1a2f551bef4298ace99d8895d316352cfc02aececcf26c"].into(),
-// 		// Rakhi//stash
-// 		hex!["c2312f7f9a8190bf76db9dc40e5ef351c4c23e3ae6540932bf2c2d485289c37b"].into(),
-// 		// Priya//stash
-// 		hex!["688d6fa54d9ace0fa07492f3d8dfef78594130719e61c213d700c62421177c38"].into()
-// 	]
-// }
-
-// fn invulnerables_accounts() -> Vec<(AccountId, AuraId)> {
-// 	vec![
-// 		(
-// 			// Sankar//stash
-// 			hex!["3233f745d0860ed64ae9c7f4ea5c0773316fc9265199f312d3f6e8ce08255c10"].into(),
-// 			// Sankar//aura
-// 			hex!["4e743e3efea9390a89894383c8567907db13edb3fb2c1e0f8c428a745e05be77"].unchecked_into()
-// 		),
-// 		(
-// 			// Arun//stash
-// 			hex!["445f574d57f768ea7e1a2f551bef4298ace99d8895d316352cfc02aececcf26c"].into(),
-// 			// Arun//aura
-// 			hex!["b21c79d2588ddeaf6005a28222110c62f7dd31b89c03efd46ba6b555b327eb08"].unchecked_into()
-// 		)
-// 	]
-// }
